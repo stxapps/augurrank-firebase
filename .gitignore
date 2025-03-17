@@ -87,6 +87,9 @@ web_modules/
 .next
 out
 
+next-image-export-optimizer-hashes.json
+nextImageExportOptimizer
+
 # Nuxt.js build / generate output
 .nuxt
 dist
@@ -134,3 +137,12 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+certificates
