@@ -5,9 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --experimental-https --hostname 0.0.0.0",
+    "emu": "JAVA_TOOL_OPTIONS=\"-Xms2g -Xmx4g\" firebase emulators:start --project demo-augurrank",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint --fix"
+    "lint": "next lint --fix",
+    "deploy-fstore-test": "firebase deploy --only firestore --project augurrank-test",
+    "deploy-fstore-prod": "firebase deploy --only firestore --project augurrank-prod",
+    "play-emu": "FIRESTORE_EMULATOR_HOST=127.0.0.1:5003 npx tsx src/play.ts",
+    "play-test": "GOOGLE_APPLICATION_CREDENTIALS=/home/wit/.config/gcloud/legacy_credentials/brace@brace.to/augurrank-test-firebase-adminsdk-fbsvc-1ed6dfb419.json npx tsx src/play.ts",
+    "play-prod": "GOOGLE_APPLICATION_CREDENTIALS=/home/wit/.config/gcloud/legacy_credentials/brace@brace.to/augurrank-prod-firebase-adminsdk-fbsvc-2fcafa33dc.json npx tsx src/play.ts"
   },
   "dependencies": {
     "@stacks/encryption": "^7.0.5",

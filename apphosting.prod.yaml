@@ -1,0 +1,21 @@
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    secret: NEXT_PUBLIC_FIREBASE_API_KEY
+
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: "augurrank-prod.firebaseapp.com"
+
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: "augurrank-prod"
+
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: "augurrank-prod.firebasestorage.app"
+
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "981610429934"
+
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:981610429934:web:177e1e6acf1a85216ce2ff"
+
+  - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+    value: "G-BS4LG6WRD4"
