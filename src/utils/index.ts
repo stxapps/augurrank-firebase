@@ -58,6 +58,17 @@ export const isZrOrPst = (number) => {
   return isNumber(number) && number >= 0;
 };
 
+export const isNotNullIn = (obj, key) => {
+  return key in obj && obj[key] !== null;
+};
+
+export const areAllString = (...vals) => {
+  for (const val of vals) {
+    if (!isString(val)) return false;
+  }
+  return true;
+};
+
 export const throttle = (func, limit) => {
   let lastFunc;
   let lastRan;
@@ -96,6 +107,17 @@ export const randBtw = (min, max) => {
   return Math.random() * (max - min) + min;
 };
 
+export const randomString = (length) => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const charactersLength = characters.length;
+
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+};
+
 export const containUrlProtocol = (url) => {
   const urlObj = new Url(url, {});
   return urlObj.protocol && urlObj.protocol !== '';
@@ -115,6 +137,17 @@ export const extractUrl = (url) => {
     pathname: urlObj.pathname,
     hash: urlObj.hash,
   };
+};
+
+export const removeTailingSlash = (url) => {
+  if (url.slice(-1) === '/') return url.slice(0, -1);
+  return url;
+};
+
+export const getReferrer = (request) => {
+  let referrer = request.headers.get('referer');
+  if (!referrer) referrer = request.headers.get('origin');
+  return referrer;
 };
 
 export const getWindowSize = () => {
@@ -167,6 +200,25 @@ export const validateEmail = (email) => {
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
+};
+
+export const validateProfile = (profile) => {
+  if (!isObject(profile)) return false;
+
+  if ('username' in profile && !isString(profile.username)) return false;
+  if ('avatar' in profile && !isString(profile.avatar)) return false;
+  if ('bio' in profile) {
+    if (!isString(profile.bio)) return false;
+    if (profile.bio.length > 160) return false;
+  }
+  if ('noInLdb' in profile && ![true, false].includes(profile.noInLdb)) return false;
+  if ('noPrflPg' in profile && ![true, false].includes(profile.noPrflPg)) return false;
+
+  return true;
+};
+
+export const validateTxn = (stxAddr, txn) => {
+
 };
 
 export const getSignInStatus = (me) => {
@@ -255,4 +307,14 @@ export const mergeTxns = (...txns) => {
   else if (isString(bin.cStatus.updg)) newTxn.cStatus = bin.cStatus.updg;
 
   return newTxn;
+};
+
+export const isAvatarEqual = (strA, strB) => {
+  let a = parseAvatar(strA);
+  a = newObject(a, ['thumbnailAlt']);
+
+  let b = parseAvatar(strB);
+  b = newObject(b, ['thumbnailAlt']);
+
+  return isEqual(a, b);
 };
