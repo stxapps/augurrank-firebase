@@ -1,21 +1,15 @@
+import { AppDispatch, AppGetState } from '@/store';
 import idxApi from '@/apis';
 import walletApi from '@/apis/wallet';
 import {
   INIT, UPDATE_WINDOW, UPDATE_ME, UPDATE_POPUP, UPDATE_WALLET_POPUP,
-  UPDATE_ERROR_POPUP, RESET_STATE, UPDATE_LTRJN_EDITOR,
+  UPDATE_ERROR_POPUP, RESET_STATE,
 } from '@/types/actionTypes';
-import {
-  STX_TST_STR, VALID, LETTERS_JOINS_PATH, JOIN_NEWSLETTER_STATUS_JOINING,
-  JOIN_NEWSLETTER_STATUS_INVALID, JOIN_NEWSLETTER_STATUS_COMMIT,
-  JOIN_NEWSLETTER_STATUS_ROLLBACK,
-} from '@/types/const';
-import {
-  isObject, throttle, getWindowInsets, validateEmail, getWalletErrorText,
-} from '@/utils';
-import vars from '@/vars';
+import { STX_TST_STR } from '@/types/const';
+import { isObject, throttle, getWindowInsets, getWalletErrorText } from '@/utils';
 
-let _didInit;
-export const init = () => async (dispatch, getState) => {
+let _didInit: boolean;
+export const init = () => async (dispatch: AppDispatch, getState: AppGetState) => {
   if (_didInit) return;
   _didInit = true;
 
@@ -59,7 +53,7 @@ export const init = () => async (dispatch, getState) => {
   }
 };
 
-export const signOut = () => async (dispatch, getState) => {
+export const signOut = () => async (dispatch: AppDispatch, getState: AppGetState) => {
   const payload = { stxAddr: '', stxPubKey: '', stxSigStr: '' };
   await resetState(payload, dispatch);
 
@@ -70,7 +64,9 @@ export const signOut = () => async (dispatch, getState) => {
   }
 };
 
-export const chooseWallet = () => async (dispatch, getState) => {
+export const chooseWallet = () => async (
+  dispatch: AppDispatch, getState: AppGetState
+) => {
   const installedWalletIds = walletApi.getInstalledWalletIds();
   if (installedWalletIds.length === 1) {
     dispatch(connectWallet(installedWalletIds[0]));
@@ -80,7 +76,9 @@ export const chooseWallet = () => async (dispatch, getState) => {
   dispatch(updateWalletPopup({ installedWalletIds }));
 };
 
-export const connectWallet = (walletId) => async (dispatch, getState) => {
+export const connectWallet = (walletId) => async (
+  dispatch: AppDispatch, getState: AppGetState
+) => {
   let data;
   try {
     data = await walletApi.connect(walletId);
@@ -98,7 +96,9 @@ export const connectWallet = (walletId) => async (dispatch, getState) => {
   dispatch(signStxTstStr());
 };
 
-export const signStxTstStr = () => async (dispatch, getState) => {
+export const signStxTstStr = () => async (
+  dispatch: AppDispatch, getState: AppGetState
+) => {
   const { stxAddr, stxPubKey } = getState().me;
 
   let data;
@@ -122,9 +122,6 @@ export const signStxTstStr = () => async (dispatch, getState) => {
 const resetState = async (payload, dispatch) => {
   idxApi.deleteLocalFiles();
 
-  vars.profileEditor.didFthAvlbUsns = false;
-  vars.profileEditor.didFthAvlbAvts = false;
-
   dispatch({ type: RESET_STATE, payload });
 };
 
@@ -145,58 +142,4 @@ export const updateErrorPopup = (payload) => {
 
 export const updateMe = (payload) => {
   return { type: UPDATE_ME, payload };
-};
-
-export const joinLetter = () => async (dispatch, getState) => {
-  const { email } = getState().ltrjnEditor;
-
-  if (!validateEmail(email)) {
-    dispatch(updateLtrjnEditor({
-      status: JOIN_NEWSLETTER_STATUS_INVALID, extraMsg: '',
-    }));
-    return;
-  }
-
-  dispatch(updateLtrjnEditor({
-    status: JOIN_NEWSLETTER_STATUS_JOINING, extraMsg: '',
-  }));
-  try {
-    const res = await fetch(LETTERS_JOINS_PATH, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      referrerPolicy: 'strict-origin',
-      body: JSON.stringify({ email }),
-    });
-    if (!res.ok) {
-      const extraMsg = res.statusText;
-      dispatch(updateLtrjnEditor({
-        status: JOIN_NEWSLETTER_STATUS_ROLLBACK, extraMsg,
-      }));
-      return;
-    }
-
-    const json = await res.json();
-    if (json.status !== VALID) {
-      const extraMsg = 'Invalid reqBody or email';
-      dispatch(updateLtrjnEditor({
-        status: JOIN_NEWSLETTER_STATUS_ROLLBACK, extraMsg,
-      }));
-      return;
-    }
-
-    dispatch(updateLtrjnEditor({
-      status: JOIN_NEWSLETTER_STATUS_COMMIT, extraMsg: '',
-    }));
-  } catch (error) {
-    const extraMsg = error.message;
-    dispatch(updateLtrjnEditor({
-      status: JOIN_NEWSLETTER_STATUS_ROLLBACK, extraMsg,
-    }));
-  }
-};
-
-export const updateLtrjnEditor = (payload) => {
-  return { type: UPDATE_LTRJN_EDITOR, payload };
 };

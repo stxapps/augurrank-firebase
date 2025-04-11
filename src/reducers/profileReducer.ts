@@ -9,7 +9,7 @@ const initialState = {
   avatar: null,
   bio: null,
   stats: null,
-  txns: null,
+  txns: {},
   txnQuryCrsr: null,
   txnFthMoreSts: null, // null: not yet, 0: fetching, 2: error
 };

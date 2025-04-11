@@ -1,7 +1,7 @@
 import { initializeApp, getApps, applicationDefault } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 
-import { isFldStr } from '@/utils';
+import { isNumber, isFldStr } from '@/utils';
 
 if (isFldStr(process.env.FIRESTORE_EMULATOR_HOST)) {
   if (getApps().length === 0) initializeApp();
@@ -11,6 +11,65 @@ if (isFldStr(process.env.FIRESTORE_EMULATOR_HOST)) {
   }
 }
 
-const fstoreAdmin = getFirestore();
+export const fstoreAdmin = getFirestore();
 
-export { fstoreAdmin };
+export const evtToDoc = (evt) => {
+  const doc = {
+    slug: evt.slug,
+    title: evt.title,
+    desc: evt.desc,
+    beta: evt.beta,
+    status: evt.status,
+    winOcId: evt.winOcId,
+    outcomes: evt.outcomes.map(oc => {
+      return { id: oc.id, desc: oc.desc, shareAmount: oc.shareAmount };
+    }),
+    createDate: Timestamp.fromDate(new Date(evt.createDate)),
+    updateDate: Timestamp.fromDate(new Date(evt.updateDate)),
+  };
+  return doc;
+};
+
+export const userToDoc = (user) => {
+  const doc: any = {
+    createDate: Timestamp.fromDate(new Date(user.createDate)),
+    updateDate: Timestamp.fromDate(new Date(user.updateDate)),
+  };
+
+  if ('username' in user) {
+    doc.username = user.username;
+
+    let usnVrfDt = null;
+    if (isNumber(user.usnVrfDt)) usnVrfDt = Timestamp.fromDate(new Date(user.usnVrfDt));
+    doc.usnVrfDt = usnVrfDt;
+  }
+  if ('avatar' in user) {
+    doc.avatar = user.avatar;
+
+    let avtVrfDt = null;
+    if (isNumber(user.avtVrfDt)) avtVrfDt = Timestamp.fromDate(new Date(user.avtVrfDt));
+    doc.avtVrfDt = avtVrfDt;
+  }
+  if ('bio' in user) {
+    doc.bio = user.bio;
+  }
+  if ('didAgreeTerms' in user) {
+    doc.didAgreeTerms = user.didAgreeTerms;
+  }
+  if ('noInLdb' in user) {
+    doc.noInLdb = user.noInLdb;
+  }
+  if ('noPrflPg' in user) {
+    doc.noPrflPg = user.noPrflPg;
+  }
+
+  return doc;
+};
+
+export const txnToDoc = (txn) => {
+  const doc = {
+    stxAddr: txn.stxAddr,
+    //evtId: txn.evtId,
+  };
+  return doc;
+};

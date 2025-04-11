@@ -1,8 +1,9 @@
-import { Timestamp, FieldValue } from 'firebase-admin/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 
-import { fstoreAdmin as db } from '@/apis/server/fbaseAdmin';
+import { fstoreAdmin as db, userToDoc, evtToDoc } from '@/apis/server/fbaseAdmin';
 import { LETTER_JOINS, USERS, SHARES, TXNS, EVENTS, ACTIVE } from '@/types/const';
-import { isNumber, isFldStr, isNotNullIn, newObject, isAvatarEqual } from '@/utils';
+import { isFldStr, newObject, isAvatarEqual } from '@/utils';
+import { docToUser, docToEvt } from '@/utils/fbase';
 
 const addLetterJoin = async (logKey, email) => {
   const ref = db.collection(LETTER_JOINS).doc(email);
@@ -192,116 +193,6 @@ const getEventBySlug = async (logKey, slug) => {
 
 const getEventById = async (logKey, contract, id) => {
 
-};
-
-const userToDoc = (user) => {
-  const doc: any = {
-    createDate: Timestamp.fromDate(new Date(user.createDate)),
-    updateDate: Timestamp.fromDate(new Date(user.updateDate)),
-  };
-
-  if ('username' in user) {
-    doc.username = user.username;
-
-    let usnVrfDt = null;
-    if (isNumber(user.usnVrfDt)) usnVrfDt = Timestamp.fromDate(new Date(user.usnVrfDt));
-    doc.usnVrfDt = usnVrfDt;
-  }
-  if ('avatar' in user) {
-    doc.avatar = user.avatar;
-
-    let avtVrfDt = null;
-    if (isNumber(user.avtVrfDt)) avtVrfDt = Timestamp.fromDate(new Date(user.avtVrfDt));
-    doc.avtVrfDt = avtVrfDt;
-  }
-  if ('bio' in user) {
-    doc.bio = user.bio;
-  }
-  if ('didAgreeTerms' in user) {
-    doc.didAgreeTerms = user.didAgreeTerms;
-  }
-  if ('noInLdb' in user) {
-    doc.noInLdb = user.noInLdb;
-  }
-  if ('noPrflPg' in user) {
-    doc.noPrflPg = user.noPrflPg;
-  }
-
-  return doc;
-};
-
-const txnToDoc = (txn) => {
-  const doc = {
-    stxAddr: txn.stxAddr,
-    //evtId: txn.evtId,
-  };
-  return doc;
-};
-
-const evtToDoc = (evt) => {
-  const doc = {
-    slug: evt.slug,
-    title: evt.title,
-    desc: evt.desc,
-    beta: evt.beta,
-    status: evt.status,
-    winOcId: evt.winOcId,
-    outcomes: evt.outcomes.map(oc => {
-      return { id: oc.id, desc: oc.desc, shareAmount: oc.shareAmount };
-    }),
-    createDate: Timestamp.fromDate(new Date(evt.createDate)),
-    updateDate: Timestamp.fromDate(new Date(evt.updateDate)),
-  };
-  return doc;
-};
-
-const docToUser = (stxAddr, doc) => {
-  const user: any = {
-    stxAddr,
-    createDate: doc.createDate.toMillis(),
-    updateDate: doc.updateDate.toMillis(),
-  };
-  if (isNotNullIn(doc, 'username')) {
-    user.username = doc.username;
-    user.usnVrfDt = null;
-    if (isNotNullIn(doc, 'usnVrfDt')) user.usnVrfDt = doc.usnVrfDt.toMillis();
-  }
-  if (isNotNullIn(doc, 'avatar')) {
-    user.avatar = doc.avatar;
-    user.avtVrfDt = null;
-    if (isNotNullIn(doc, 'avtVrfDt')) user.avtVrfDt = doc.avtVrfDt.toMillis();
-  }
-  if (isNotNullIn(doc, 'bio')) user.bio = doc.bio;
-  if (isNotNullIn(doc, 'didAgreeTerms')) user.didAgreeTerms = doc.didAgreeTerms;
-  if (isNotNullIn(doc, 'noInLdb')) user.noInLdb = doc.noInLdb;
-  if (isNotNullIn(doc, 'noPrflPg')) user.noPrflPg = doc.noPrflPg;
-
-  return user;
-};
-
-const docToTxn = (id, doc) => {
-  const txn = {
-
-  }
-  return txn;
-};
-
-const docToEvt = (id, doc) => {
-  const evt = {
-    id,
-    slug: doc.slug,
-    title: doc.title,
-    desc: doc.desc,
-    beta: doc.beta,
-    status: doc.status,
-    winOcId: doc.winOcId,
-    outcomes: doc.outcomes.map(oc => {
-      return { id: oc.id, desc: oc.desc, shareAmount: oc.shareAmount };
-    }),
-    createDate: doc.createDate.toMillis(),
-    updateDate: doc.updateDate.toMillis(),
-  };
-  return evt;
 };
 
 const data = {

@@ -12,7 +12,7 @@ const initialState = {
   avatar: null, // same as above
   bio: null, // same as above
   didAgreeTerms: null, // null or false: n/a or did not agree, true: agreed
-  txns: null,
+  txns: {},
 };
 
 const meReducer = (state = initialState, action) => produce(state, draft => {

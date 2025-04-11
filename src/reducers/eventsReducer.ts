@@ -5,7 +5,7 @@ import { isFldStr, isObject } from '@/utils';
 
 const initialState = {
   fthSts: null, // null: not yet, 0: fetching, 1: fetched, 2: error
-  entries: null,
+  entries: {},
   quryCrsr: null,
   fthMoreSts: null, // null: not yet, 0: fetching, 2: error
   slug: null,
