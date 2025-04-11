@@ -1,7 +1,7 @@
 import { produce } from 'immer';
 
-import { UPDATE_WINDOW } from '../types/actionTypes';
-import { getWindowSize, getWindowInsets } from '../utils';
+import { UPDATE_WINDOW } from '@/types/actionTypes';
+import { getWindowSize, getWindowInsets } from '@/utils';
 
 const [size, insets] = [getWindowSize(), getWindowInsets()];
 const initialState = {

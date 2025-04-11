@@ -4,9 +4,28 @@ export const APP_NAME = 'AugurRank';
 export const APP_ICON_NAME = 'logo-for-stacks-access.png';
 export const APP_SCOPES = ['store_write'];
 
+export const ALLOWED_ORIGINS = [
+  'https://augurrank.com',
+];
+
 export const HTTP = 'http://';
 
 export const VALID = 'VALID';
+export const INVALID = 'INVALID';
+export const UNKNOWN = 'UNKNOWN';
+export const ERROR = 'ERROR';
+
+export const LETTER_JOINS = 'letterJoins';
+export const USERS = 'users';
+export const SHARES = 'shares';
+export const TXNS = 'txns';
+export const EVENTS = 'events';
+export const COMMENTS = 'comments';
+export const COMMENT_REPLIES = 'commentReplies';
+export const TOTALS = 'totals';
+export const SYNC_DATA = 'syncData';
+
+export const ACTIVE = 'Active';
 
 export const SM_WIDTH = 640;
 export const MD_WIDTH = 768;
@@ -30,11 +49,18 @@ export const ME_PATH = '/api/me';
 export const EVENTS_PATH = '/api/events';
 export const TXNS_PATH = '/api/txns';
 
-export const JOIN_NEWSLETTER_STATUS_INIT = 'JOIN_NEWSLETTER_STATUS_INIT';
-export const JOIN_NEWSLETTER_STATUS_JOINING = 'JOIN_NEWSLETTER_STATUS_JOINING';
-export const JOIN_NEWSLETTER_STATUS_INVALID = 'JOIN_NEWSLETTER_STATUS_INVALID';
-export const JOIN_NEWSLETTER_STATUS_COMMIT = 'JOIN_NEWSLETTER_STATUS_COMMIT';
-export const JOIN_NEWSLETTER_STATUS_ROLLBACK = 'JOIN_NEWSLETTER_STATUS_ROLLBACK';
+export const JOIN_LETTER_STATUS_INIT = 'JOIN_LETTER_STATUS_INIT';
+export const JOIN_LETTER_STATUS_JOINING = 'JOIN_LETTER_STATUS_JOINING';
+export const JOIN_LETTER_STATUS_INVALID = 'JOIN_LETTER_STATUS_INVALID';
+export const JOIN_LETTER_STATUS_COMMIT = 'JOIN_LETTER_STATUS_COMMIT';
+export const JOIN_LETTER_STATUS_ROLLBACK = 'JOIN_LETTER_STATUS_ROLLBACK';
+
+export const TXN_STATUS_INIT = 'TXN_STATUS_INIT';
+export const TXN_STATUS_IN_MEMPOOL = 'TXN_STATUS_IN_MEMPOOL';
+export const TXN_STATUS_PUT_OK = 'TXN_STATUS_PUT_OK';
+export const TXN_STATUS_PUT_ERROR = 'TXN_STATUS_PUT_ERROR';
+export const TXN_STATUS_CONFIRMED_OK = 'TXN_STATUS_CONFIRMED_OK';
+export const TXN_STATUS_CONFIRMED_ERROR = 'TXN_STATUS_CONFIRMED_ERROR';
 
 export const PDG = 'pending';
 export const SCS = 'success';

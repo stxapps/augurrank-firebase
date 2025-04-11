@@ -1,10 +1,10 @@
 import { produce } from 'immer';
 
-import { UPDATE_LTRJN_EDITOR, RESET_STATE } from '../types/actionTypes';
-import { JOIN_NEWSLETTER_STATUS_INIT } from '@/types/const';
+import { UPDATE_LTRJN_EDITOR, RESET_STATE } from '@/types/actionTypes';
+import { JOIN_LETTER_STATUS_INIT } from '@/types/const';
 
 const initialState = {
-  status: JOIN_NEWSLETTER_STATUS_INIT,
+  status: JOIN_LETTER_STATUS_INIT,
   email: '',
   extraMsg: '',
 };

@@ -28,8 +28,9 @@ export const makeStore = () => {
 };
 
 export type AppStore = ReturnType<typeof makeStore>;
-export type RootState = ReturnType<AppStore['getState']>;
 export type AppDispatch = AppStore['dispatch'];
+export type AppGetState = AppStore['getState'];
+export type RootState = ReturnType<AppGetState>;
 
 export const useStore = _useStore.withTypes<AppStore>();
 export const useSelector = _useSelector.withTypes<RootState>();

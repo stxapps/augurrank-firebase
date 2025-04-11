@@ -48,7 +48,7 @@ const setEventBetaDb = async () => {
   const dbBtEvt = { ...btEvt, id: `${info.marketsContract}-${btEvt.id}` };
   await dataApi.updateEvent(logKey, dbBtEvt, false);
   console.log(`(${logKey}) setEventBetaDb finishes`);
-}
+};
 //setEventBetaSc();
 //setEventBetaDb();
 
