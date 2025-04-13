@@ -3,12 +3,10 @@ import {
 } from 'firebase/firestore';
 
 import { fstore as db } from '@/apis/fbase';
-import { EVENTS, SYNC_DATA } from '@/types/const';
-import { docToEvt, docToSyncData } from '@/utils/fbase';
+import { EVENTS, SYNCS, INDEX, N_DOCS } from '@/types/const';
+import { docToEvt, docToSync } from '@/utils/fbase';
 import { isFldStr } from '@/utils';
 import vars from '@/vars';
-
-const N_DOCS = 10;
 
 const fetchEvents = async (quryCrsr: string) => {
   const clt = collection(db, EVENTS);
@@ -50,20 +48,22 @@ const fetchEvent = async (slug: string) => {
 
 };
 
-const listenSyncData = async (callback) => {
+const listenSync = async (onSuccess, onError) => {
   const removeListener = onSnapshot(
-    doc(db, SYNC_DATA, 'index'),
+    doc(db, SYNCS, INDEX),
     (snapshot) => {
-      let syncData = null;
-      if (snapshot.exists()) syncData = docToSyncData(snapshot.id, snapshot.data());
-      callback(syncData);
+      if (!snapshot.exists()) return;
+
+      const data = docToSync(snapshot.id, snapshot.data());
+      onSuccess(data);
     },
     (error) => {
-      callback(null, error);
-    });
+      onError(error);
+    }
+  );
   return removeListener;
 };
 
-const common = { fetchEvents, fetchEvent, listenSyncData };
+const common = { fetchEvents, fetchEvent, listenSync };
 
 export default common;

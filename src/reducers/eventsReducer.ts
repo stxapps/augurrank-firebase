@@ -1,7 +1,7 @@
 import { produce } from 'immer';
 
-import { UPDATE_EVENTS } from '@/types/actionTypes';
-import { isFldStr, isObject } from '@/utils';
+import { UPDATE_EVENTS, UPDATE_SYNC } from '@/types/actionTypes';
+import { isFldStr, isObject, isNumber } from '@/utils';
 
 const initialState = {
   fthSts: null, // null: not yet, 0: fetching, 1: fetched, 2: error
@@ -38,6 +38,38 @@ const eventsReducer = (state = initialState, action) => produce(state, draft => 
     if (slug === null || isFldStr(slug)) draft.slug = slug;
     if ([null, 0, 1, 2].includes(slugFthSts)) draft.slugFthSts = slugFthSts;
   }
+
+  if (action.type === UPDATE_SYNC) {
+    const { evts } = action.payload;
+    if (isObject(evts)) {
+      for (const [evtId, evt] of Object.entries<any>(evts)) {
+        if (!isObject(draft.entries[evtId])) continue;
+
+        draft.entries[evtId].beta = evt.beta;
+        draft.entries[evtId].status = evt.status;
+        draft.entries[evtId].winOcId = evt.winOcId;
+
+        const ocsPerId = toPerId(evt.outcomes);
+        for (const oc of draft.entries[evtId].outcomes) {
+          if (isObject(ocsPerId[oc.id]) && isNumber(ocsPerId[oc.id].shareAmount)) {
+            oc.shareAmount = ocsPerId[oc.id].shareAmount;
+          }
+        }
+
+        draft.entries[evtId].updateDate = evt.updateDate;
+      }
+    }
+  }
 });
+
+const toPerId = (ocs) => {
+  const ocsPerId = {};
+  if (Array.isArray(ocs)) {
+    for (const oc of ocs) {
+      ocsPerId[oc.id] = oc;
+    }
+  }
+  return ocsPerId;
+};
 
 export default eventsReducer;

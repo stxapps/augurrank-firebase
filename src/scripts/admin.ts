@@ -19,40 +19,23 @@ const evt = {
     { id: 1, desc: 'No', shareAmount: 0 },
   ],
 };
-const dbEvt = {
-  ...evt,
-  id: `${info.marketsContract}-0`, // Make sure update contract and id!
-  slug: slugify(evt.title),
-  createDate: now,
-  updateDate: now,
-};
 const createEventSc = async () => {
   const res = await scApi.createEvent(evt);
   console.log(`(${logKey}) createEventSc with txid: ${res.txid}`);
 };
 const createEventDb = async () => {
-  await dataApi.updateEvent(logKey, dbEvt, true);
-  console.log(`(${logKey}) createEventDb finishes`);
-};
-const createEventSync = async () => {
-  const evtSync = {
-    id: dbEvt.id,
-    beta: dbEvt.beta,
-    status: dbEvt.status,
-    winOcId: dbEvt.winOcId,
-    outcomes: dbEvt.outcomes.map(oc => {
-      return { id: oc.id, shareAmount: oc.shareAmount };
-    }),
+  const dbEvt = {
+    ...evt,
+    id: `${info.marketsContract}-0`, // Make sure update contract and id!
+    slug: slugify(evt.title),
     createDate: now,
     updateDate: now,
   };
-
-  await dataApi.updateEvtSync(logKey, evtSync);
-  console.log(`(${logKey}) createEventSync finishes`);
+  await dataApi.updateEvent(logKey, dbEvt, true);
+  console.log(`(${logKey}) createEventDb finishes`);
 };
 //createEventSc();
 //createEventDb();
-//createEventSync();
 
 const btEvt = { id: 0, beta: 300000000 };
 const setEventBetaSc = async () => {
@@ -79,6 +62,12 @@ const setEventStatusDb = async () => {
 };
 //setEventStatusSc();
 //setEventStatusDb();
+
+const updateSyncEvt = async () => {
+  await dataApi.updateSyncEvt(logKey, `${info.marketsContract}-0`);
+  console.log(`(${logKey}) updateSyncEvt finishes`);
+};
+//updateSyncEvt();
 
 // buyShares
 

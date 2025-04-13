@@ -2,10 +2,10 @@ const fetchEvents = {
   quryCrsr: { id: null, snapshot: null },
 };
 
-const syncData = {
+const listenSync = {
   removeListener: null,
 };
 
-const vars = { fetchEvents, syncData };
+const vars = { fetchEvents, listenSync };
 
 export default vars;

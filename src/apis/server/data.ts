@@ -1,13 +1,13 @@
 import { FieldValue } from 'firebase-admin/firestore';
 
 import {
-  fstoreAdmin as db, userToDoc, evtToDoc, syncToDoc,
+  fstoreAdmin as db, evtToDoc, syncToDoc, userToDoc,
 } from '@/apis/server/fbaseAdmin';
 import {
-  LETTER_JOINS, USERS, SHARES, TXNS, EVENTS, SYNCS, ACTIVE, INDEX,
+  LETTER_JOINS, USERS, SHARES, TXNS, EVENTS, SYNCS, ACTIVE, INDEX, N_DOCS,
 } from '@/types/const';
 import { isFldStr, newObject, isAvatarEqual } from '@/utils';
-import { docToUser, docToEvt, docToSync } from '@/utils/fbase';
+import { docToEvt, docToSync, docToUser, docToTxn } from '@/utils/fbase';
 
 const addLetterJoin = async (logKey, email) => {
   const ref = db.collection(LETTER_JOINS).doc(email);
@@ -135,38 +135,34 @@ const getTxns = async (stxAddr, ids) => {
 
 };
 
-const queryTxns = async (stxAddr, lastId) => {
-  const ref = db.collection(USERS).doc(stxAddr).collection(TXNS);
-  const snapshots = await ref.orderBy('createDate', 'desc').limit(10).get();
+const queryTxns = async (stxAddr: string, quryCrsr: string | null) => {
+  const clt = db.collection(USERS).doc(stxAddr).collection(TXNS);
+  const by = clt.orderBy('createDate', 'desc');
 
-
-  // need to use the last id to get a snapshot
-  //   and use the snapshot with startAfter
-
-  const querySnapshot = await db
-    .collection('yourCollection')
-    .orderBy('timestamp', 'desc') // Example: order by timestamp
-    .limit(pageSize)
-    .get();
-
-  const results = [];
-  querySnapshot.forEach((doc) => {
-    results.push(doctoTxn(doc.id, doc.data()));
-  });
-
-  let lastVisible = null;
-  if (results.length > 0) {
-    lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+  let q;
+  if (isFldStr(quryCrsr)) {
+    const ss = await clt.doc(quryCrsr).get();
+    q = by.startAt(ss);
+  } else {
+    q = by;
   }
 
-  const cursor = lastVisible
-    ? {
-      id: lastVisible.id,
-      timestamp: lastVisible.data().timestamp, // Send the field used in orderBy
-    }
-    : null;
+  const snapshots = [];
 
-  return { results, cursor };
+  const rawSnapshots = await q.limit(N_DOCS + 1).get();
+  rawSnapshots.forEach(ss => {
+    snapshots.push(ss);
+  });
+
+  const nTxns = snapshots.slice(0, N_DOCS).map(ss => docToTxn(ss.id, ss.data()));
+
+  let nQuryCrsr = null;
+  if (snapshots.length >= N_DOCS + 1) {
+    const ss = snapshots[N_DOCS];
+    nQuryCrsr = ss.id;
+  }
+
+  return { txns: nTxns, quryCrsr: nQuryCrsr };
 };
 
 const updateEvent = async (logKey, evt, doAdd) => {
@@ -199,45 +195,49 @@ const getEventById = async (logKey, contract, id) => {
 
 };
 
-const updateEvtSync = async (logKey, evtSync) => {
-  const ref = db.collection(SYNCS).doc(INDEX);
+const updateSyncEvt = async (logKey, evtId) => {
+  const evtRef = db.collection(EVENTS).doc(evtId);
+  const syncRef = db.collection(SYNCS).doc(INDEX);
 
   await db.runTransaction(async (t) => {
-    let newSync;
+    const evtSs = await t.get(evtRef);
+    if (!evtSs.exists) throw new Error(`Invalid evtId: ${evtId}`);
+    const evt = docToEvt(evtId, evtSs.data());
 
-    const snapshot = await t.get(ref);
-    if (snapshot.exists) {
-      newSync = docToSync(INDEX, snapshot.data());
-      newSync.evts[evtSync.id] = evtSync;
+    let newSync;
+    const syncSs = await t.get(syncRef);
+    if (syncSs.exists) {
+      newSync = docToSync(INDEX, syncSs.data());
+      newSync.evts[evt.id] = evt;
     } else {
       newSync = {
         id: INDEX,
         evts: {
-          [evtSync.id]: evtSync,
+          [evt.id]: evt,
         }
       }
     }
 
-    t.set(ref, syncToDoc(newSync));
+    t.set(syncRef, syncToDoc(newSync));
     console.log(`(${logKey}) Updated to Firestore`);
   });
 };
 
-const deleteEvtSync = async (logKey, evtSyncId) => {
+const deleteSyncEvt = async (logKey, evtId) => {
   const ref = db.collection(SYNCS).doc(INDEX);
 
   await db.runTransaction(async (t) => {
     const snapshot = await t.get(ref);
     if (!snapshot.exists) {
-      throw new Error(`Not found sync: ${INDEX}`);
+      throw new Error(`Not found syncId: ${INDEX}`);
     }
 
     const newSync = docToSync(INDEX, snapshot.data());
-    if (!(evtSyncId in newSync.evts)) {
-      throw new Error(`Invalid evtSyncId: ${evtSyncId}`);
+    if (!(evtId in newSync.evts)) {
+      throw new Error(`Invalid syncEvtId: ${evtId}`);
     }
 
-    delete newSync.evts[evtSyncId];
+    delete newSync.evts[evtId];
 
     t.set(ref, syncToDoc(newSync));
     console.log(`(${logKey}) Updated to Firestore`);
@@ -246,7 +246,7 @@ const deleteEvtSync = async (logKey, evtSyncId) => {
 
 const data = {
   addLetterJoin, updateProfile, updateTxn, getUser, getTxns, queryTxns, updateEvent,
-  getEventBySlug, getEventById, updateEvtSync, deleteEvtSync,
+  getEventBySlug, getEventById, updateSyncEvt, deleteSyncEvt,
 };
 
 export default data;

@@ -1,12 +1,13 @@
 import { AppDispatch, AppGetState } from '@/store';
 
 import cmnApi from '@/apis/common';
-import { UPDATE_EVENTS, UPDATE_LTRJN_EDITOR } from '@/types/actionTypes';
+import { UPDATE_EVENTS, UPDATE_SYNC, UPDATE_LTRJN_EDITOR } from '@/types/actionTypes';
 import {
   VALID, LETTERS_JOINS_PATH, JOIN_LETTER_STATUS_JOINING, JOIN_LETTER_STATUS_INVALID,
   JOIN_LETTER_STATUS_COMMIT, JOIN_LETTER_STATUS_ROLLBACK,
 } from '@/types/const';
 import { isFldStr, validateEmail } from '@/utils';
+import vars from '@/vars';
 
 export const fetchEvents = (doForce = false) => async (
   dispatch: AppDispatch, getState: AppGetState
@@ -28,7 +29,7 @@ export const fetchEvents = (doForce = false) => async (
 
   dispatch(updateEvents({ ...data, fthSts: 1 }));
 
-  await syncData(dispatch, getState);
+  await listenSync(dispatch, getState);
 };
 
 export const fetchEventsMore = (doForce = false) => async (
@@ -58,17 +59,28 @@ export const fetchEvent = (slug: string, doForce = false) => async (
 ) => {
   const { slug, slugFthSts } = getState().events;
 
-  await syncData(dispatch, getState);
+  await listenSync(dispatch, getState);
 };
 
 export const updateEvents = (payload) => {
   return { type: UPDATE_EVENTS, payload };
 };
 
-const syncData = async (dispatch: AppDispatch, getState: AppGetState) => {
+const listenSync = async (dispatch: AppDispatch, getState: AppGetState) => {
+  if (vars.listenSync.removeListener) return;
+  vars.listenSync.removeListener = cmnApi.listenSync(
+    (data) => {
+      dispatch(updateSync(data));
+    },
+    (error) => {
+      console.log('listenSync error:', error);
+      vars.listenSync.removeListener = null;
+    },
+  );
+};
 
-  // syncData if not sync
-
+export const updateSync = (payload) => {
+  return { type: UPDATE_SYNC, payload };
 };
 
 export const joinLetter = () => async (
