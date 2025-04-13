@@ -18,8 +18,21 @@ export const docToEvt = (id, doc) => {
   return evt;
 };
 
-export const docToSyncData = (id, doc) => {
-  return { id, ...doc };
+export const docToSync = (id, doc) => {
+  const sync = { id, evts: {} };
+  for (const [evtId, evtDoc] of Object.entries<any>(doc.evts)) {
+    sync.evts[evtId] = {
+      beta: evtDoc.beta,
+      status: evtDoc.status,
+      winOcId: evtDoc.winOcId,
+      outcomes: evtDoc.outcomes.map(oc => {
+        return { id: oc.id, shareAmount: oc.shareAmount };
+      }),
+      createDate: evtDoc.createDate.toMillis(),
+      updateDate: evtDoc.updateDate.toMillis(),
+    };
+  }
+  return sync;
 };
 
 export const docToUser = (stxAddr, doc) => {

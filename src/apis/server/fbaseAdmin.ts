@@ -30,6 +30,23 @@ export const evtToDoc = (evt) => {
   return doc;
 };
 
+export const syncToDoc = (sync) => {
+  const doc = { evts: {} };
+  for (const [evtId, evt] of Object.entries<any>(sync.evts)) {
+    doc.evts[evtId] = {
+      beta: evt.beta,
+      status: evt.status,
+      winOcId: evt.winOcId,
+      outcomes: evt.outcomes.map(oc => {
+        return { id: oc.id, shareAmount: oc.shareAmount };
+      }),
+      createDate: Timestamp.fromDate(new Date(evt.createDate)),
+      updateDate: Timestamp.fromDate(new Date(evt.updateDate)),
+    };
+  }
+  return doc;
+};
+
 export const userToDoc = (user) => {
   const doc: any = {
     createDate: Timestamp.fromDate(new Date(user.createDate)),

@@ -1,9 +1,13 @@
 import { FieldValue } from 'firebase-admin/firestore';
 
-import { fstoreAdmin as db, userToDoc, evtToDoc } from '@/apis/server/fbaseAdmin';
-import { LETTER_JOINS, USERS, SHARES, TXNS, EVENTS, ACTIVE } from '@/types/const';
+import {
+  fstoreAdmin as db, userToDoc, evtToDoc, syncToDoc,
+} from '@/apis/server/fbaseAdmin';
+import {
+  LETTER_JOINS, USERS, SHARES, TXNS, EVENTS, SYNCS, ACTIVE, INDEX,
+} from '@/types/const';
 import { isFldStr, newObject, isAvatarEqual } from '@/utils';
-import { docToUser, docToEvt } from '@/utils/fbase';
+import { docToUser, docToEvt, docToSync } from '@/utils/fbase';
 
 const addLetterJoin = async (logKey, email) => {
   const ref = db.collection(LETTER_JOINS).doc(email);
@@ -147,7 +151,7 @@ const queryTxns = async (stxAddr, lastId) => {
 
   const results = [];
   querySnapshot.forEach((doc) => {
-    results.push({ id: doc.id, ...doc.data() });
+    results.push(doctoTxn(doc.id, doc.data()));
   });
 
   let lastVisible = null;
@@ -195,9 +199,54 @@ const getEventById = async (logKey, contract, id) => {
 
 };
 
+const updateEvtSync = async (logKey, evtSync) => {
+  const ref = db.collection(SYNCS).doc(INDEX);
+
+  await db.runTransaction(async (t) => {
+    let newSync;
+
+    const snapshot = await t.get(ref);
+    if (snapshot.exists) {
+      newSync = docToSync(INDEX, snapshot.data());
+      newSync.evts[evtSync.id] = evtSync;
+    } else {
+      newSync = {
+        id: INDEX,
+        evts: {
+          [evtSync.id]: evtSync,
+        }
+      }
+    }
+
+    t.set(ref, syncToDoc(newSync));
+    console.log(`(${logKey}) Updated to Firestore`);
+  });
+};
+
+const deleteEvtSync = async (logKey, evtSyncId) => {
+  const ref = db.collection(SYNCS).doc(INDEX);
+
+  await db.runTransaction(async (t) => {
+    const snapshot = await t.get(ref);
+    if (!snapshot.exists) {
+      throw new Error(`Not found sync: ${INDEX}`);
+    }
+
+    const newSync = docToSync(INDEX, snapshot.data());
+    if (!(evtSyncId in newSync.evts)) {
+      throw new Error(`Invalid evtSyncId: ${evtSyncId}`);
+    }
+
+    delete newSync.evts[evtSyncId];
+
+    t.set(ref, syncToDoc(newSync));
+    console.log(`(${logKey}) Updated to Firestore`);
+  });
+};
+
 const data = {
   addLetterJoin, updateProfile, updateTxn, getUser, getTxns, queryTxns, updateEvent,
-  getEventBySlug, getEventById,
+  getEventBySlug, getEventById, updateEvtSync, deleteEvtSync,
 };
 
 export default data;

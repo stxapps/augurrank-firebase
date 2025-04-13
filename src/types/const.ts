@@ -23,8 +23,9 @@ export const EVENTS = 'events';
 export const COMMENTS = 'comments';
 export const COMMENT_REPLIES = 'commentReplies';
 export const TOTALS = 'totals';
-export const SYNC_DATA = 'syncData';
+export const SYNCS = 'syncs';
 
+export const INDEX = 'index';
 export const ACTIVE = 'Active';
 
 export const SM_WIDTH = 640;
