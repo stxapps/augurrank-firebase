@@ -150,6 +150,21 @@ export const getReferrer = (request) => {
   return referrer;
 };
 
+export const getResErrMsg = async (res) => {
+  let bodyText = '';
+  try {
+    const json = await res.json();
+    bodyText = json.error;
+  } catch (error) {
+    console.log('No json error attr from http response body.');
+  }
+
+  let msg = `${res.status}`;
+  if (isFldStr(res.statusText)) msg += ' ' + res.statusText;
+  if (isFldStr(bodyText)) msg += ' ' + bodyText;
+  return msg;
+};
+
 export const getWindowSize = () => {
   let width = null, height = null, visualWidth = null, visualHeight = null;
   if (typeof window !== 'undefined' && isObject(window)) {

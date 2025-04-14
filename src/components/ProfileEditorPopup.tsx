@@ -18,9 +18,9 @@ import {
   getPflEdtrAvtWthObj, getAvlbAvtsWthObj, getAvlbAvtsHasMore,
 } from '@/selectors';
 import { isString, isFldStr, getAvtThbnl } from '@/utils';
+import LogoBns from '@/images/logo-bns.png';
 
 import { useSafeAreaFrame } from '.';
-import LogoBns from '../images/logo-bns.png';
 
 const mdlFMV = {
   hidden: {

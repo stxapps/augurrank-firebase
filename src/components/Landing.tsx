@@ -4,6 +4,8 @@ import {
   CheckIcon, TrophyIcon, EnvelopeIcon, NewspaperIcon,
 } from '@heroicons/react/24/solid';
 
+import { LandingEvtList } from '@/components/LandingEvtList';
+import { LtrjnEditor } from '@/components/LtrjnEditor';
 import { TwitterIcon, ThreadsIcon, BSkyIcon, GithubIcon } from '@/components/Icons';
 import Logo from '@/images/logo.svg';
 
@@ -19,6 +21,7 @@ export function Landing() {
           <p className="mt-3 text-center text-xl text-slate-400 sm:text-left">Your vision on chain</p>
         </div>
       </div>
+      <LandingEvtList />
       <div className="mt-10 flex justify-center space-x-4">
         <Link className="group flex size-10 items-center justify-center rounded-full bg-slate-800" href="https://x.com/AugurRank" target="_blank" rel="noreferrer">
           <TwitterIcon className="size-5 fill-violet-600 group-hover:fill-violet-500" />
@@ -39,6 +42,7 @@ export function Landing() {
           <NewspaperIcon className="size-5 fill-orange-400 group-hover:fill-orange-300" />
         </Link>
       </div>
+      <LtrjnEditor />
     </main>
   );
 }

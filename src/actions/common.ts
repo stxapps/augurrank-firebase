@@ -3,7 +3,7 @@ import { AppDispatch, AppGetState } from '@/store';
 import cmnApi from '@/apis/common';
 import { UPDATE_EVENTS, UPDATE_SYNC, UPDATE_LTRJN_EDITOR } from '@/types/actionTypes';
 import {
-  VALID, LETTERS_JOINS_PATH, JOIN_LETTER_STATUS_JOINING, JOIN_LETTER_STATUS_INVALID,
+  LETTERS_JOINS_PATH, JOIN_LETTER_STATUS_JOINING, JOIN_LETTER_STATUS_INVALID,
   JOIN_LETTER_STATUS_COMMIT, JOIN_LETTER_STATUS_ROLLBACK,
 } from '@/types/const';
 import { isFldStr, validateEmail } from '@/utils';
@@ -94,45 +94,23 @@ export const joinLetter = () => async (
     }));
     return;
   }
-
   dispatch(updateLtrjnEditor({
     status: JOIN_LETTER_STATUS_JOINING, extraMsg: '',
   }));
+
   try {
-    const res = await fetch(LETTERS_JOINS_PATH, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      referrerPolicy: 'strict-origin',
-      body: JSON.stringify({ email }),
-    });
-    if (!res.ok) {
-      const extraMsg = res.statusText;
-      dispatch(updateLtrjnEditor({
-        status: JOIN_LETTER_STATUS_ROLLBACK, extraMsg,
-      }));
-      return;
-    }
-
-    const json = await res.json();
-    if (json.status !== VALID) {
-      const extraMsg = 'Invalid reqBody or email';
-      dispatch(updateLtrjnEditor({
-        status: JOIN_LETTER_STATUS_ROLLBACK, extraMsg,
-      }));
-      return;
-    }
-
-    dispatch(updateLtrjnEditor({
-      status: JOIN_LETTER_STATUS_COMMIT, extraMsg: '',
-    }));
+    await cmnApi.joinLetter(email);
   } catch (error) {
     const extraMsg = error.message;
     dispatch(updateLtrjnEditor({
       status: JOIN_LETTER_STATUS_ROLLBACK, extraMsg,
     }));
+    return;
   }
+
+  dispatch(updateLtrjnEditor({
+    status: JOIN_LETTER_STATUS_COMMIT, extraMsg: '',
+  }));
 };
 
 export const updateLtrjnEditor = (payload) => {

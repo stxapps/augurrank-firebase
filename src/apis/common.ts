@@ -3,9 +3,9 @@ import {
 } from 'firebase/firestore';
 
 import { fstore as db } from '@/apis/fbase';
-import { EVENTS, SYNCS, INDEX, N_DOCS } from '@/types/const';
+import { LETTERS_JOINS_PATH, EVENTS, SYNCS, INDEX, N_DOCS } from '@/types/const';
+import { isFldStr, getResErrMsg } from '@/utils';
 import { docToEvt, docToSync } from '@/utils/fbase';
-import { isFldStr } from '@/utils';
 import vars from '@/vars';
 
 const fetchEvents = async (quryCrsr: string) => {
@@ -64,6 +64,21 @@ const listenSync = async (onSuccess, onError) => {
   return removeListener;
 };
 
-const common = { fetchEvents, fetchEvent, listenSync };
+const joinLetter = async (email) => {
+  const res = await fetch(LETTERS_JOINS_PATH, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    referrerPolicy: 'strict-origin',
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) {
+    const msg = await getResErrMsg(res);
+    throw new Error(msg);
+  }
+};
+
+const common = { fetchEvents, fetchEvent, listenSync, joinLetter };
 
 export default common;
