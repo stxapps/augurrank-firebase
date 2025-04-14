@@ -37,7 +37,6 @@ export const XL_WIDTH = 1280;
 
 export const WALLET_ID = 'walletId';
 export const ME_OBJ = 'meObj';
-export const UNSAVED_TXNS = 'unsaved-txns';
 export const NFT_METAS = 'nft-metas';
 
 export const ID_LEATHER = 'LeatherProvider';

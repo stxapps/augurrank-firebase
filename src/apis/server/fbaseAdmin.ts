@@ -83,6 +83,18 @@ export const userToDoc = (user) => {
   return doc;
 };
 
+export const shareToDoc = (share) => {
+  const doc = {
+    evtId: share.evtId,
+    ocId: share.ocId,
+    amount: share.amount,
+    avgCost: share.avgCost,
+    createDate: Timestamp.fromDate(new Date(share.createDate)),
+    updateDate: Timestamp.fromDate(new Date(share.updateDate)),
+  };
+  return doc;
+};
+
 export const txnToDoc = (txn) => {
   const doc = {
     stxAddr: txn.stxAddr,

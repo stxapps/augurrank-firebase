@@ -1,7 +1,7 @@
 import { produce } from 'immer';
 
 import { INIT, UPDATE_ME, RESET_STATE } from '@/types/actionTypes';
-import { isObject, isString } from '@/utils';
+import { isObject, isString, isNumber } from '@/utils';
 
 const initialState = {
   stxAddr: null, // null: n/a, '': no value, str: has value
@@ -12,24 +12,16 @@ const initialState = {
   avatar: null, // same as above
   bio: null, // same as above
   didAgreeTerms: null, // null or false: n/a or did not agree, true: agreed
+  balance: null,
+  shares: {},
   txns: {},
 };
 
 const meReducer = (state = initialState, action) => produce(state, draft => {
-  if (action.type === INIT) {
-    draft.stxAddr = action.payload.stxAddr;
-    draft.stxPubKey = action.payload.stxPubKey;
-    draft.stxSigStr = action.payload.stxSigStr;
-    draft.username = action.payload.username;
-    draft.avatar = action.payload.avatar;
-    draft.bio = action.payload.bio;
-    draft.didAgreeTerms = action.payload.didAgreeTerms;
-  }
-
-  if (action.type === UPDATE_ME) {
+  if ([INIT, UPDATE_ME].includes(action.type)) {
     const {
       stxAddr, stxPubKey, stxSigStr, fthSts, username, avatar, bio, didAgreeTerms,
-      txn, txns, removeTxnIds,
+      balance, shares, txn, txns, removeTxnIds,
     } = action.payload;
 
     if (stxAddr === null || isString(stxAddr)) draft.stxAddr = stxAddr;
@@ -44,6 +36,18 @@ const meReducer = (state = initialState, action) => produce(state, draft => {
 
     if ([null, true, false].includes(didAgreeTerms)) {
       draft.didAgreeTerms = didAgreeTerms;
+    }
+
+    if (balance === null || isNumber(balance)) draft.balance = balance;
+
+    if (Array.isArray(shares)) {
+      for (const share of shares) {
+        draft.shares[share.id] = structuredClone(share);
+      }
+    } else if (isObject(shares)) {
+      for (const share of Object.values<any>(shares)) {
+        draft.shares[share.id] = structuredClone(share);
+      }
     }
 
     if (isObject(txn)) {

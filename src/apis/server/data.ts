@@ -7,7 +7,7 @@ import {
   LETTER_JOINS, USERS, SHARES, TXNS, EVENTS, SYNCS, ACTIVE, INDEX, N_DOCS,
 } from '@/types/const';
 import { isFldStr, newObject, isAvatarEqual } from '@/utils';
-import { docToEvt, docToSync, docToUser, docToTxn } from '@/utils/fbase';
+import { docToEvt, docToSync, docToUser, docToShare, docToTxn } from '@/utils/fbase';
 
 const addLetterJoin = async (logKey, email) => {
   const ref = db.collection(LETTER_JOINS).doc(email);
@@ -118,7 +118,7 @@ const updateProfile = async (logKey, stxAddr, profile) => {
 };
 
 const updateTxn = async (logKey, stxAddr, txn) => {
-
+  // update share?
 };
 
 const getUser = async (stxAddr) => {
@@ -129,6 +129,19 @@ const getUser = async (stxAddr) => {
     return user;
   }
   return null;
+};
+
+const getShares = async (stxAddr) => {
+  const clt = db.collection(USERS).doc(stxAddr).collection(SHARES);
+  const q = clt.where('amount', '>', 0);
+
+  const shares = [];
+  const snapshots = await q.get();
+  snapshots.forEach(ss => {
+    shares.push(docToShare(ss.id, ss.data()));
+  });
+
+  return shares;
 };
 
 const getTxns = async (stxAddr, ids) => {
@@ -245,8 +258,8 @@ const deleteSyncEvt = async (logKey, evtId) => {
 };
 
 const data = {
-  addLetterJoin, updateProfile, updateTxn, getUser, getTxns, queryTxns, updateEvent,
-  getEventBySlug, getEventById, updateSyncEvt, deleteSyncEvt,
+  addLetterJoin, updateProfile, updateTxn, getUser, getShares, getTxns, queryTxns,
+  updateEvent, getEventBySlug, getEventById, updateSyncEvt, deleteSyncEvt,
 };
 
 export default data;

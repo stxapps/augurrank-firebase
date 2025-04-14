@@ -1,24 +1,15 @@
 import lsgApi from '@/apis/localSg';
-import { ME_OBJ, UNSAVED_TXNS, NFT_METAS, STX_TST_STR } from '@/types/const';
-import { isString } from '@/utils';
+import { ME_OBJ, NFT_METAS, STX_TST_STR, ME_PATH } from '@/types/const';
+import { isString, isFldStr, newObject, getResErrMsg } from '@/utils';
 
 const getLocalMe = () => {
-  const data = {
-    stxAddr: '', stxTstStr: STX_TST_STR, stxPubKey: '', stxSigStr: '',
-    username: null, avatar: null, bio: null, didAgreeTerms: null,
-  };
+  let data: any = { stxAddr: '', stxPubKey: '', stxSigStr: '' };
 
   const str = lsgApi.getItemSync(ME_OBJ);
   if (isString(str)) {
     try {
       const obj = JSON.parse(str);
-      if (isString(obj.stxAddr)) data.stxAddr = obj.stxAddr;
-      if (isString(obj.stxPubKey)) data.stxPubKey = obj.stxPubKey;
-      if (isString(obj.stxSigStr)) data.stxSigStr = obj.stxSigStr;
-      if (isString(obj.username)) data.username = obj.username;
-      if (isString(obj.avatar)) data.avatar = obj.avatar;
-      if (isString(obj.bio)) data.bio = obj.bio;
-      if (obj.didAgreeTerms === true) data.didAgreeTerms = obj.didAgreeTerms;
+      data = newObject(obj, ['fthSts']);
     } catch (error) {
       // Ignore if cache value invalid
     }
@@ -28,15 +19,14 @@ const getLocalMe = () => {
 };
 
 const putLocalMe = (me) => {
-  lsgApi.setItemSync(ME_OBJ, JSON.stringify(me));
+  const obj = newObject(me, ['fthSts']);
+  lsgApi.setItemSync(ME_OBJ, JSON.stringify(obj));
 };
 
 const deleteLocalFiles = () => {
   const keys = lsgApi.listKeysSync();
   for (const key of keys) {
-    if (
-      key.startsWith(`${UNSAVED_TXNS}/`) || key.startsWith(`${NFT_METAS}/`)
-    ) {
+    if (key.startsWith(`${NFT_METAS}/`)) {
       lsgApi.removeItemSync(key);
     }
   }
@@ -44,6 +34,38 @@ const deleteLocalFiles = () => {
   // Delete files in IndexedDB here if needed
 };
 
-const index = { getLocalMe, putLocalMe, deleteLocalFiles };
+const getAuthData = () => {
+  const { stxAddr, stxPubKey, stxSigStr } = getLocalMe();
+  if (!isFldStr(stxAddr) || !isFldStr(stxPubKey) || !isFldStr(stxSigStr)) {
+    let msg = `Invalid stxAddr: ${stxAddr}`;
+    msg += `, stxPubKey: ${stxPubKey}`;
+    msg += `, or stxSigStr: ${stxSigStr}`;
+    throw new Error(msg);
+  }
+
+  return { stxAddr, stxTstStr: STX_TST_STR, stxPubKey, stxSigStr };
+};
+
+const fetchMe = async () => {
+  const authData = getAuthData();
+
+  const res = await fetch(ME_PATH, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    referrerPolicy: 'strict-origin',
+    body: JSON.stringify({ ...authData }),
+  });
+  if (!res.ok) {
+    const msg = await getResErrMsg(res);
+    throw new Error(msg);
+  }
+
+  const obj = await res.json();
+  return obj;
+};
+
+const index = { getLocalMe, putLocalMe, deleteLocalFiles, getAuthData, fetchMe };
 
 export default index;

@@ -5,17 +5,17 @@ import { legacy_createStore as createStore, applyMiddleware } from 'redux';
 import { thunk } from 'redux-thunk';
 import { composeWithDevTools } from '@redux-devtools/extension';
 
-import { UPDATE_ME } from '@/types/actionTypes';
+import idxApi from '@/apis';
+import { UPDATE_ME, RESET_STATE } from '@/types/actionTypes';
 import reducers from '@/reducers';
 import { isObject } from '@/utils';
 
 const persistMiddleWare = ({ dispatch, getState }) => next => action => {
   const res = next(action);
 
-  if (isObject(action) && action.type === UPDATE_ME) {
-    // cannot have await
-    //const me = getState().me;
-
+  if (isObject(action) && [UPDATE_ME, RESET_STATE].includes(action.type)) {
+    const me = getState().me;
+    idxApi.putLocalMe(me);
   }
 
   return res;

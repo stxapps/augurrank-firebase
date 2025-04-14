@@ -59,6 +59,19 @@ export const docToUser = (stxAddr, doc) => {
   return user;
 };
 
+export const docToShare = (id, doc) => {
+  const share = {
+    id,
+    evtId: doc.evtId,
+    ocId: doc.ocId,
+    amount: doc.amount,
+    avgCost: doc.avgCost,
+    createDate: doc.createDate.toMillis(),
+    updateDate: doc.updateDate.toMillis(),
+  };
+  return share;
+};
+
 export const docToTxn = (id, doc) => {
   const txn = {
 

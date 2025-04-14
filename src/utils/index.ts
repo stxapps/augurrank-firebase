@@ -95,7 +95,7 @@ export const sleep = (ms) => {
 };
 
 export const newObject = (object, ignoreAttrs) => {
-  const nObject = {};
+  const nObject: any = {};
   for (const attr in object) {
     if (ignoreAttrs.includes(attr)) continue;
     nObject[attr] = object[attr];

@@ -2,24 +2,21 @@ import { AppDispatch, AppGetState } from '@/store';
 import idxApi from '@/apis';
 import walletApi from '@/apis/wallet';
 import {
-  INIT, UPDATE_WINDOW, UPDATE_ME, UPDATE_POPUP, UPDATE_WALLET_POPUP,
-  UPDATE_ERROR_POPUP, RESET_STATE,
+  INIT, UPDATE_WINDOW, UPDATE_ME, UPDATE_POPUP, UPDATE_WALLET_POPUP, UPDATE_ERROR_POPUP,
+  RESET_STATE,
 } from '@/types/actionTypes';
 import { STX_TST_STR } from '@/types/const';
-import { isObject, throttle, getWindowInsets, getWalletErrorText } from '@/utils';
+import {
+  isObject, throttle, getWindowInsets, getWalletErrorText, getSignInStatus,
+} from '@/utils';
 
 let _didInit: boolean;
 export const init = () => async (dispatch: AppDispatch, getState: AppGetState) => {
   if (_didInit) return;
   _didInit = true;
 
-  const {
-    stxAddr, stxPubKey, stxSigStr, username, avatar, bio, didAgreeTerms,
-  } = idxApi.getLocalMe();
-  dispatch({
-    type: INIT,
-    payload: { stxAddr, stxPubKey, stxSigStr, username, avatar, bio, didAgreeTerms },
-  });
+  const localMe = idxApi.getLocalMe();
+  dispatch({ type: INIT, payload: { ...localMe } });
 
   window.addEventListener('resize', throttle(() => {
     const insets = getWindowInsets();
@@ -51,6 +48,8 @@ export const init = () => async (dispatch: AppDispatch, getState: AppGetState) =
       });
     }, 16));
   }
+
+  dispatch(fetchMe());
 };
 
 export const signOut = () => async (dispatch: AppDispatch, getState: AppGetState) => {
@@ -117,6 +116,8 @@ export const signStxTstStr = () => async (
 
   const me = { stxSigStr: data.stxSigStr };
   dispatch(updateMe(me));
+
+  dispatch(fetchMe());
 };
 
 const resetState = async (payload, dispatch) => {
@@ -138,6 +139,31 @@ export const updateWalletPopup = (payload) => {
 
 export const updateErrorPopup = (payload) => {
   return { type: UPDATE_ERROR_POPUP, payload };
+};
+
+export const fetchMe = (doForce = false) => async (
+  dispatch: AppDispatch, getState: AppGetState
+) => {
+  if (getSignInStatus(getState().me) !== 3) return;
+
+  const { fthSts } = getState().me;
+
+  if (fthSts === 0) return;
+  if (!doForce && fthSts !== null) return;
+  dispatch(updateMe({ fthSts: 0 }));
+
+  let data;
+  try {
+    data = await idxApi.fetchMe();
+  } catch (error) {
+    console.log('fetchMe error:', error);
+    dispatch(updateMe({ fthSts: 2 }));
+    return;
+  }
+
+  if (getSignInStatus(getState().me) !== 3) return;
+
+  dispatch(updateMe({ ...data, fthSts: 1 }));
 };
 
 export const updateMe = (payload) => {
