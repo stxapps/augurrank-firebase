@@ -1,0 +1,6 @@
+env:
+  - variable: FIRESTORE_EMULATOR_HOST
+    value: "127.0.0.1:5003"
+
+  - variable: STACKS_NETWORK
+    value: "testnet"

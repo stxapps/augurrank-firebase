@@ -19,3 +19,6 @@ env:
 
   - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
     value: "G-BS4LG6WRD4"
+
+  - variable: STACKS_NETWORK
+    value: "mainnet"
