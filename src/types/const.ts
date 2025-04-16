@@ -18,7 +18,7 @@ export const ERROR = 'ERROR';
 export const LETTER_JOINS = 'letterJoins';
 export const USERS = 'users';
 export const SHARES = 'shares';
-export const TXNS = 'txns';
+export const TXS = 'txs';
 export const EVENTS = 'events';
 export const COMMENTS = 'comments';
 export const COMMENT_REPLIES = 'commentReplies';
@@ -48,23 +48,29 @@ export const AGREE_POPUP = 'AGREE_POPUP';
 
 export const LETTERS_JOINS_PATH = '/api/letters/joins';
 export const ME_PATH = '/api/me';
+export const ENROLLS_PATH = '/api/enrolls';
 export const EVENTS_PATH = '/api/events';
-export const TXNS_PATH = '/api/txns';
+export const TXS_PATH = '/api/txs';
 
-export const JOIN_LETTER_STATUS_INIT = 'JOIN_LETTER_STATUS_INIT';
-export const JOIN_LETTER_STATUS_JOINING = 'JOIN_LETTER_STATUS_JOINING';
-export const JOIN_LETTER_STATUS_INVALID = 'JOIN_LETTER_STATUS_INVALID';
-export const JOIN_LETTER_STATUS_COMMIT = 'JOIN_LETTER_STATUS_COMMIT';
-export const JOIN_LETTER_STATUS_ROLLBACK = 'JOIN_LETTER_STATUS_ROLLBACK';
+export const JOIN_LETTER_INIT = 'JOIN_LETTER_INIT'; // Join letter status
+export const JOIN_LETTER_JOINING = 'JOIN_LETTER_JOINING';
+export const JOIN_LETTER_INVALID = 'JOIN_LETTER_INVALID';
+export const JOIN_LETTER_COMMIT = 'JOIN_LETTER_COMMIT';
+export const JOIN_LETTER_ROLLBACK = 'JOIN_LETTER_ROLLBACK';
 
-export const TXN_STATUS_INIT = 'TXN_STATUS_INIT';
-export const TXN_STATUS_IN_MEMPOOL = 'TXN_STATUS_IN_MEMPOOL';
-export const TXN_STATUS_PUT_OK = 'TXN_STATUS_PUT_OK';
-export const TXN_STATUS_PUT_ERROR = 'TXN_STATUS_PUT_ERROR';
-export const TXN_STATUS_CONFIRMED_OK = 'TXN_STATUS_CONFIRMED_OK';
-export const TXN_STATUS_CONFIRMED_ERROR = 'TXN_STATUS_CONFIRMED_ERROR';
+export const TX_BUY = 'buy'; // Tx type
+export const TX_SELL = 'sell';
+export const TX_ENROLL = 'enroll';
+export const TX_IAP = 'iap';
 
-export const PDG = 'pending';
+export const TX_INIT = 'TX_INIT'; // Tx state
+export const TX_IN_MEMPOOL = 'TX_IN_MEMPOOL';
+export const TX_PUT_OK = 'TX_PUT_OK';
+export const TX_PUT_ERROR = 'TX_PUT_ERROR';
+export const TX_CONFIRMED_OK = 'TX_CONFIRMED_OK';
+export const TX_CONFIRMED_ERROR = 'TX_CONFIRMED_ERROR';
+
+export const PDG = 'pending'; // Tx status
 export const SCS = 'success';
 export const ABT_BY_RES = 'abort_by_response';
 export const ABT_BY_PC = 'abort_by_post_condition';
@@ -74,3 +80,5 @@ export const ERR_INVALID_ARGS = 'ERR_INVALID_ARGS';
 export const ERR_NOT_FOUND = 'ERR_NOT_FOUND';
 export const ERR_INVALID_RES = 'ERR_INVALID_RES';
 export const ERR_VRF_SIG = 'ERR_VRF_SIG';
+
+export const ENRL_ID_SUFFIX = '-0000000000000enrlmnt';

@@ -21,7 +21,7 @@ const evt = {
 };
 const createEventSc = async () => {
   const res = await scApi.createEvent(evt);
-  console.log(`(${logKey}) createEventSc with txid: ${res.txid}`);
+  console.log(`(${logKey}) createEventSc with txId: ${res.txId}`);
 };
 const createEventDb = async () => {
   const dbEvt = {
@@ -40,7 +40,7 @@ const createEventDb = async () => {
 const btEvt = { id: 0, beta: 300000000 };
 const setEventBetaSc = async () => {
   const res = await scApi.setEventBeta(btEvt.id, btEvt.beta);
-  console.log(`(${logKey}) setEventBeta with txid: ${res.txid}`);
+  console.log(`(${logKey}) setEventBeta with txId: ${res.txId}`);
 };
 const setEventBetaDb = async () => {
   const dbBtEvt = { ...btEvt, id: `${info.marketsContract}-${btEvt.id}` };
@@ -53,7 +53,7 @@ const setEventBetaDb = async () => {
 const stsEvt = { id: 0, status: 1, winOcId: null };
 const setEventStatusSc = async () => {
   const res = await scApi.setEventStatus(stsEvt.id, stsEvt.status, stsEvt.winOcId);
-  console.log(`(${logKey}) setEventStatusSc with txid: ${res.txid}`);
+  console.log(`(${logKey}) setEventStatusSc with txId: ${res.txId}`);
 };
 const setEventStatusDb = async () => {
   const dbStsEvt = { ...stsEvt, id: `${info.marketsContract}-${stsEvt.id}` };

@@ -14,6 +14,7 @@ const getStacksInfo = () => {
       stxAddr: 'SP1ARJX5XDEYWNDX8JEKGTZNZ0YJHQAYDWVNBRXGM',
       tokenContract: 'augur-token-v1',
       marketsContract: 'augur-markets-v1',
+      enrollContract: 'augur-enroll-v1',
       storeContract: 'augur-store-v1',
     };
   }
@@ -23,6 +24,7 @@ const getStacksInfo = () => {
       stxAddr: 'ST1ARJX5XDEYWNDX8JEKGTZNZ0YJHQAYDWRSAB44M',
       tokenContract: 'augur-token-t1',
       marketsContract: 'augur-markets-t1',
+      enrollContract: 'augur-enroll-t1',
       storeContract: 'augur-store-t1',
     };
   }
@@ -47,7 +49,7 @@ const setMarketsContract = async () => {
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
-  return res;
+  return { ...res, txId: res.txid };
 };
 
 const setStoreContract = async () => {
@@ -67,7 +69,7 @@ const setStoreContract = async () => {
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
-  return res;
+  return { ...res, txId: res.txid };
 };
 
 const setTokenUri = async (uri) => {
@@ -87,7 +89,7 @@ const setTokenUri = async (uri) => {
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
-  return res;
+  return { ...res, txId: res.txid };
 };
 
 const mint = async (amount, recipient = null) => {
@@ -108,7 +110,7 @@ const mint = async (amount, recipient = null) => {
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
-  return res;
+  return { ...res, txId: res.txid };
 };
 
 const createEvent = async (evt) => {
@@ -140,7 +142,7 @@ const createEvent = async (evt) => {
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
-  return res;
+  return { ...res, txId: res.txid };
 };
 
 const setEventBeta = async (evtId, beta) => {
@@ -160,7 +162,7 @@ const setEventBeta = async (evtId, beta) => {
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
-  return res;
+  return { ...res, txId: res.txid };
 };
 
 const setEventStatus = async (evtId, status, winOcId = null) => {
@@ -181,7 +183,7 @@ const setEventStatus = async (evtId, status, winOcId = null) => {
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
-  return res;
+  return { ...res, txId: res.txid };
 };
 
 const payRewards = async () => {
@@ -192,9 +194,29 @@ const refundFunds = async () => {
 
 };
 
+const enroll = async (stxAddr) => {
+  const info = getStacksInfo();
+
+  const txOptions = {
+    network: info.network,
+    senderKey: SENDER_KEY,
+    contractAddress: info.stxAddr,
+    contractName: info.enrollContract,
+    functionName: 'enroll',
+    functionArgs: [Cl.principal(stxAddr)],
+    postConditionMode: PostConditionMode.Allow,
+    postConditions: [],
+    fee: 3261,
+    validateWithAbi: true,
+  };
+  const transaction = await makeContractCall(txOptions);
+  const res = await broadcastTransaction({ transaction, network: info.network });
+  return { ...res, txId: res.txid, contract: info.enrollContract };
+};
+
 const sc = {
   getStacksInfo, setMarketsContract, setStoreContract, setTokenUri, mint, createEvent,
-  setEventBeta, setEventStatus, payRewards, refundFunds,
+  setEventBeta, setEventStatus, payRewards, refundFunds, enroll,
 };
 
 export default sc;

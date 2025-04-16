@@ -9,9 +9,9 @@ const initialState = {
   avatar: null,
   bio: null,
   stats: null,
-  txns: {},
-  txnQuryCrsr: null,
-  txnFthMoreSts: null, // null: not yet, 0: fetching, 2: error
+  txs: {},
+  txQuryCrsr: null,
+  txFthMoreSts: null, // null: not yet, 0: fetching, 2: error
 };
 
 const profileReducer = (state = initialState, action) => produce(state, draft => {

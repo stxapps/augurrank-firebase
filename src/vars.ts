@@ -6,6 +6,11 @@ const listenSync = {
   removeListener: null,
 };
 
-const vars = { fetchEvents, listenSync };
+const refreshEnroll = {
+  timeId: null,
+  seq: 0,
+};
+
+const vars = { fetchEvents, listenSync, refreshEnroll };
 
 export default vars;

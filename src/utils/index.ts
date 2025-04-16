@@ -210,32 +210,6 @@ export const getWindowInsets = () => {
   return { top, right, bottom, left };
 };
 
-export const validateEmail = (email) => {
-  if (!isString(email)) return false;
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
-
-export const validateProfile = (profile) => {
-  if (!isObject(profile)) return false;
-
-  if ('username' in profile && !isString(profile.username)) return false;
-  if ('avatar' in profile && !isString(profile.avatar)) return false;
-  if ('bio' in profile) {
-    if (!isString(profile.bio)) return false;
-    if (profile.bio.length > 160) return false;
-  }
-  if ('noInLdb' in profile && ![true, false].includes(profile.noInLdb)) return false;
-  if ('noPrflPg' in profile && ![true, false].includes(profile.noPrflPg)) return false;
-
-  return true;
-};
-
-export const validateTxn = (stxAddr, txn) => {
-
-};
-
 export const getSignInStatus = (me) => {
   const { stxAddr, stxPubKey, stxSigStr } = me;
   if (stxAddr === null && stxPubKey === null && stxSigStr === null) return 0; // loading
@@ -264,6 +238,116 @@ export const getWalletErrorText = (code) => {
   return { title, body };
 };
 
+export const validateEmail = (email) => {
+  if (!isString(email)) return false;
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+export const validateProfile = (profile) => {
+  if (!isObject(profile)) return false;
+
+  if ('username' in profile && !isString(profile.username)) return false;
+  if ('avatar' in profile && !isString(profile.avatar)) return false;
+  if ('bio' in profile) {
+    if (!isString(profile.bio)) return false;
+    if (profile.bio.length > 160) return false;
+  }
+  if ('noInLdb' in profile && ![true, false].includes(profile.noInLdb)) return false;
+  if ('noPrflPg' in profile && ![true, false].includes(profile.noPrflPg)) return false;
+
+  return true;
+};
+
+export const deriveTxInfo = (txInfo) => {
+  const obj = {
+    txId: txInfo.tx_id,
+    status: txInfo.tx_status,
+    height: null,
+    burnHeight: null,
+    result: null,
+    vls: null,
+  };
+  if (isNumber(txInfo.block_height)) obj.height = txInfo.block_height;
+  if (isNumber(txInfo.burn_block_height)) obj.burnHeight = txInfo.burn_block_height;
+  if (isObject(txInfo.tx_result) && isString(txInfo.tx_result.repr)) {
+    obj.result = txInfo.tx_result.repr;
+  }
+  if (Array.isArray(txInfo.events)) {
+    obj.vls = [];
+    for (const evt of txInfo.events) {
+      try {
+        obj.vls.push(evt.contract_log.value.repr);
+      } catch (error) {
+        // might be other event types.
+      }
+    }
+  }
+  return obj;
+};
+
+export const validateTx = (stxAddr, tx) => {
+  if (!isObject(tx)) return false;
+
+  if (!isFldStr(tx.id)) return false;
+  if (!isFldStr(tx.type)) return false;
+  if (!isFldStr(tx.contract)) return false;
+
+  if (!isNumber(tx.createDate)) return false;
+  if (!isNumber(tx.updateDate)) return false;
+
+  if ('evtId' in tx && !isFldStr(tx.evtId)) return false;
+  if ('ocId' in tx && !isNumber(tx.ocId)) return false;
+  if ('amount' in tx && !isNumber(tx.amount)) return false;
+  if ('cost' in tx && !isNumber(tx.cost)) return false;
+
+  if ('cTxId' in tx && !isFldStr(tx.cTxId)) return false;
+  if ('pTxSts' in tx && !isFldStr(tx.pTxSts)) return false;
+  if ('cTxSts' in tx && !isFldStr(tx.cTxSts)) return false;
+
+  return true;
+};
+
+export const mergeTxs = (...txs) => {
+  const bin = {
+    updateDate: 0,
+    pTxSts: { scs: null, updg: null },
+    cTxSts: { scs: null, updg: null },
+  };
+
+  let newTx: any = {};
+  for (const tx of txs) {
+    if (!isObject(tx)) continue;
+
+    if (isNumber(tx.updateDate)) {
+      if (tx.updateDate > bin.updateDate) {
+        bin.updateDate = tx.updateDate;
+      }
+    }
+    if (isString(tx.pTxSts)) {
+      if (tx.pTxSts === SCS) bin.pTxSts.scs = tx.pTxSts;
+      else if (tx.pTxSts !== PDG) bin.pTxSts.updg = tx.pTxSts;
+    }
+    if (isString(tx.cTxSts)) {
+      if (tx.cTxSts === SCS) bin.cTxSts.scs = tx.cTxSts;
+      else if (tx.cTxSts !== PDG) bin.cTxSts.updg = tx.cTxSts;
+    }
+
+    newTx = { ...newTx, ...tx };
+  }
+
+  if (isNumber(bin.updateDate)) newTx.updateDate = bin.updateDate;
+
+  if (isString(bin.pTxSts.scs)) newTx.pTxSts = bin.pTxSts.scs;
+  else if (isString(bin.pTxSts.updg)) newTx.pTxSts = bin.pTxSts.updg;
+
+  if (isString(bin.cTxSts.scs)) newTx.cTxSts = bin.cTxSts.scs;
+  else if (isString(bin.cTxSts.updg)) newTx.cTxSts = bin.cTxSts.updg;
+
+  return newTx;
+};
+
 export const parseAvatar = (str) => {
   // str can be undefined, null, empty string, filled string
   let avatar: any = {};
@@ -283,45 +367,6 @@ export const getAvtThbnl = (obj) => {
   if (isFldStr(obj.thumbnail)) return obj.thumbnail;
   if (isFldStr(obj.image)) return obj.image;
   return null;
-};
-
-export const mergeTxns = (...txns) => {
-  const bin = {
-    updateDate: 0,
-    pStatus: { scs: null, updg: null },
-    cStatus: { scs: null, updg: null },
-  };
-
-  let newTxn: any = {};
-  for (const txn of txns) {
-    if (!isObject(txn)) continue;
-
-    if (isNumber(txn.updateDate)) {
-      if (txn.updateDate > bin.updateDate) {
-        bin.updateDate = txn.updateDate;
-      }
-    }
-    if (isString(txn.pStatus)) {
-      if (txn.pStatus === SCS) bin.pStatus.scs = txn.pStatus;
-      else if (txn.pStatus !== PDG) bin.pStatus.updg = txn.pStatus;
-    }
-    if (isString(txn.cStatus)) {
-      if (txn.cStatus === SCS) bin.cStatus.scs = txn.cStatus;
-      else if (txn.cStatus !== PDG) bin.cStatus.updg = txn.cStatus;
-    }
-
-    newTxn = { ...newTxn, ...txn };
-  }
-
-  if (isNumber(bin.updateDate)) newTxn.updateDate = bin.updateDate;
-
-  if (isString(bin.pStatus.scs)) newTxn.pStatus = bin.pStatus.scs;
-  else if (isString(bin.pStatus.updg)) newTxn.pStatus = bin.pStatus.updg;
-
-  if (isString(bin.cStatus.scs)) newTxn.cStatus = bin.cStatus.scs;
-  else if (isString(bin.cStatus.updg)) newTxn.cStatus = bin.cStatus.updg;
-
-  return newTxn;
 };
 
 export const isAvatarEqual = (strA, strB) => {

@@ -55,6 +55,7 @@ export const docToUser = (stxAddr, doc) => {
   if (isNotNullIn(doc, 'didAgreeTerms')) user.didAgreeTerms = doc.didAgreeTerms;
   if (isNotNullIn(doc, 'noInLdb')) user.noInLdb = doc.noInLdb;
   if (isNotNullIn(doc, 'noPrflPg')) user.noPrflPg = doc.noPrflPg;
+  if (isNotNullIn(doc, 'balance')) user.balance = doc.balance;
 
   return user;
 };
@@ -65,16 +66,28 @@ export const docToShare = (id, doc) => {
     evtId: doc.evtId,
     ocId: doc.ocId,
     amount: doc.amount,
-    avgCost: doc.avgCost,
+    cost: doc.cost,
     createDate: doc.createDate.toMillis(),
     updateDate: doc.updateDate.toMillis(),
   };
   return share;
 };
 
-export const docToTxn = (id, doc) => {
-  const txn = {
-
+export const docToTx = (id, doc) => {
+  const tx: any = {
+    id,
+    type: doc.type,
+    contract: doc.contract,
+    createDate: doc.createDate.toMillis(),
+    updateDate: doc.updateDate.toMillis(),
   };
-  return txn;
+  if (isNotNullIn(doc, 'evtId')) tx.evtId = doc.evtId;
+  if (isNotNullIn(doc, 'ocId')) tx.ocId = doc.ocId;
+  if (isNotNullIn(doc, 'amount')) tx.amount = doc.amount;
+  if (isNotNullIn(doc, 'cost')) tx.cost = doc.cost;
+  if (isNotNullIn(doc, 'cTxId')) tx.cTxId = doc.cTxId;
+  if (isNotNullIn(doc, 'pTxSts')) tx.pTxSts = doc.pTxSts;
+  if (isNotNullIn(doc, 'cTxSts')) tx.cTxSts = doc.cTxSts;
+
+  return tx;
 };

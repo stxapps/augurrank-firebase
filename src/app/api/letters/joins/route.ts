@@ -35,5 +35,6 @@ export async function POST(req: NextRequest) {
 
   await dataApi.addLetterJoin(logKey, email);
 
+  console.log(`(${logKey}) /api/letters/joins finished`);
   return new NextResponse(null, { status: 204 });
 }

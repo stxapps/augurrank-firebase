@@ -1,13 +1,13 @@
 import { FieldValue } from 'firebase-admin/firestore';
 
 import {
-  fstoreAdmin as db, evtToDoc, syncToDoc, userToDoc,
+  fstoreAdmin as db, evtToDoc, syncToDoc, userToDoc, shareToDoc, txToDoc,
 } from '@/apis/server/fbaseAdmin';
 import {
-  LETTER_JOINS, USERS, SHARES, TXNS, EVENTS, SYNCS, ACTIVE, INDEX, N_DOCS,
+  LETTER_JOINS, USERS, SHARES, TXS, EVENTS, SYNCS, ACTIVE, INDEX, N_DOCS,
 } from '@/types/const';
-import { isFldStr, newObject, isAvatarEqual } from '@/utils';
-import { docToEvt, docToSync, docToUser, docToShare, docToTxn } from '@/utils/fbase';
+import { isObject, isFldStr, newObject, isAvatarEqual, mergeTxs } from '@/utils';
+import { docToEvt, docToSync, docToUser, docToShare, docToTx } from '@/utils/fbase';
 
 const addLetterJoin = async (logKey, email) => {
   const ref = db.collection(LETTER_JOINS).doc(email);
@@ -117,8 +117,82 @@ const updateProfile = async (logKey, stxAddr, profile) => {
   });
 };
 
-const updateTxn = async (logKey, stxAddr, txn) => {
-  // update share?
+const updateTx = async (logKey, stxAddr, tx) => {
+  const ref = db.collection(USERS).doc(stxAddr).collection(TXS).doc(tx.id);
+
+  await db.runTransaction(async (t) => {
+    let newTx;
+
+    const snapshot = await t.get(ref);
+    if (snapshot.exists) {
+      const oldTx = docToTx(tx.id, snapshot.data());
+      newTx = mergeTxs(oldTx, tx);
+    } else {
+      newTx = tx;
+    }
+
+    t.set(ref, txToDoc(newTx));
+    console.log(`(${logKey}) Updated to Firestore`);
+  });
+};
+
+const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
+  const rRef = db.collection(USERS).doc(stxAddr);
+
+  const userRef = isObject(user) ? rRef : null;
+  const shareRef = isObject(share) ? rRef.collection(SHARES).doc(share.id) : null;
+  const txRef = rRef.collection(TXS).doc(tx.id);
+
+  await db.runTransaction(async (t) => {
+    let newUser, newShare, newTx;
+    const now = Date.now();
+
+    if (isObject(userRef)) {
+      const ss = await t.get(userRef);
+      if (ss.exists) {
+        const oldUser = docToUser(ss.id, ss.data());
+        newUser = { ...oldUser, balance: oldUser.balance + user.balance };
+      } else {
+        newUser = { stxAddr, balance: user.balance, createDate: now, updateDate: now };
+      }
+    }
+    if (isObject(shareRef)) {
+      const ss = await t.get(shareRef);
+      if (ss.exists) {
+        const oldShare = docToShare(ss.id, ss.data());
+        newShare = {
+          ...oldShare,
+          amount: oldShare.amount + share.amount,
+          cost: oldShare.cost + share.cost,
+        };
+      } else {
+        newShare = share;
+      }
+    }
+    if (isObject(txRef)) {
+      const ss = await t.get(txRef);
+      if (ss.exists) {
+        const oldTx = docToTx(ss.id, ss.data());
+        newTx = mergeTxs(oldTx, tx);
+      } else {
+        newTx = tx;
+      }
+    }
+    if (isObject(userRef)) {
+      //if (newUser.balance < 0) throw new Error();
+      //if (`${newUser.balance}`.length < 7) throw new Error();
+      validateUser(newUser);
+      t.set(userRef, userToDoc(newUser));
+    }
+    if (isObject(shareRef)) {
+      validateShare(newShare);
+      t.set(shareRef, shareToDoc(newShare));
+    }
+    if (isObject(txRef)) {
+      validateTx(newTx);
+      t.set(txRef, txToDoc(newTx));
+    }
+  });
 };
 
 const getUser = async (stxAddr) => {
@@ -144,12 +218,40 @@ const getShares = async (stxAddr) => {
   return shares;
 };
 
-const getTxns = async (stxAddr, ids) => {
-
+const getTx = async (stxAddr, id) => {
+  const ref = db.collection(USERS).doc(stxAddr).collection(TXS).doc(id);
+  const snapshot = await ref.get();
+  if (snapshot.exists) {
+    const tx = docToTx(id, snapshot.data());
+    return tx;
+  }
+  return null;
 };
 
-const queryTxns = async (stxAddr: string, quryCrsr: string | null) => {
-  const clt = db.collection(USERS).doc(stxAddr).collection(TXNS);
+const getTxs = async (stxAddr, ids) => {
+  const refs = ids.map(id => {
+    return db.collection(USERS).doc(stxAddr).collection(TXS).doc(id);
+  });
+
+  const txsPerId = {};
+  const snapshots = await db.getAll(...refs);
+  snapshots.forEach(ss => {
+    if (!ss.exists) return;
+
+    const tx = docToTx(ss.id, ss.data());
+    txsPerId[tx.id] = tx;
+  });
+
+  const txs = ids.map(id => {
+    const tx = txsPerId[id];
+    return isObject(tx) ? tx : null;
+  });
+
+  return txs;
+};
+
+const queryTxs = async (stxAddr: string, quryCrsr: string | null) => {
+  const clt = db.collection(USERS).doc(stxAddr).collection(TXS);
   const by = clt.orderBy('createDate', 'desc');
 
   let q;
@@ -167,7 +269,7 @@ const queryTxns = async (stxAddr: string, quryCrsr: string | null) => {
     snapshots.push(ss);
   });
 
-  const nTxns = snapshots.slice(0, N_DOCS).map(ss => docToTxn(ss.id, ss.data()));
+  const nTxs = snapshots.slice(0, N_DOCS).map(ss => docToTx(ss.id, ss.data()));
 
   let nQuryCrsr = null;
   if (snapshots.length >= N_DOCS + 1) {
@@ -175,7 +277,7 @@ const queryTxns = async (stxAddr: string, quryCrsr: string | null) => {
     nQuryCrsr = ss.id;
   }
 
-  return { txns: nTxns, quryCrsr: nQuryCrsr };
+  return { txs: nTxs, quryCrsr: nQuryCrsr };
 };
 
 const updateEvent = async (logKey, evt, doAdd) => {
@@ -258,8 +360,9 @@ const deleteSyncEvt = async (logKey, evtId) => {
 };
 
 const data = {
-  addLetterJoin, updateProfile, updateTxn, getUser, getShares, getTxns, queryTxns,
-  updateEvent, getEventBySlug, getEventById, updateSyncEvt, deleteSyncEvt,
+  addLetterJoin, updateProfile, updateTx, updateUsrShrTx, getUser, getShares,
+  getTx, getTxs, queryTxs, updateEvent, getEventBySlug, getEventById, updateSyncEvt,
+  deleteSyncEvt,
 };
 
 export default data;

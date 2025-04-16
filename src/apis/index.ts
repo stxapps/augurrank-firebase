@@ -1,5 +1,7 @@
 import lsgApi from '@/apis/localSg';
-import { ME_OBJ, NFT_METAS, STX_TST_STR, ME_PATH } from '@/types/const';
+import {
+  ME_OBJ, NFT_METAS, STX_TST_STR, ME_PATH, ENROLLS_PATH, ERR_NOT_FOUND,
+} from '@/types/const';
 import { isString, isFldStr, newObject, getResErrMsg } from '@/utils';
 
 const getLocalMe = () => {
@@ -9,7 +11,7 @@ const getLocalMe = () => {
   if (isString(str)) {
     try {
       const obj = JSON.parse(str);
-      data = newObject(obj, ['fthSts']);
+      data = newObject(obj, ['fthSts', 'enrlFthSts']);
     } catch (error) {
       // Ignore if cache value invalid
     }
@@ -19,7 +21,7 @@ const getLocalMe = () => {
 };
 
 const putLocalMe = (me) => {
-  const obj = newObject(me, ['fthSts']);
+  const obj = newObject(me, ['fthSts', 'enrlFthSts']);
   lsgApi.setItemSync(ME_OBJ, JSON.stringify(obj));
 };
 
@@ -66,6 +68,62 @@ const fetchMe = async () => {
   return obj;
 };
 
-const index = { getLocalMe, putLocalMe, deleteLocalFiles, getAuthData, fetchMe };
+const applyEnroll = async () => {
+  const authData = getAuthData();
+
+  const res = await fetch(`${ENROLLS_PATH}/${authData.stxAddr}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    referrerPolicy: 'strict-origin',
+    body: JSON.stringify({ ...authData }),
+  });
+  if (!res.ok) {
+    const msg = await getResErrMsg(res);
+    throw new Error(msg);
+  }
+
+  const obj = await res.json();
+  return obj;
+};
+
+const patchEnroll = async (tx) => {
+  const authData = getAuthData();
+
+  const res = await fetch(`${ENROLLS_PATH}/${authData.stxAddr}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    referrerPolicy: 'strict-origin',
+    body: JSON.stringify({ ...authData, tx }),
+  });
+  if (!res.ok) {
+    const msg = await getResErrMsg(res);
+    throw new Error(msg);
+  }
+
+  const obj = await res.json();
+  return obj;
+};
+
+const fetchTxInfo = async (txId) => {
+  const res = await fetch(`https://api.hiro.so/extended/v1/tx/${txId}`);
+  if (res.status === 404) {
+    throw new Error(ERR_NOT_FOUND);
+  }
+  if (!res.ok) {
+    const msg = await getResErrMsg(res);
+    throw new Error(msg);
+  }
+  const obj = await res.json();
+  return obj;
+};
+
+const index = {
+  getLocalMe, putLocalMe, deleteLocalFiles, getAuthData, fetchMe, applyEnroll,
+  patchEnroll, fetchTxInfo,
+};
 
 export default index;

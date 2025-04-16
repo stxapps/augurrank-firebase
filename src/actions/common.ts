@@ -3,8 +3,7 @@ import { AppDispatch, AppGetState } from '@/store';
 import cmnApi from '@/apis/common';
 import { UPDATE_EVENTS, UPDATE_SYNC, UPDATE_LTRJN_EDITOR } from '@/types/actionTypes';
 import {
-  LETTERS_JOINS_PATH, JOIN_LETTER_STATUS_JOINING, JOIN_LETTER_STATUS_INVALID,
-  JOIN_LETTER_STATUS_COMMIT, JOIN_LETTER_STATUS_ROLLBACK,
+  JOIN_LETTER_JOINING, JOIN_LETTER_INVALID, JOIN_LETTER_COMMIT, JOIN_LETTER_ROLLBACK,
 } from '@/types/const';
 import { isFldStr, validateEmail } from '@/utils';
 import vars from '@/vars';
@@ -90,12 +89,12 @@ export const joinLetter = () => async (
 
   if (!validateEmail(email)) {
     dispatch(updateLtrjnEditor({
-      status: JOIN_LETTER_STATUS_INVALID, extraMsg: '',
+      status: JOIN_LETTER_INVALID, extraMsg: '',
     }));
     return;
   }
   dispatch(updateLtrjnEditor({
-    status: JOIN_LETTER_STATUS_JOINING, extraMsg: '',
+    status: JOIN_LETTER_JOINING, extraMsg: '',
   }));
 
   try {
@@ -103,13 +102,13 @@ export const joinLetter = () => async (
   } catch (error) {
     const extraMsg = error.message;
     dispatch(updateLtrjnEditor({
-      status: JOIN_LETTER_STATUS_ROLLBACK, extraMsg,
+      status: JOIN_LETTER_ROLLBACK, extraMsg,
     }));
     return;
   }
 
   dispatch(updateLtrjnEditor({
-    status: JOIN_LETTER_STATUS_COMMIT, extraMsg: '',
+    status: JOIN_LETTER_COMMIT, extraMsg: '',
   }));
 };
 

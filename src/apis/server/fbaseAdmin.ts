@@ -79,6 +79,9 @@ export const userToDoc = (user) => {
   if ('noPrflPg' in user) {
     doc.noPrflPg = user.noPrflPg;
   }
+  if ('balance' in user) {
+    doc.balance = user.balance;
+  }
 
   return doc;
 };
@@ -95,10 +98,20 @@ export const shareToDoc = (share) => {
   return doc;
 };
 
-export const txnToDoc = (txn) => {
-  const doc = {
-    stxAddr: txn.stxAddr,
-    //evtId: txn.evtId,
+export const txToDoc = (tx) => {
+  const doc: any = {
+    type: tx.type,
+    contract: tx.contract,
+    createDate: Timestamp.fromDate(new Date(tx.createDate)),
+    updateDate: Timestamp.fromDate(new Date(tx.updateDate)),
   };
+  if ('evtId' in tx) doc.evtId = tx.evtId;
+  if ('ocId' in tx) doc.ocId = tx.ocId;
+  if ('amount' in tx) doc.amount = tx.amount;
+  if ('cost' in tx) doc.cost = tx.cost;
+  if ('cTxId' in tx) doc.cTxId = tx.cTxId;
+  if ('pTxSts' in tx) doc.pTxSts = tx.pTxSts;
+  if ('cTxSts' in tx) doc.cTxSts = tx.cTxSts;
+
   return doc;
 };
