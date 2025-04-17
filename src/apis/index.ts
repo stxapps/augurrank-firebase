@@ -103,9 +103,6 @@ const patchEnroll = async (tx) => {
     const msg = await getResErrMsg(res);
     throw new Error(msg);
   }
-
-  const obj = await res.json();
-  return obj;
 };
 
 const fetchTxInfo = async (txId) => {

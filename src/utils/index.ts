@@ -415,7 +415,7 @@ export const rectifyTx = (oldTx, newTx) => {
       cTxSts        false      false
   */
   const rfAttrs = ['id', 'type', 'contract', 'createDate'];
-  const rAttrs = ['updateData'];
+  const rAttrs = ['updateDate'];
   const fAttrs = ['evtId', 'ocId', 'amount', 'cost', 'cTxId'];
 
   for (const attr of rfAttrs) {
