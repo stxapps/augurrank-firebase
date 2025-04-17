@@ -7,7 +7,7 @@ import { SENDER_KEY } from '@/keys';
 import { isFldStr, isNumber } from '@/utils';
 
 const getStacksInfo = () => {
-  const network = process.env.STACKS_NETWORK;
+  const network = process.env.NEXT_PUBLIC_STACKS_NETWORK;
   if (network === 'mainnet') {
     return {
       network: STACKS_MAINNET,
@@ -32,6 +32,11 @@ const getStacksInfo = () => {
   throw new Error(`Invalid Stacks network: ${network}`);
 };
 
+const prepend0x = (txId) => {
+  if (!txId.startsWith('0x')) return '0x' + txId;
+  return txId;
+};
+
 const setMarketsContract = async () => {
   const info = getStacksInfo();
 
@@ -49,7 +54,7 @@ const setMarketsContract = async () => {
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
-  return { ...res, txId: res.txid };
+  return { ...res, txId: prepend0x(res.txid) };
 };
 
 const setStoreContract = async () => {
@@ -69,7 +74,7 @@ const setStoreContract = async () => {
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
-  return { ...res, txId: res.txid };
+  return { ...res, txId: prepend0x(res.txid) };
 };
 
 const setTokenUri = async (uri) => {
@@ -89,7 +94,7 @@ const setTokenUri = async (uri) => {
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
-  return { ...res, txId: res.txid };
+  return { ...res, txId: prepend0x(res.txid) };
 };
 
 const mint = async (amount, recipient = null) => {
@@ -110,7 +115,7 @@ const mint = async (amount, recipient = null) => {
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
-  return { ...res, txId: res.txid };
+  return { ...res, txId: prepend0x(res.txid) };
 };
 
 const createEvent = async (evt) => {
@@ -142,7 +147,7 @@ const createEvent = async (evt) => {
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
-  return { ...res, txId: res.txid };
+  return { ...res, txId: prepend0x(res.txid) };
 };
 
 const setEventBeta = async (evtId, beta) => {
@@ -162,7 +167,7 @@ const setEventBeta = async (evtId, beta) => {
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
-  return { ...res, txId: res.txid };
+  return { ...res, txId: prepend0x(res.txid) };
 };
 
 const setEventStatus = async (evtId, status, winOcId = null) => {
@@ -183,7 +188,7 @@ const setEventStatus = async (evtId, status, winOcId = null) => {
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
-  return { ...res, txId: res.txid };
+  return { ...res, txId: prepend0x(res.txid) };
 };
 
 const payRewards = async () => {
@@ -211,7 +216,7 @@ const enroll = async (stxAddr) => {
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
-  return { ...res, txId: res.txid, contract: info.enrollContract };
+  return { ...res, txId: prepend0x(res.txid), contract: info.enrollContract };
 };
 
 const sc = {

@@ -14,10 +14,10 @@
     "play-emu": "FIRESTORE_EMULATOR_HOST=127.0.0.1:5003 npx tsx src/scripts/play.ts",
     "play-test": "GOOGLE_APPLICATION_CREDENTIALS=/home/wit/.config/gcloud/legacy_credentials/brace@brace.to/augurrank-test-firebase-adminsdk-fbsvc-1ed6dfb419.json npx tsx src/scripts/play.ts",
     "play-prod": "GOOGLE_APPLICATION_CREDENTIALS=/home/wit/.config/gcloud/legacy_credentials/brace@brace.to/augurrank-prod-firebase-adminsdk-fbsvc-2fcafa33dc.json npx tsx src/scripts/play.ts",
-    "sc-test": "GOOGLE_APPLICATION_CREDENTIALS=/home/wit/.config/gcloud/legacy_credentials/brace@brace.to/augurrank-test-firebase-adminsdk-fbsvc-1ed6dfb419.json STACKS_NETWORK=testnet npx tsx src/scripts/sc.ts",
-    "sc-prod": "GOOGLE_APPLICATION_CREDENTIALS=/home/wit/.config/gcloud/legacy_credentials/brace@brace.to/augurrank-prod-firebase-adminsdk-fbsvc-2fcafa33dc.json STACKS_NETWORK=mainnet npx tsx src/scripts/sc.ts",
-    "admin-test": "GOOGLE_APPLICATION_CREDENTIALS=/home/wit/.config/gcloud/legacy_credentials/brace@brace.to/augurrank-test-firebase-adminsdk-fbsvc-1ed6dfb419.json STACKS_NETWORK=testnet npx tsx src/scripts/admin.ts",
-    "admin-prod": "GOOGLE_APPLICATION_CREDENTIALS=/home/wit/.config/gcloud/legacy_credentials/brace@brace.to/augurrank-prod-firebase-adminsdk-fbsvc-2fcafa33dc.json STACKS_NETWORK=mainnet npx tsx src/scripts/admin.ts"
+    "sc-test": "GOOGLE_APPLICATION_CREDENTIALS=/home/wit/.config/gcloud/legacy_credentials/brace@brace.to/augurrank-test-firebase-adminsdk-fbsvc-1ed6dfb419.json NEXT_PUBLIC_STACKS_NETWORK=testnet npx tsx src/scripts/sc.ts",
+    "sc-prod": "GOOGLE_APPLICATION_CREDENTIALS=/home/wit/.config/gcloud/legacy_credentials/brace@brace.to/augurrank-prod-firebase-adminsdk-fbsvc-2fcafa33dc.json NEXT_PUBLIC_STACKS_NETWORK=mainnet npx tsx src/scripts/sc.ts",
+    "admin-test": "GOOGLE_APPLICATION_CREDENTIALS=/home/wit/.config/gcloud/legacy_credentials/brace@brace.to/augurrank-test-firebase-adminsdk-fbsvc-1ed6dfb419.json NEXT_PUBLIC_STACKS_NETWORK=testnet npx tsx src/scripts/admin.ts",
+    "admin-prod": "GOOGLE_APPLICATION_CREDENTIALS=/home/wit/.config/gcloud/legacy_credentials/brace@brace.to/augurrank-prod-firebase-adminsdk-fbsvc-2fcafa33dc.json NEXT_PUBLIC_STACKS_NETWORK=mainnet npx tsx src/scripts/admin.ts"
   },
   "dependencies": {
     "@sindresorhus/slugify": "^2.2.1",

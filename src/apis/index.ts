@@ -109,7 +109,11 @@ const patchEnroll = async (tx) => {
 };
 
 const fetchTxInfo = async (txId) => {
-  const res = await fetch(`https://api.hiro.so/extended/v1/tx/${txId}`);
+  let url = 'https://api.hiro.so/extended/v1/tx/';
+  const network = process.env.NEXT_PUBLIC_STACKS_NETWORK;
+  if (network === 'testnet') url = 'https://api.testnet.hiro.so/extended/v1/tx/';
+
+  const res = await fetch(`${url}${txId}`);
   if (res.status === 404) {
     throw new Error(ERR_NOT_FOUND);
   }
