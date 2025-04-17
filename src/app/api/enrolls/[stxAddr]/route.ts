@@ -52,10 +52,9 @@ export async function POST(
     const res = await scApi.enroll(stxAddr);
     console.log(`(${logKey}) enroll with txId: ${res.txId}`);
 
-    const now = Date.now();
     enrlTx = {
       id: enrlId, type: TX_ENROLL, contract: res.contract, cTxId: res.txId,
-      pTxSts: SCS, cTxSts: PDG, createDate: now, updateDate: now,
+      pTxSts: SCS, cTxSts: PDG,
     };
     await dataApi.updateTx(logKey, stxAddr, enrlTx);
   }

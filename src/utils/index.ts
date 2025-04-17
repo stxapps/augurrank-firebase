@@ -378,3 +378,78 @@ export const isAvatarEqual = (strA, strB) => {
 
   return isEqual(a, b);
 };
+
+export const rectifyUser = (oldUser, newUser) => {
+  if (newUser.balance < 0) {
+    throw new Error(`In rectifyUser, invalid balance of User: ${newUser.stxAddr}`);
+  }
+  return newUser;
+};
+
+export const rectifyShare = (oldShare, newShare) => {
+  if (newShare.amount < 0) {
+    throw new Error(`In rectifyShare, invalid amount of share: ${newShare.id}`);
+  }
+  if (!isNumber(newShare.cost)) {
+    throw new Error(`In rectifyShare, invalid cost of share: ${newShare.id}`);
+  }
+  return newShare;
+};
+
+export const rectifyTx = (oldTx, newTx) => {
+  /*
+    required: must always in tx
+    fixed: if exists, cannot change
+      attr          required   fixed
+      id            true       true
+      type          true       true
+      contract      true       true
+      createDate    true       true
+      updateDate    true       false
+      evtId         false      true
+      ocId          false      true
+      amount        false      true
+      cost          false      true
+      cTxid         false      true
+      pTxSts        false      false
+      cTxSts        false      false
+  */
+  const rfAttrs = ['id', 'type', 'contract', 'createDate'];
+  const rAttrs = ['updateData'];
+  const fAttrs = ['evtId', 'ocId', 'amount', 'cost', 'cTxId'];
+
+  for (const attr of rfAttrs) {
+    if (!isFldStr(newTx[attr]) && !isNumber(newTx[attr])) {
+      throw new Error(`In rectifyTx, invalid rfAttr: ${attr} of tx: ${newTx.id}`);
+    }
+    if (isObject(oldTx)) {
+      if (newTx[attr] !== oldTx[attr]) {
+        throw new Error(`In rectifyTx, invalid rfAttr: ${attr} of tx: ${newTx.id}`);
+      }
+    }
+  }
+  for (const attr of rAttrs) {
+    if (!isFldStr(newTx[attr]) && !isNumber(newTx[attr])) {
+      throw new Error(`In rectifyTx, invalid rAttr: ${attr} of tx: ${newTx.id}`);
+    }
+  }
+  for (const attr of fAttrs) {
+    if (isObject(oldTx) && attr in oldTx) {
+      if (newTx[attr] !== oldTx[attr]) {
+        throw new Error(`In rectifyTx, invalid fAttr: ${attr} of tx: ${newTx.id}`);
+      }
+    }
+  }
+
+  if ('amount' in newTx) {
+    if (newTx.amount < 0) {
+      throw new Error(`In rectifyTx, invalid amount of tx: ${newTx.id}`);
+    }
+  }
+  if ('cost' in newTx) {
+    if (!isNumber(newTx.cost)) {
+      throw new Error(`In rectifyTx, invalid cost of tx: ${newTx.id}`);
+    }
+  }
+  return newTx;
+};

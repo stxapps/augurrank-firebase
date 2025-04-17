@@ -6,7 +6,10 @@ import {
 import {
   LETTER_JOINS, USERS, SHARES, TXS, EVENTS, SYNCS, ACTIVE, INDEX, N_DOCS,
 } from '@/types/const';
-import { isObject, isFldStr, newObject, isAvatarEqual, mergeTxs } from '@/utils';
+import {
+  isObject, isFldStr, newObject, isAvatarEqual, mergeTxs, rectifyUser, rectifyShare,
+  rectifyTx,
+} from '@/utils';
 import { docToEvt, docToSync, docToUser, docToShare, docToTx } from '@/utils/fbase';
 
 const addLetterJoin = async (logKey, email) => {
@@ -122,13 +125,14 @@ const updateTx = async (logKey, stxAddr, tx) => {
 
   await db.runTransaction(async (t) => {
     let newTx;
+    const now = Date.now();
 
     const snapshot = await t.get(ref);
     if (snapshot.exists) {
       const oldTx = docToTx(tx.id, snapshot.data());
-      newTx = mergeTxs(oldTx, tx);
+      newTx = mergeTxs(oldTx, { tx, updateDate: now });
     } else {
-      newTx = tx;
+      newTx = { ...tx, createDate: now, updateDate: now };
     }
 
     t.set(ref, txToDoc(newTx));
@@ -144,54 +148,55 @@ const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
   const txRef = rRef.collection(TXS).doc(tx.id);
 
   await db.runTransaction(async (t) => {
-    let newUser, newShare, newTx;
+    let oldUser, newUser, oldShare, newShare, oldTx, newTx;
     const now = Date.now();
 
     if (isObject(userRef)) {
-      const ss = await t.get(userRef);
-      if (ss.exists) {
-        const oldUser = docToUser(ss.id, ss.data());
-        newUser = { ...oldUser, balance: oldUser.balance + user.balance };
+      const snapshot = await t.get(userRef);
+      if (snapshot.exists) {
+        oldUser = docToUser(snapshot.id, snapshot.data());
+        newUser = {
+          ...oldUser, balance: oldUser.balance + user.balance, updateDate: now,
+        };
       } else {
-        newUser = { stxAddr, balance: user.balance, createDate: now, updateDate: now };
+        newUser = {
+          stxAddr, balance: user.balance, createDate: now, updateDate: now,
+        };
       }
     }
     if (isObject(shareRef)) {
-      const ss = await t.get(shareRef);
-      if (ss.exists) {
-        const oldShare = docToShare(ss.id, ss.data());
+      const snapshot = await t.get(shareRef);
+      if (snapshot.exists) {
+        oldShare = docToShare(snapshot.id, snapshot.data());
         newShare = {
           ...oldShare,
           amount: oldShare.amount + share.amount,
           cost: oldShare.cost + share.cost,
+          updateDate: now,
         };
       } else {
-        newShare = share;
+        newShare = { ...share, createDate: now, updateDate: now };
       }
     }
-    if (isObject(txRef)) {
-      const ss = await t.get(txRef);
-      if (ss.exists) {
-        const oldTx = docToTx(ss.id, ss.data());
-        newTx = mergeTxs(oldTx, tx);
-      } else {
-        newTx = tx;
-      }
+    const snapshot = await t.get(txRef);
+    if (snapshot.exists) {
+      oldTx = docToTx(snapshot.id, snapshot.data());
+      newTx = mergeTxs(oldTx, { ...tx, updateDate: now });
+    } else {
+      newTx = { ...tx, createDate: now, updateDate: now };
     }
+
     if (isObject(userRef)) {
-      //if (newUser.balance < 0) throw new Error();
-      //if (`${newUser.balance}`.length < 7) throw new Error();
-      validateUser(newUser);
-      t.set(userRef, userToDoc(newUser));
+      const rctdUser = rectifyUser(oldUser, newUser);
+      t.set(userRef, userToDoc(rctdUser));
     }
     if (isObject(shareRef)) {
-      validateShare(newShare);
-      t.set(shareRef, shareToDoc(newShare));
+      const rctdShare = rectifyShare(oldShare, newShare);
+      t.set(shareRef, shareToDoc(rctdShare));
     }
-    if (isObject(txRef)) {
-      validateTx(newTx);
-      t.set(txRef, txToDoc(newTx));
-    }
+    const rctdTx = rectifyTx(oldTx, newTx);
+    t.set(txRef, txToDoc(rctdTx));
+    console.log(`(${logKey}) Updated to Firestore`);
   });
 };
 
