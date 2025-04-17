@@ -91,3 +91,13 @@ export const docToTx = (id, doc) => {
 
   return tx;
 };
+
+export const docToStxAcc = (stxAddr, doc) => {
+  const stxAcc = {
+    stxAddr,
+    nonce: doc.nonce,
+    createDate: doc.createDate.toMillis(),
+    updateDate: doc.updateDate.toMillis(),
+  };
+  return stxAcc;
+};

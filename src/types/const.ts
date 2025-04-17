@@ -24,6 +24,7 @@ export const COMMENTS = 'comments';
 export const COMMENT_REPLIES = 'commentReplies';
 export const TOTALS = 'totals';
 export const SYNCS = 'syncs';
+export const STX_ACCS = 'stxAccs';
 
 export const INDEX = 'index';
 export const ACTIVE = 'Active';

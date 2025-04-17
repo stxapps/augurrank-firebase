@@ -3,6 +3,7 @@ import {
 } from '@stacks/transactions';
 import { STACKS_MAINNET, STACKS_TESTNET } from '@stacks/network';
 
+import stxAccApi from '@/apis/server/stxAcc';
 import { SENDER_KEY } from '@/keys';
 import { isFldStr, isNumber } from '@/utils';
 
@@ -40,6 +41,7 @@ const prepend0x = (txId) => {
 const setMarketsContract = async () => {
   const info = getStacksInfo();
 
+  const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
     senderKey: SENDER_KEY,
@@ -50,6 +52,7 @@ const setMarketsContract = async () => {
     postConditionMode: PostConditionMode.Allow,
     postConditions: [],
     fee: 3261,
+    nonce,
     validateWithAbi: true,
   };
   const transaction = await makeContractCall(txOptions);
@@ -60,6 +63,7 @@ const setMarketsContract = async () => {
 const setStoreContract = async () => {
   const info = getStacksInfo();
 
+  const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
     senderKey: SENDER_KEY,
@@ -70,6 +74,7 @@ const setStoreContract = async () => {
     postConditionMode: PostConditionMode.Allow,
     postConditions: [],
     fee: 3261,
+    nonce,
     validateWithAbi: true,
   };
   const transaction = await makeContractCall(txOptions);
@@ -80,6 +85,7 @@ const setStoreContract = async () => {
 const setTokenUri = async (uri) => {
   const info = getStacksInfo();
 
+  const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
     senderKey: SENDER_KEY,
@@ -90,6 +96,7 @@ const setTokenUri = async (uri) => {
     postConditionMode: PostConditionMode.Allow,
     postConditions: [],
     fee: 3261,
+    nonce,
     validateWithAbi: true,
   };
   const transaction = await makeContractCall(txOptions);
@@ -101,6 +108,7 @@ const mint = async (amount, recipient = null) => {
   const info = getStacksInfo();
   if (!isFldStr(recipient)) recipient = info.stxAddr;
 
+  const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
     senderKey: SENDER_KEY,
@@ -111,6 +119,7 @@ const mint = async (amount, recipient = null) => {
     postConditionMode: PostConditionMode.Allow,
     postConditions: [],
     fee: 3261,
+    nonce,
     validateWithAbi: true,
   };
   const transaction = await makeContractCall(txOptions);
@@ -133,6 +142,7 @@ const createEvent = async (evt) => {
     })),
   ];
 
+  const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
     senderKey: SENDER_KEY,
@@ -143,6 +153,7 @@ const createEvent = async (evt) => {
     postConditionMode: PostConditionMode.Allow,
     postConditions: [],
     fee: 3261,
+    nonce,
     validateWithAbi: true,
   };
   const transaction = await makeContractCall(txOptions);
@@ -153,6 +164,7 @@ const createEvent = async (evt) => {
 const setEventBeta = async (evtId, beta) => {
   const info = getStacksInfo();
 
+  const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
     senderKey: SENDER_KEY,
@@ -163,6 +175,7 @@ const setEventBeta = async (evtId, beta) => {
     postConditionMode: PostConditionMode.Allow,
     postConditions: [],
     fee: 3261,
+    nonce,
     validateWithAbi: true,
   };
   const transaction = await makeContractCall(txOptions);
@@ -174,6 +187,7 @@ const setEventStatus = async (evtId, status, winOcId = null) => {
   const info = getStacksInfo();
   const clWinOcId = isNumber(winOcId) ? Cl.uint(winOcId) : Cl.none();
 
+  const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
     senderKey: SENDER_KEY,
@@ -184,6 +198,7 @@ const setEventStatus = async (evtId, status, winOcId = null) => {
     postConditionMode: PostConditionMode.Allow,
     postConditions: [],
     fee: 3261,
+    nonce,
     validateWithAbi: true,
   };
   const transaction = await makeContractCall(txOptions);
@@ -202,6 +217,7 @@ const refundFunds = async () => {
 const enroll = async (stxAddr) => {
   const info = getStacksInfo();
 
+  const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
     senderKey: SENDER_KEY,
@@ -212,6 +228,7 @@ const enroll = async (stxAddr) => {
     postConditionMode: PostConditionMode.Allow,
     postConditions: [],
     fee: 3261,
+    nonce,
     validateWithAbi: true,
   };
   const transaction = await makeContractCall(txOptions);

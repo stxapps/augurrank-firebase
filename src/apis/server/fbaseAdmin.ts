@@ -115,3 +115,12 @@ export const txToDoc = (tx) => {
 
   return doc;
 };
+
+export const stxAccToDoc = (stxAcc) => {
+  const doc = {
+    nonce: stxAcc.nonce,
+    createDate: Timestamp.fromDate(new Date(stxAcc.createDate)),
+    updateDate: Timestamp.fromDate(new Date(stxAcc.updateDate)),
+  };
+  return doc;
+};
