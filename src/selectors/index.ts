@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect';
 
-import { isNumber, isFldStr, parseAvatar } from '@/utils';
+import { isNumber, isFldStr, parseAvatar, isObject } from '@/utils';
 
 const _getInsets = (insetTop, insetRight, insetBottom, insetLeft) => {
   let [top, right, bottom, left] = [0, 0, 0, 0];
@@ -63,6 +63,38 @@ export const getSafeAreaInsets = createSelector(
   (insetTop, insetRight, insetBottom, insetLeft) => {
     const insets = _getInsets(insetTop, insetRight, insetBottom, insetLeft);
     return insets;
+  },
+);
+
+export const getEvents = createSelector(
+  state => state.events.fthSts,
+  state => state.events.entries,
+  (fthSts, entries) => {
+    return [];
+  },
+);
+
+export const getEvent = createSelector(
+  (state, _) => state.events.entries,
+  (state, _) => state.events.slug,
+  (state, _) => state.events.slugFthSts,
+  (_, slug) => slug,
+  (entries, slug, slugFthSts, curSlug) => {
+    // show loading, event, error
+
+    if (isObject(entries)) {
+      // if found an event with the same slug in events, return that event
+    }
+
+    if (slug === curSlug && slugFthSts === 2) {
+      // show error
+    }
+
+    // show loading
+
+    //if (!isFldStr(curSlug) || curSlug !== slug)
+
+    // logic to fetch in useEffect?
   },
 );
 

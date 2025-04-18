@@ -10,6 +10,10 @@ import {
   validateProfile,
 } from '@/utils';
 
+//export const dynamic = 'force-static';
+//export const revalidate = 60;
+//Use revalidatePath('/profiles/[stxAddr]'), when there is a change?
+
 export async function GET(
   req: NextRequest, { params }: { params: Promise<{ stxAddr: string }> },
 ) {
@@ -28,7 +32,12 @@ export async function GET(
   const profile = { username: user.username, avatar: user.avatar, bio: user.bio };
 
   console.log(`(${logKey}) /api/profiles/[stxAddr] finished`);
-  return NextResponse.json({ profile }, { status: 200 });
+  return NextResponse.json({ profile }, {
+    status: 200, headers: {
+      'Cache-Control': 'public, max-age=60', // Cache for 60 seconds
+      //'Cache-Control': 's-maxage=300, stale-while-revalidate=60', // CDN caches for 5 min, serves stale for 1 min while revalidating
+    }
+  });
 }
 
 export async function PATCH(
