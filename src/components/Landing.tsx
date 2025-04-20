@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Image from 'next-image-export-optimizer';
+import Image from 'next/image';
 import {
   CheckIcon, TrophyIcon, EnvelopeIcon, NewspaperIcon,
 } from '@heroicons/react/24/solid';

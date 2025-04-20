@@ -67,10 +67,11 @@ export const getSafeAreaInsets = createSelector(
 );
 
 export const getEvents = createSelector(
-  state => state.events.fthSts,
   state => state.events.entries,
-  (fthSts, entries) => {
-    return [];
+  (entries) => {
+    const evts = Object.values<any>(entries);
+    evts.sort((a, b) => b.createDate - a.createDate);
+    return evts;
   },
 );
 
@@ -95,6 +96,14 @@ export const getEvent = createSelector(
     //if (!isFldStr(curSlug) || curSlug !== slug)
 
     // logic to fetch in useEffect?
+  },
+);
+
+export const doShowTradeEditor = createSelector(
+  state => state.tradeEditor.evtId,
+  (_, evtId) => evtId,
+  (trdEdtrEvtId, evtId) => {
+    return trdEdtrEvtId === evtId;
   },
 );
 
