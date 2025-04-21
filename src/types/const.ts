@@ -83,3 +83,5 @@ export const ERR_INVALID_RES = 'ERR_INVALID_RES';
 export const ERR_VRF_SIG = 'ERR_VRF_SIG';
 
 export const ENRL_ID_SUFFIX = '-0000000000000enrlmnt';
+
+export const SCALE = 1000000;

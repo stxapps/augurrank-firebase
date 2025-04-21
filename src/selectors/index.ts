@@ -1,6 +1,8 @@
 import { createSelector } from 'reselect';
 
+import { SCALE } from '@/types/const';
 import { isNumber, isFldStr, parseAvatar, isObject } from '@/utils';
+import { getShareCosts } from '@/utils/lmsr';
 
 const _getInsets = (insetTop, insetRight, insetBottom, insetLeft) => {
   let [top, right, bottom, left] = [0, 0, 0, 0];
@@ -69,7 +71,20 @@ export const getSafeAreaInsets = createSelector(
 export const getEvents = createSelector(
   state => state.events.entries,
   (entries) => {
-    const evts = Object.values<any>(entries);
+    let evts = Object.values<any>(entries);
+    evts = evts.map(evt => {
+      const costs = getShareCosts(evt);
+      const oc0Chance = Math.floor((costs[0] * 100) / SCALE);
+      const oc0Rot = Math.floor(180 / 100 * oc0Chance);
+
+      let fmtdVol;
+      if (isNumber(evt.valVol)) {
+        if (evt.valVol >= 1000000) fmtdVol = Math.floor(evt.valVol / 1000000) + 'm';
+        else if (evt.valVol >= 100) fmtdVol = Math.floor(evt.valVol / 1000) + 'k';
+      }
+
+      return { ...evt, oc0Chance, oc0Rot, fmtdVol };
+    });
     evts.sort((a, b) => b.createDate - a.createDate);
     return evts;
   },

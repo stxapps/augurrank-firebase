@@ -56,6 +56,9 @@ const eventsReducer = (state = initialState, action) => produce(state, draft => 
           }
         }
 
+        draft.entries[evtId].qtyVol = evt.qtyVol;
+        draft.entries[evtId].valVol = evt.valVol;
+        draft.entries[evtId].nTraders = evt.nTraders;
         draft.entries[evtId].updateDate = evt.updateDate;
       }
     }

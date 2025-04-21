@@ -17,6 +17,7 @@ const getStacksInfo = () => {
       marketsContract: 'augur-markets-v1',
       enrollContract: 'augur-enroll-v1',
       storeContract: 'augur-store-v1',
+      bucket: 'augurrank-prod.firebasestorage.app',
     };
   }
   if (network === 'testnet') {
@@ -27,6 +28,7 @@ const getStacksInfo = () => {
       marketsContract: 'augur-markets-t1',
       enrollContract: 'augur-enroll-t1',
       storeContract: 'augur-store-t1',
+      bucket: 'augurrank-test.firebasestorage.app',
     };
   }
 

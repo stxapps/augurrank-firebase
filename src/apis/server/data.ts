@@ -1,4 +1,5 @@
 import { FieldValue } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
 
 import {
   fstoreAdmin as db, evtToDoc, syncToDoc, userToDoc, shareToDoc, txToDoc,
@@ -293,12 +294,12 @@ const updateEvent = async (logKey, evt, doAdd) => {
 
     const snapshot = await t.get(ref);
     if (snapshot.exists) {
-      if (doAdd) throw new Error(`Invalid doAdd ${doAdd} with slug: ${evt.slug}`);
+      if (doAdd) throw new Error(`Invalid doAdd ${doAdd} with evt.id: ${evt.id}`);
 
       const oldEvt = docToEvt(evt.id, snapshot.data());
       newEvt = { ...oldEvt, ...evt };
     } else {
-      if (!doAdd) throw new Error(`Invalid doAdd ${doAdd} with slug: ${evt.slug}`);
+      if (!doAdd) throw new Error(`Invalid doAdd ${doAdd} with evt.id: ${evt.id}`);
       newEvt = evt;
     }
 
@@ -364,10 +365,14 @@ const deleteSyncEvt = async (logKey, evtId) => {
   });
 };
 
+const uploadFile = async (src, bucket, options) => {
+  await getStorage().bucket(bucket).upload(src, options);
+};
+
 const data = {
   addLetterJoin, updateProfile, updateTx, updateUsrShrTx, getUser, getShares,
   getTx, getTxs, queryTxs, updateEvent, getEventBySlug, getEventById, updateSyncEvt,
-  deleteSyncEvt,
+  deleteSyncEvt, uploadFile,
 };
 
 export default data;

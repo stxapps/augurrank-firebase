@@ -8,6 +8,21 @@ const now = Date.now(), logKey = `${now}-${randomString(4)}`;
 const info = scApi.getStacksInfo();
 const slugify = slugifyWithCounter();
 
+const uploadImage = async () => {
+  const src = '/home/wit/Desktop/lrmnHOuN_400x400.jpg';
+  const bucket = info.bucket;
+  const options = {
+    destination: 'static/media/lrmnHOuN_400x400.jpg',
+    public: true,
+    metadata: {
+      cacheControl: 'public, max-age=31536000',
+    },
+  };
+  await dataApi.uploadFile(src, bucket, options);
+  console.log(`(${logKey}) uploaded the image`);
+};
+//uploadImage();
+
 const evt = {
   title: 'Will STX price more than $1 on 1 May 2025?',
   desc: '',
@@ -24,10 +39,16 @@ const createEventSc = async () => {
   console.log(`(${logKey}) createEventSc with txId: ${res.txId}`);
 };
 const createEventDb = async () => {
+  const closeDate = new Date('2025-05-01T00:00:00-04:00');
   const dbEvt = {
     ...evt,
     id: `${info.marketsContract}-0`, // Make sure update contract and id!
     slug: slugify(evt.title),
+    img: `https://storage.googleapis.com/${info.bucket}/static/media/lrmnHOuN_400x400.jpg`,
+    qtyVol: 0,
+    valVol: 0,
+    nTraders: 0,
+    closeDate: closeDate.getTime(),
     createDate: now,
     updateDate: now,
   };

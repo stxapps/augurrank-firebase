@@ -18,12 +18,17 @@ export const evtToDoc = (evt) => {
     slug: evt.slug,
     title: evt.title,
     desc: evt.desc,
+    img: evt.img,
     beta: evt.beta,
     status: evt.status,
     winOcId: evt.winOcId,
     outcomes: evt.outcomes.map(oc => {
       return { id: oc.id, desc: oc.desc, shareAmount: oc.shareAmount };
     }),
+    qtyVol: evt.qtyVol,
+    valVol: evt.valVol,
+    nTraders: evt.nTraders,
+    closeDate: Timestamp.fromDate(new Date(evt.closeDate)),
     createDate: Timestamp.fromDate(new Date(evt.createDate)),
     updateDate: Timestamp.fromDate(new Date(evt.updateDate)),
   };
@@ -40,6 +45,9 @@ export const syncToDoc = (sync) => {
       outcomes: evt.outcomes.map(oc => {
         return { id: oc.id, shareAmount: oc.shareAmount };
       }),
+      qtyVol: evt.qtyVol,
+      valVol: evt.valVol,
+      nTraders: evt.nTraders,
       createDate: Timestamp.fromDate(new Date(evt.createDate)),
       updateDate: Timestamp.fromDate(new Date(evt.updateDate)),
     };

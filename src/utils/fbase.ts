@@ -6,12 +6,17 @@ export const docToEvt = (id, doc) => {
     slug: doc.slug,
     title: doc.title,
     desc: doc.desc,
+    img: doc.img,
     beta: doc.beta,
     status: doc.status,
     winOcId: doc.winOcId,
     outcomes: doc.outcomes.map(oc => {
       return { id: oc.id, desc: oc.desc, shareAmount: oc.shareAmount };
     }),
+    qtyVol: doc.qtyVol,
+    valVol: doc.valVol,
+    nTraders: doc.nTraders,
+    closeDate: doc.closeDate.toMillis(),
     createDate: doc.createDate.toMillis(),
     updateDate: doc.updateDate.toMillis(),
   };
@@ -28,6 +33,9 @@ export const docToSync = (id, doc) => {
       outcomes: evtDoc.outcomes.map(oc => {
         return { id: oc.id, shareAmount: oc.shareAmount };
       }),
+      qtyVol: evtDoc.qtyVol,
+      valVol: evtDoc.valVol,
+      nTraders: evtDoc.nTraders,
       createDate: evtDoc.createDate.toMillis(),
       updateDate: evtDoc.updateDate.toMillis(),
     };
