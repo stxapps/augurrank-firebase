@@ -1,6 +1,6 @@
 import { produce } from 'immer';
 
-import { UPDATE_PROFILE_EDITOR, RESET_STATE } from '../types/actionTypes';
+import { UPDATE_PROFILE_EDITOR, RESET_STATE } from '@/types/actionTypes';
 import { isString, isNumber } from '@/utils';
 
 const initialState = {
@@ -8,22 +8,22 @@ const initialState = {
   avatar: null,
   bio: null,
   renderCode: null,
-  didFthAvlbUsns: null, // null: not yet, true: fetched, false: error
+  avlbUsnsFthSts: null, // null: not yet, 0: fetching, 1: fetched, 2: error
   avlbUsns: null,
-  didFthAvlbAvts: null, // null: not yet, true: fetched, false: error
+  avlbAvtsFthSts: null, // null: not yet, 0: fetching, 1: fetched, 2: error
   avlbAvts: null,
   nftOffset: null,
   nftLimit: null,
   nftTotal: null,
-  fthgAvlbAvtsMore: null, // null: not fetching, true: fetching, false: error
+  avlbAvtsFthMoreSts: null, // null: not fetching, 0: fetching, 2: error
   saving: null, // null: not saving, true: saving, false: error
 };
 
 const profileEditorReducer = (state = initialState, action) => produce(state, draft => {
   if (action.type === UPDATE_PROFILE_EDITOR) {
     const {
-      username, avatar, bio, renderCode, didFthAvlbUsns, avlbUsns, didFthAvlbAvts,
-      avlbAvts, avlbAvtsMore, nftOffset, nftLimit, nftTotal, fthgAvlbAvtsMore, saving,
+      username, avatar, bio, renderCode, avlbUsnsFthSts, avlbUsns, avlbAvtsFthSts,
+      avlbAvts, avlbAvtsMore, nftOffset, nftLimit, nftTotal, avlbAvtsFthMoreSts, saving,
     } = action.payload;
 
     if (username === null || isString(username)) draft.username = username;
@@ -34,28 +34,28 @@ const profileEditorReducer = (state = initialState, action) => produce(state, dr
 
     if (renderCode === null || isNumber(renderCode)) draft.renderCode = renderCode;
 
-    if ([null, true, false].includes(didFthAvlbUsns)) {
-      draft.didFthAvlbUsns = didFthAvlbUsns;
+    if ([null, 0, 1, 2].includes(avlbUsnsFthSts)) {
+      draft.avlbUsnsFthSts = avlbUsnsFthSts;
     }
     if (avlbUsns === null) draft.avlbUsns = avlbUsns;
-    else if (Array.isArray(avlbUsns)) draft.avlbUsns = [...avlbUsns];
+    else if (Array.isArray(avlbUsns)) draft.avlbUsns = structuredClone(avlbUsns);
 
-    if ([null, true, false].includes(didFthAvlbAvts)) {
-      draft.didFthAvlbAvts = didFthAvlbAvts;
+    if ([null, 0, 1, 2].includes(avlbAvtsFthSts)) {
+      draft.avlbAvtsFthSts = avlbAvtsFthSts;
     }
     if (avlbAvts === null) draft.avlbAvts = avlbAvts;
-    else if (Array.isArray(avlbAvts)) draft.avlbAvts = [...avlbAvts];
+    else if (Array.isArray(avlbAvts)) draft.avlbAvts = structuredClone(avlbAvts);
 
     if (Array.isArray(avlbAvtsMore) && Array.isArray(draft.avlbAvts)) {
-      draft.avlbAvts = [...draft.avlbAvts, ...avlbAvtsMore];
+      draft.avlbAvts.push(...structuredClone(avlbAvtsMore));
     }
 
     if (nftOffset === null || isNumber(nftOffset)) draft.nftOffset = nftOffset;
     if (nftLimit === null || isNumber(nftLimit)) draft.nftLimit = nftLimit;
     if (nftTotal === null || isNumber(nftTotal)) draft.nftTotal = nftTotal;
 
-    if ([null, true, false].includes(fthgAvlbAvtsMore)) {
-      draft.fthgAvlbAvtsMore = fthgAvlbAvtsMore;
+    if ([null, 0, 2].includes(avlbAvtsFthMoreSts)) {
+      draft.avlbAvtsFthMoreSts = avlbAvtsFthMoreSts;
     }
     if ([null, true, false].includes(saving)) draft.saving = saving;
   }

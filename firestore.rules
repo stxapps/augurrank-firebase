@@ -6,7 +6,7 @@ service cloud.firestore {
       allow read: if true;
     }
 
-    match /syncData/{document=**} {
+    match /syncs/{document=**} {
       allow read: if true;
     }
   }

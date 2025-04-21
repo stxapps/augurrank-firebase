@@ -4,7 +4,7 @@ import { InformationCircleIcon } from '@heroicons/react/24/solid';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '@/store';
-import { agreeTerms, cancelAgreeTerms } from '@/actions/txn';
+import { agreeTerms, cancelAgreeTerms } from '@/actions/tx';
 import { SM_WIDTH } from '@/types/const';
 import { dialogBgFMV, dialogFMV } from '@/types/animConfigs';
 

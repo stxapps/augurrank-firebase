@@ -19,3 +19,6 @@ env:
 
   - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
     value: "G-QSK86NW95K"
+
+  - variable: NEXT_PUBLIC_STACKS_NETWORK
+    value: "testnet"

@@ -1,31 +1,26 @@
+import { AppDispatch, AppGetState } from '@/store';
 import idxApi from '@/apis';
 import walletApi from '@/apis/wallet';
 import {
-  INIT, UPDATE_WINDOW, UPDATE_ME, UPDATE_POPUP, UPDATE_WALLET_POPUP,
-  UPDATE_ERROR_POPUP, RESET_STATE, UPDATE_LTRJN_EDITOR,
+  INIT, UPDATE_WINDOW, UPDATE_POPUP, UPDATE_WALLET_POPUP, UPDATE_ERROR_POPUP,
+  UPDATE_ME, RESET_STATE,
 } from '@/types/actionTypes';
 import {
-  STX_TST_STR, VALID, LETTERS_JOINS_PATH, JOIN_NEWSLETTER_STATUS_JOINING,
-  JOIN_NEWSLETTER_STATUS_INVALID, JOIN_NEWSLETTER_STATUS_COMMIT,
-  JOIN_NEWSLETTER_STATUS_ROLLBACK,
+  STX_TST_STR, PDG, ABT_BY_NF, ERR_NOT_FOUND, ENRL_ID_SUFFIX,
 } from '@/types/const';
 import {
-  isObject, throttle, getWindowInsets, validateEmail, getWalletErrorText,
+  isObject, isNumber, throttle, getWindowInsets, getWalletErrorText, getSignInStatus,
+  deriveTxInfo, mergeTxs,
 } from '@/utils';
 import vars from '@/vars';
 
-let _didInit;
-export const init = () => async (dispatch, getState) => {
+let _didInit: boolean;
+export const init = () => async (dispatch: AppDispatch, getState: AppGetState) => {
   if (_didInit) return;
   _didInit = true;
 
-  const {
-    stxAddr, stxPubKey, stxSigStr, username, avatar, bio, didAgreeTerms,
-  } = idxApi.getLocalMe();
-  dispatch({
-    type: INIT,
-    payload: { stxAddr, stxPubKey, stxSigStr, username, avatar, bio, didAgreeTerms },
-  });
+  const localMe = idxApi.getLocalMe();
+  dispatch({ type: INIT, payload: { ...localMe } });
 
   window.addEventListener('resize', throttle(() => {
     const insets = getWindowInsets();
@@ -57,9 +52,11 @@ export const init = () => async (dispatch, getState) => {
       });
     }, 16));
   }
+
+  dispatch(fetchMe());
 };
 
-export const signOut = () => async (dispatch, getState) => {
+export const signOut = () => async (dispatch: AppDispatch, getState: AppGetState) => {
   const payload = { stxAddr: '', stxPubKey: '', stxSigStr: '' };
   await resetState(payload, dispatch);
 
@@ -70,7 +67,9 @@ export const signOut = () => async (dispatch, getState) => {
   }
 };
 
-export const chooseWallet = () => async (dispatch, getState) => {
+export const chooseWallet = () => async (
+  dispatch: AppDispatch, getState: AppGetState
+) => {
   const installedWalletIds = walletApi.getInstalledWalletIds();
   if (installedWalletIds.length === 1) {
     dispatch(connectWallet(installedWalletIds[0]));
@@ -80,7 +79,9 @@ export const chooseWallet = () => async (dispatch, getState) => {
   dispatch(updateWalletPopup({ installedWalletIds }));
 };
 
-export const connectWallet = (walletId) => async (dispatch, getState) => {
+export const connectWallet = (walletId) => async (
+  dispatch: AppDispatch, getState: AppGetState
+) => {
   let data;
   try {
     data = await walletApi.connect(walletId);
@@ -98,7 +99,9 @@ export const connectWallet = (walletId) => async (dispatch, getState) => {
   dispatch(signStxTstStr());
 };
 
-export const signStxTstStr = () => async (dispatch, getState) => {
+export const signStxTstStr = () => async (
+  dispatch: AppDispatch, getState: AppGetState
+) => {
   const { stxAddr, stxPubKey } = getState().me;
 
   let data;
@@ -117,13 +120,11 @@ export const signStxTstStr = () => async (dispatch, getState) => {
 
   const me = { stxSigStr: data.stxSigStr };
   dispatch(updateMe(me));
+  dispatch(fetchMe());
 };
 
 const resetState = async (payload, dispatch) => {
   idxApi.deleteLocalFiles();
-
-  vars.profileEditor.didFthAvlbUsns = false;
-  vars.profileEditor.didFthAvlbAvts = false;
 
   dispatch({ type: RESET_STATE, payload });
 };
@@ -143,60 +144,155 @@ export const updateErrorPopup = (payload) => {
   return { type: UPDATE_ERROR_POPUP, payload };
 };
 
+export const fetchMe = (doForce = false) => async (
+  dispatch: AppDispatch, getState: AppGetState
+) => {
+  if (getSignInStatus(getState().me) !== 3) return;
+
+  const { stxAddr, fthSts } = getState().me;
+
+  if (fthSts === 0) return;
+  if (!doForce && fthSts !== null) return;
+  dispatch(updateMe({ fthSts: 0 }));
+
+  let data, isError;
+  try {
+    data = await idxApi.fetchMe();
+  } catch (error) {
+    console.log('fetchMe error:', error);
+    isError = true;
+  }
+
+  if (getState().me.stxAddr !== stxAddr) return;
+
+  if (isError) {
+    dispatch(updateMe({ fthSts: 2 }));
+    return;
+  }
+
+  dispatch(updateMe({ ...data, fthSts: 1 }));
+  dispatch(applyEnroll());
+};
+
 export const updateMe = (payload) => {
   return { type: UPDATE_ME, payload };
 };
 
-export const joinLetter = () => async (dispatch, getState) => {
-  const { email } = getState().ltrjnEditor;
+export const applyEnroll = (doForce = false) => async (
+  dispatch: AppDispatch, getState: AppGetState
+) => {
+  if (getSignInStatus(getState().me) !== 3) return;
 
-  if (!validateEmail(email)) {
-    dispatch(updateLtrjnEditor({
-      status: JOIN_NEWSLETTER_STATUS_INVALID, extraMsg: '',
-    }));
+  // cases: 1. first time/no data/no enroll
+  //        2. enroll and processing
+  //        3. enrolled successfully
+  const { stxAddr, balance, enrlFthSts } = getState().me;
+  if (isNumber(balance)) return;
+
+  if (enrlFthSts === 0) return;
+  if (!doForce && enrlFthSts !== null) return;
+  dispatch(updateMe({ enrlFthSts: 0 }));
+
+  let data, isError;
+  try {
+    data = await idxApi.applyEnroll();
+  } catch (error) {
+    console.log('applyEnroll error:', error);
+    isError = true;
+  }
+
+  if (getState().me.stxAddr !== stxAddr) return;
+
+  if (isError) {
+    dispatch(updateMe({ enrlFthSts: 2 }));
     return;
   }
 
-  dispatch(updateLtrjnEditor({
-    status: JOIN_NEWSLETTER_STATUS_JOINING, extraMsg: '',
-  }));
-  try {
-    const res = await fetch(LETTERS_JOINS_PATH, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      referrerPolicy: 'strict-origin',
-      body: JSON.stringify({ email }),
-    });
-    if (!res.ok) {
-      const extraMsg = res.statusText;
-      dispatch(updateLtrjnEditor({
-        status: JOIN_NEWSLETTER_STATUS_ROLLBACK, extraMsg,
-      }));
-      return;
-    }
-
-    const json = await res.json();
-    if (json.status !== VALID) {
-      const extraMsg = 'Invalid reqBody or email';
-      dispatch(updateLtrjnEditor({
-        status: JOIN_NEWSLETTER_STATUS_ROLLBACK, extraMsg,
-      }));
-      return;
-    }
-
-    dispatch(updateLtrjnEditor({
-      status: JOIN_NEWSLETTER_STATUS_COMMIT, extraMsg: '',
-    }));
-  } catch (error) {
-    const extraMsg = error.message;
-    dispatch(updateLtrjnEditor({
-      status: JOIN_NEWSLETTER_STATUS_ROLLBACK, extraMsg,
-    }));
-  }
+  dispatch(updateMe({ tx: data, enrlFthSts: 1 }))
+  setTimeout(() => {
+    dispatch(refreshEnroll());
+  }, 1000);
 };
 
-export const updateLtrjnEditor = (payload) => {
-  return { type: UPDATE_LTRJN_EDITOR, payload };
+const refreshEnroll = (doForce = false) => async (
+  dispatch: AppDispatch, getState: AppGetState
+) => {
+  if (!doForce && vars.refreshEnroll.timeId) return;
+  clearTimeout(vars.refreshEnroll.timeId);
+  [vars.refreshEnroll.timeId, vars.refreshEnroll.seq] = [null, 0];
+
+  if (getSignInStatus(getState().me) !== 3) return;
+
+  const { stxAddr, balance } = getState().me;
+  if (isNumber(balance)) return;
+
+  const enrlId = `${stxAddr}${ENRL_ID_SUFFIX}`;
+  const enrlTx = getState().me.txs[enrlId];
+  if (enrlTx.cTxSts !== PDG) return;
+
+  vars.refreshEnroll.timeId = PDG;
+
+  let txInfo, isError;
+  try {
+    txInfo = await idxApi.fetchTxInfo(enrlTx.cTxId);
+  } catch (error) {
+    if (error.message !== ERR_NOT_FOUND) {
+      console.log('refreshEnroll.fetchTxInfo error:', error);
+      // server error, network error, do it later or by server.
+      isError = true;
+    } else if (Date.now() - enrlTx.createDate < 60 * 60 * 1000) {
+      txInfo = { tx_id: enrlTx.cTxId, tx_status: PDG };
+    } else {
+      // Not in mempool anymore like cannot confirm i.e. wrong nonce, not enough fee
+      txInfo = { tx_id: enrlTx.cTxId, tx_status: ABT_BY_NF };
+    }
+  }
+
+  if (getState().me.stxAddr !== stxAddr) {
+    [vars.refreshEnroll.timeId, vars.refreshEnroll.seq] = [null, 0];
+    return;
+  }
+
+  if (isError) {
+    setRefreshEnrollTimeout(dispatch);
+    return;
+  }
+
+  txInfo = deriveTxInfo(txInfo);
+  if (txInfo.status === PDG) {
+    setRefreshEnrollTimeout(dispatch);
+    return;
+  }
+
+  const newTx = mergeTxs(enrlTx, { cTxSts: txInfo.status });
+  try {
+    await idxApi.patchEnroll(newTx);
+  } catch (error) {
+    console.log('refreshEnroll.patchEnroll error:', error);
+    isError = true;
+  }
+
+  if (getState().me.stxAddr !== stxAddr) {
+    [vars.refreshEnroll.timeId, vars.refreshEnroll.seq] = [null, 0];
+    return;
+  }
+
+  if (isError) {
+    setRefreshEnrollTimeout(dispatch);
+    return;
+  }
+
+  dispatch(updateMe({ tx: newTx }));
+  [vars.refreshEnroll.timeId, vars.refreshEnroll.seq] = [null, 0];
+};
+
+const setRefreshEnrollTimeout = (dispatch) => {
+  const seq = vars.refreshEnroll.seq;
+  const ms = Math.max(Math.min(Math.round(
+    (0.8217 * seq ^ 2 + 2.6469 * seq + 5.7343) * 1000
+  ), 5 * 60 * 1000), 5 * 1000);
+  vars.refreshEnroll.timeId = setTimeout(() => {
+    dispatch(refreshEnroll(true));
+  }, ms);
+  vars.refreshEnroll.seq += 1;
 };

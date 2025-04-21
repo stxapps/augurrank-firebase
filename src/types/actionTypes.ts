@@ -12,8 +12,7 @@ export const UPDATE_PROFILE = 'UPDATE_PROFILE';
 export const UPDATE_PROFILE_EDITOR = 'UPDATE_PROFILE_EDITOR';
 
 export const UPDATE_EVENTS = 'UPDATE_EVENTS';
-export const UPDATE_TXNS = 'UPDATE_TXNS';
-
 export const UPDATE_SYNC = 'UPDATE_SYNC';
+export const UPDATE_TXS = 'UPDATE_TXS';
 
 export const RESET_STATE = 'RESET_STATE';

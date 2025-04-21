@@ -4,9 +4,32 @@ export const APP_NAME = 'AugurRank';
 export const APP_ICON_NAME = 'logo-for-stacks-access.png';
 export const APP_SCOPES = ['store_write'];
 
+export const ALLOWED_ORIGINS = [
+  'https://augurrank.com',
+];
+
 export const HTTP = 'http://';
 
 export const VALID = 'VALID';
+export const INVALID = 'INVALID';
+export const UNKNOWN = 'UNKNOWN';
+export const ERROR = 'ERROR';
+
+export const LETTER_JOINS = 'letterJoins';
+export const USERS = 'users';
+export const SHARES = 'shares';
+export const TXS = 'txs';
+export const EVENTS = 'events';
+export const COMMENTS = 'comments';
+export const COMMENT_REPLIES = 'commentReplies';
+export const TOTALS = 'totals';
+export const SYNCS = 'syncs';
+export const STX_ACCS = 'stxAccs';
+
+export const INDEX = 'index';
+export const ACTIVE = 'Active';
+
+export const N_DOCS = 10;
 
 export const SM_WIDTH = 640;
 export const MD_WIDTH = 768;
@@ -15,7 +38,6 @@ export const XL_WIDTH = 1280;
 
 export const WALLET_ID = 'walletId';
 export const ME_OBJ = 'meObj';
-export const UNSAVED_TXNS = 'unsaved-txns';
 export const NFT_METAS = 'nft-metas';
 
 export const ID_LEATHER = 'LeatherProvider';
@@ -27,16 +49,29 @@ export const AGREE_POPUP = 'AGREE_POPUP';
 
 export const LETTERS_JOINS_PATH = '/api/letters/joins';
 export const ME_PATH = '/api/me';
+export const ENROLLS_PATH = '/api/enrolls';
 export const EVENTS_PATH = '/api/events';
-export const TXNS_PATH = '/api/txns';
+export const TXS_PATH = '/api/txs';
 
-export const JOIN_NEWSLETTER_STATUS_INIT = 'JOIN_NEWSLETTER_STATUS_INIT';
-export const JOIN_NEWSLETTER_STATUS_JOINING = 'JOIN_NEWSLETTER_STATUS_JOINING';
-export const JOIN_NEWSLETTER_STATUS_INVALID = 'JOIN_NEWSLETTER_STATUS_INVALID';
-export const JOIN_NEWSLETTER_STATUS_COMMIT = 'JOIN_NEWSLETTER_STATUS_COMMIT';
-export const JOIN_NEWSLETTER_STATUS_ROLLBACK = 'JOIN_NEWSLETTER_STATUS_ROLLBACK';
+export const JOIN_LETTER_INIT = 'JOIN_LETTER_INIT'; // Join letter status
+export const JOIN_LETTER_JOINING = 'JOIN_LETTER_JOINING';
+export const JOIN_LETTER_INVALID = 'JOIN_LETTER_INVALID';
+export const JOIN_LETTER_COMMIT = 'JOIN_LETTER_COMMIT';
+export const JOIN_LETTER_ROLLBACK = 'JOIN_LETTER_ROLLBACK';
 
-export const PDG = 'pending';
+export const TX_BUY = 'buy'; // Tx type
+export const TX_SELL = 'sell';
+export const TX_ENROLL = 'enroll';
+export const TX_IAP = 'iap';
+
+export const TX_INIT = 'TX_INIT'; // Tx state
+export const TX_IN_MEMPOOL = 'TX_IN_MEMPOOL';
+export const TX_PUT_OK = 'TX_PUT_OK';
+export const TX_PUT_ERROR = 'TX_PUT_ERROR';
+export const TX_CONFIRMED_OK = 'TX_CONFIRMED_OK';
+export const TX_CONFIRMED_ERROR = 'TX_CONFIRMED_ERROR';
+
+export const PDG = 'pending'; // Tx status
 export const SCS = 'success';
 export const ABT_BY_RES = 'abort_by_response';
 export const ABT_BY_PC = 'abort_by_post_condition';
@@ -46,3 +81,7 @@ export const ERR_INVALID_ARGS = 'ERR_INVALID_ARGS';
 export const ERR_NOT_FOUND = 'ERR_NOT_FOUND';
 export const ERR_INVALID_RES = 'ERR_INVALID_RES';
 export const ERR_VRF_SIG = 'ERR_VRF_SIG';
+
+export const ENRL_ID_SUFFIX = '-0000000000000enrlmnt';
+
+export const SCALE = 1000000;

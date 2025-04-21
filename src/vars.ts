@@ -1,20 +1,16 @@
-const me = {
-  didFetch: null,
+const fetchEvents = {
+  quryCrsr: { id: null, snapshot: null },
 };
 
-const profile = {
-  stxAddr: null,
+const listenSync = {
+  removeListener: null,
 };
 
-const profileEditor = {
-  didFthAvlbUsns: false,
-  didFthAvlbAvts: false,
+const refreshEnroll = {
+  timeId: null,
+  seq: 0,
 };
 
-const events = {
-  didFetch: null,
-};
-
-const vars = { me, profile, profileEditor, events };
+const vars = { fetchEvents, listenSync, refreshEnroll };
 
 export default vars;
