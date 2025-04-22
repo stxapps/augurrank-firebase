@@ -1,7 +1,7 @@
 import { AppDispatch, AppGetState } from '@/store';
 
 export const fetchAvlbUsns = (doForce = false, doLoad = false) => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
 
 };
@@ -13,7 +13,7 @@ export const fetchAvlbAvts = (doForce = false, doLoad = false) => async (
 };
 
 export const fetchAvlbAvtsMore = (doForce = false) => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
 
 };

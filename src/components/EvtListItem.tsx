@@ -33,8 +33,8 @@ export function EvtListItem(props) {
   const { evt } = props;
   const doShowTrdEdtr = useSelector(state => doShowTradeEditor(state, evt.id));
 
-  if (doShowTrdEdtr) return <Edt />
-  return <Cnt evt={evt} />
+  if (doShowTrdEdtr) return <Edt />;
+  return <Cnt evt={evt} />;
 }
 
 function Cnt(props) {

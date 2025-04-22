@@ -335,8 +335,8 @@ const updateSyncEvt = async (logKey, evtId) => {
         id: INDEX,
         evts: {
           [evt.id]: evt,
-        }
-      }
+        },
+      };
     }
 
     t.set(syncRef, syncToDoc(newSync));

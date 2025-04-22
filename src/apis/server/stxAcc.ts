@@ -18,7 +18,7 @@ const reserveNonce = async (stxAddr, network) => {
       newStxAcc = { ...oldStxAcc, updateDate: now };
     } else {
       cNonce = BigInt(0);
-      newStxAcc = { stxAddr, createDate: now, updateDate: now }
+      newStxAcc = { stxAddr, createDate: now, updateDate: now };
     }
 
     const fNonce = await fetchNonce({ address: stxAddr, network });

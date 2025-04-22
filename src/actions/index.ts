@@ -68,7 +68,7 @@ export const signOut = () => async (dispatch: AppDispatch, getState: AppGetState
 };
 
 export const chooseWallet = () => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
   const installedWalletIds = walletApi.getInstalledWalletIds();
   if (installedWalletIds.length === 1) {
@@ -80,7 +80,7 @@ export const chooseWallet = () => async (
 };
 
 export const connectWallet = (walletId) => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
   let data;
   try {
@@ -100,7 +100,7 @@ export const connectWallet = (walletId) => async (
 };
 
 export const signStxTstStr = () => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
   const { stxAddr, stxPubKey } = getState().me;
 
@@ -145,7 +145,7 @@ export const updateErrorPopup = (payload) => {
 };
 
 export const fetchMe = (doForce = false) => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
   if (getSignInStatus(getState().me) !== 3) return;
 
@@ -179,7 +179,7 @@ export const updateMe = (payload) => {
 };
 
 export const applyEnroll = (doForce = false) => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
   if (getSignInStatus(getState().me) !== 3) return;
 
@@ -208,14 +208,14 @@ export const applyEnroll = (doForce = false) => async (
     return;
   }
 
-  dispatch(updateMe({ tx: data, enrlFthSts: 1 }))
+  dispatch(updateMe({ tx: data, enrlFthSts: 1 }));
   setTimeout(() => {
     dispatch(refreshEnroll());
   }, 1000);
 };
 
 const refreshEnroll = (doForce = false) => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
   if (!doForce && vars.refreshEnroll.timeId) return;
   clearTimeout(vars.refreshEnroll.timeId);
@@ -289,7 +289,7 @@ const refreshEnroll = (doForce = false) => async (
 const setRefreshEnrollTimeout = (dispatch) => {
   const seq = vars.refreshEnroll.seq;
   const ms = Math.max(Math.min(Math.round(
-    (0.8217 * seq ^ 2 + 2.6469 * seq + 5.7343) * 1000
+    (0.8217 * seq ^ 2 + 2.6469 * seq + 5.7343) * 1000,
   ), 5 * 60 * 1000), 5 * 1000);
   vars.refreshEnroll.timeId = setTimeout(() => {
     dispatch(refreshEnroll(true));

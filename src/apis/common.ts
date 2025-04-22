@@ -59,7 +59,7 @@ const listenSync = async (onSuccess, onError) => {
     },
     (error) => {
       onError(error);
-    }
+    },
   );
   return removeListener;
 };
