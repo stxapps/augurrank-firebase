@@ -59,6 +59,14 @@ export const JOIN_LETTER_INVALID = 'JOIN_LETTER_INVALID';
 export const JOIN_LETTER_COMMIT = 'JOIN_LETTER_COMMIT';
 export const JOIN_LETTER_ROLLBACK = 'JOIN_LETTER_ROLLBACK';
 
+export const EVT_INIT = 'EVT_INIT'; // Event status
+export const EVT_OPENED = 'EVT_OPENED';
+export const EVT_CLOSED = 'EVT_CLOSED';
+export const EVT_RESOLVED = 'EVT_RESOLVED';
+export const EVT_PAUSED = 'EVT_PAUSED';
+export const EVT_DISPUTED = 'EVT_DISPUTED';
+export const EVT_CANCELED = 'EVT_CANCELED';
+
 export const TX_BUY = 'buy'; // Tx type
 export const TX_SELL = 'sell';
 export const TX_ENROLL = 'enroll';

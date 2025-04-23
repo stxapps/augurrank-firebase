@@ -122,6 +122,20 @@ export const doShowTradeEditor = createSelector(
   },
 );
 
+export const getTrdEdtrEvt = createSelector(
+  state => state.events.entries,
+  state => state.tradeEditor.evtId,
+  (entries, evtId) => {
+    const evt = entries[evtId];
+    if (!isObject(evt)) return null;
+
+    let costs = getShareCosts(evt);
+    costs = costs.map(cost => cost / SCALE);
+
+    return { ...evt, shareCosts: costs };
+  },
+);
+
 export const getPflEdtrAvtWthObj = createSelector(
   state => state.meEditor.avatar,
   (str) => {

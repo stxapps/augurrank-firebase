@@ -7,6 +7,7 @@ import ltrjnEditorReducer from './ltrjnEditorReducer';
 import meReducer from './meReducer';
 import profileReducer from './profileReducer';
 import profileEditorReducer from './profileEditorReducer';
+import tradeEditorReducer from './tradeEditorReducer';
 
 const reducers = combineReducers({
   window: windowReducer,
@@ -16,6 +17,7 @@ const reducers = combineReducers({
   me: meReducer,
   profile: profileReducer,
   profileEditor: profileEditorReducer,
+  tradeEditor: tradeEditorReducer,
 });
 
 export default reducers;

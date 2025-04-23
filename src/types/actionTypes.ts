@@ -15,4 +15,6 @@ export const UPDATE_EVENTS = 'UPDATE_EVENTS';
 export const UPDATE_SYNC = 'UPDATE_SYNC';
 export const UPDATE_TXS = 'UPDATE_TXS';
 
+export const UPDATE_TRADE_EDITOR = 'UPDATE_TRADE_EDITOR';
+
 export const RESET_STATE = 'RESET_STATE';
