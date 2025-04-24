@@ -2,11 +2,11 @@ import { AppDispatch, AppGetState } from '@/store';
 import idxApi from '@/apis';
 import walletApi from '@/apis/wallet';
 import {
-  INIT, UPDATE_WINDOW, UPDATE_POPUP, UPDATE_WALLET_POPUP, UPDATE_ERROR_POPUP,
-  UPDATE_ME, RESET_STATE,
+  INIT, UPDATE_WINDOW, UPDATE_POPUP, UPDATE_WALLET_POPUP, UPDATE_NOTI_POPUP,
+  UPDATE_ERROR_POPUP, UPDATE_ME, RESET_STATE,
 } from '@/types/actionTypes';
 import {
-  STX_TST_STR, PDG, ABT_BY_NF, ERR_NOT_FOUND, ENRL_ID_SUFFIX,
+  STX_TST_STR, PDG, ABT_BY_NF, ERR_NOT_FOUND, ERR_NO_ACCOUNT, ENRL_ID_SUFFIX,
 } from '@/types/const';
 import {
   isObject, isNumber, throttle, getWindowInsets, getWalletErrorText, getSignInStatus,
@@ -88,8 +88,12 @@ export const connectWallet = (walletId) => async (
   } catch (error) {
     console.log('In connectWallet, error:', error);
     if (isObject(error.error) && [4001, -32000].includes(error.error.code)) return;
+    if (isObject(error.error) && [-32603].includes(error.error.code)) {
+      dispatch(updateErrorPopup(getWalletErrorText(ERR_NO_ACCOUNT)));
+      return;
+    }
 
-    dispatch(updateErrorPopup(getWalletErrorText(error.message)));
+    dispatch(updateErrorPopup(getWalletErrorText(error)));
     return;
   }
 
@@ -111,7 +115,7 @@ export const signStxTstStr = () => async (
     console.log('In signStxTstStr, error:', error);
     if (isObject(error.error) && [4001, -32000].includes(error.error.code)) return;
 
-    dispatch(updateErrorPopup(getWalletErrorText(error.message)));
+    dispatch(updateErrorPopup(getWalletErrorText(error)));
     return;
   }
 
@@ -138,6 +142,10 @@ export const updatePopup = (id, isShown, anchorPosition) => {
 
 export const updateWalletPopup = (payload) => {
   return { type: UPDATE_WALLET_POPUP, payload };
+};
+
+export const updateNotiPopup = (payload) => {
+  return { type: UPDATE_NOTI_POPUP, payload };
 };
 
 export const updateErrorPopup = (payload) => {

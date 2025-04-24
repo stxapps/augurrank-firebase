@@ -7,7 +7,6 @@ import { updateErrorPopup } from '@/actions';
 import { isFldStr } from '@/utils';
 
 export function ErrorPopup() {
-
   const title = useSelector(state => state.display.errorPopupTitle);
   const body = useSelector(state => state.display.errorPopupBody);
   const didClick = useRef(false);

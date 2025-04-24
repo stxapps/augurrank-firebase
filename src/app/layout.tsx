@@ -5,7 +5,7 @@ import { StarField } from '@/components/StarField';
 import { TopBar } from '@/components/TopBar';
 import { Footer } from '@/components/Footer';
 import { WalletPopup } from '@/components/WalletPopup';
-import { AgreePopup } from '@/components/AgreePopup';
+import { NotiPopup } from '@/components/NotiPopup';
 import { ErrorPopup } from '@/components/ErrorPopup';
 
 import './globals.css';
@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
           <Footer />
           <WalletPopup />
-          <AgreePopup />
+          <NotiPopup />
           <ErrorPopup />
         </Providers>
       </body>

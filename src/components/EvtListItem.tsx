@@ -45,7 +45,7 @@ function Cnt(props) {
   const dispatch = useDispatch();
 
   const onTradeBtnClick = (ocId) => {
-    dispatch(updateTradeEditor({ evtId: evt.id, type: TX_BUY, ocId, costStr: '10' }));
+    dispatch(updateTradeEditor({ evtId: evt.id, type: TX_BUY, ocId, value: '10' }));
   };
 
   let btmCnt = null;

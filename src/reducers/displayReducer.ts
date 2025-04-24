@@ -1,13 +1,15 @@
 import { produce } from 'immer';
 
 import {
-  UPDATE_POPUP, UPDATE_WALLET_POPUP, UPDATE_ERROR_POPUP, RESET_STATE,
+  UPDATE_POPUP, UPDATE_WALLET_POPUP, UPDATE_ERROR_POPUP, UPDATE_NOTI_POPUP, RESET_STATE,
 } from '@/types/actionTypes';
 import { AGREE_POPUP } from '@/types/const';
 
 const initialState = {
   isAgreePopupShown: false,
   installedWalletIds: null,
+  notiPopupTitle: null,
+  notiPopupBody: null,
   errorPopupTitle: null,
   errorPopupBody: null,
 };
@@ -29,6 +31,11 @@ const displayReducer = (state = initialState, action) => produce(state, draft =>
     } else {
       draft.installedWalletIds = null;
     }
+  }
+
+  if (action.type === UPDATE_NOTI_POPUP) {
+    const { title, body } = action.payload;
+    [draft.notiPopupTitle, draft.notiPopupBody] = [title, body];
   }
 
   if (action.type === UPDATE_ERROR_POPUP) {

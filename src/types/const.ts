@@ -59,13 +59,13 @@ export const JOIN_LETTER_INVALID = 'JOIN_LETTER_INVALID';
 export const JOIN_LETTER_COMMIT = 'JOIN_LETTER_COMMIT';
 export const JOIN_LETTER_ROLLBACK = 'JOIN_LETTER_ROLLBACK';
 
-export const EVT_INIT = 'EVT_INIT'; // Event status
-export const EVT_OPENED = 'EVT_OPENED';
-export const EVT_CLOSED = 'EVT_CLOSED';
-export const EVT_RESOLVED = 'EVT_RESOLVED';
-export const EVT_PAUSED = 'EVT_PAUSED';
-export const EVT_DISPUTED = 'EVT_DISPUTED';
-export const EVT_CANCELED = 'EVT_CANCELED';
+export const EVT_INIT = 0; // Event status
+export const EVT_OPENED = 1;
+export const EVT_CLOSED = 2;
+export const EVT_RESOLVED = 3;
+export const EVT_PAUSED = 4;
+export const EVT_DISPUTED = 5;
+export const EVT_CANCELED = 6;
 
 export const TX_BUY = 'buy'; // Tx type
 export const TX_SELL = 'sell';
@@ -87,8 +87,11 @@ export const ABT_BY_NF = 'abort_by_not_found';
 
 export const ERR_INVALID_ARGS = 'ERR_INVALID_ARGS';
 export const ERR_NOT_FOUND = 'ERR_NOT_FOUND';
+export const ERR_NO_ACCOUNT = 'ERR_NO_ACCOUNT';
 export const ERR_INVALID_RES = 'ERR_INVALID_RES';
 export const ERR_VRF_SIG = 'ERR_VRF_SIG';
+export const ERR_BALANCE_TOO_LOW = 'ERR_BALANCE_TOO_LOW';
+export const ERR_SHARES_TOO_LOW = 'ERR_SHARES_TOO_LOW';
 
 export const ENRL_ID_SUFFIX = '-0000000000000enrlmnt';
 

@@ -1,6 +1,8 @@
 import Url from 'url-parse';
 import {
-  HTTP, PDG, SCS, ERR_INVALID_ARGS, ERR_NOT_FOUND, ERR_VRF_SIG,
+  HTTP, TX_INIT, TX_IN_MEMPOOL, TX_PUT_OK, TX_PUT_ERROR, TX_CONFIRMED_OK,
+  TX_CONFIRMED_ERROR, PDG, SCS, ERR_INVALID_ARGS, ERR_NOT_FOUND, ERR_NO_ACCOUNT,
+  ERR_VRF_SIG,
 } from '@/types/const';
 
 export const isObject = (val) => {
@@ -222,15 +224,24 @@ export const getSignInStatus = (me) => {
   return 1; // not signed in
 };
 
-export const getWalletErrorText = (code) => {
-  let title = 'Error', body = code;
-  if (code === ERR_INVALID_ARGS) {
+export const getWalletErrorText = (error) => {
+  let msg = isFldStr(error) ? error : 'There is an unknown error.';
+  if (isObject(error)) {
+    if (isFldStr(error.message)) msg = error.message;
+    else if (isObject(error.error)) msg = error.error.message;
+  }
+
+  let title = 'Error', body = msg;
+  if (msg === ERR_INVALID_ARGS) {
     title = 'Unknown Wallet';
     body = 'Please sign out and connect with a supported wallet.';
-  } else if (code === ERR_NOT_FOUND) {
+  } else if (msg === ERR_NOT_FOUND) {
     title = 'Wallet Not Found';
     body = 'Please make sure the wallet is installed and enabled.';
-  } else if (code === ERR_VRF_SIG) {
+  } else if (msg === ERR_NO_ACCOUNT) {
+    title = 'Account Not Found';
+    body = 'Please ensure that you are signed in to your wallet.';
+  } else if (msg === ERR_VRF_SIG) {
     title = 'Incorrect Signature';
     body = 'Please check if you signed a message using the same account connected to the wallet.';
   }
@@ -452,4 +463,18 @@ export const rectifyTx = (oldTx, newTx) => {
     }
   }
   return newTx;
+};
+
+export const getTxState = (tx) => {
+  if ('pTxSts' in tx && ![PDG, SCS].includes(tx.pTxSts)) {
+    return TX_PUT_ERROR;
+  }
+  if ('cTxSts' in tx && ![PDG, SCS].includes(tx.cTxSts)) {
+    return TX_CONFIRMED_ERROR;
+  }
+
+  if (tx.cTxSts === SCS) return TX_CONFIRMED_OK;
+  if (tx.pTxSts === SCS) return TX_PUT_OK;
+  if ('cTxId' in tx) return TX_IN_MEMPOOL;
+  return TX_INIT;
 };
