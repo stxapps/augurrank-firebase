@@ -6,7 +6,8 @@ import { useSelector, useDispatch } from '@/store';
 import { updateTradeEditor, trade } from '@/actions/tx';
 import {
   EVT_INIT, EVT_OPENED, EVT_CLOSED, EVT_RESOLVED, EVT_PAUSED, EVT_DISPUTED,
-  EVT_CANCELED, ERR_INVALID_ARGS, ERR_BALANCE_TOO_LOW, ERR_SHARES_TOO_LOW,
+  EVT_CANCELED, ERR_INVALID_ARGS, ERR_BALANCE_NOT_FOUND, ERR_BALANCE_TOO_LOW,
+  ERR_SHARES_TOO_LOW,
 } from '@/types/const';
 import { getTrdEdtrEvt } from '@/selectors';
 import { isObject, isFldStr } from '@/utils';
@@ -17,8 +18,11 @@ const getMsgCnt = (msg) => {
   if (msg === ERR_INVALID_ARGS) {
     return 'Please fill in a positive whole number.';
   }
+  if (msg === ERR_BALANCE_NOT_FOUND) {
+    return 'Your bag is empty, but your ₳1,000 is on the way. Please wait!';
+  }
   if (msg === ERR_BALANCE_TOO_LOW) {
-    return 'Your balance is too low. Please lower your spending.';
+    return 'Your balance is too low. Please add more or spend less.';
   }
   if (msg === ERR_SHARES_TOO_LOW) {
     return 'Not enough shares. Please lower your selling.';

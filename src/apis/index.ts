@@ -1,6 +1,6 @@
 import lsgApi from '@/apis/localSg';
 import {
-  ME_OBJ, NFT_METAS, STX_TST_STR, ME_PATH, ENROLLS_PATH, ERR_NOT_FOUND,
+  ME_OBJ, NFT_METAS, STX_TST_STR, ME_PATH, ENROLLS_PATH, TXS_PATH, ERR_NOT_FOUND,
 } from '@/types/const';
 import { isString, isFldStr, newObject, getResErrMsg } from '@/utils';
 
@@ -88,10 +88,10 @@ const applyEnroll = async () => {
   return obj;
 };
 
-const patchEnroll = async (tx) => {
+const patchTx = async (tx) => {
   const authData = getAuthData();
 
-  const res = await fetch(`${ENROLLS_PATH}/${authData.stxAddr}`, {
+  const res = await fetch(`${TXS_PATH}/${tx.id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ const fetchTxInfo = async (txId) => {
 
 const index = {
   getLocalMe, putLocalMe, deleteLocalFiles, getAuthData, fetchMe, applyEnroll,
-  patchEnroll, fetchTxInfo,
+  patchTx, fetchTxInfo,
 };
 
 export default index;

@@ -131,10 +131,9 @@ export const getTrdEdtrEvt = createSelector(
     const evt = entries[evtId];
     if (!isObject(evt)) return null;
 
-    let costs = getShareCosts(evt);
-    costs = costs.map(cost => cost / SCALE);
+    const shareCosts = getShareCosts(evt).map(cost => cost / SCALE);
 
-    return { ...evt, shareCosts: costs };
+    return { ...evt, shareCosts };
   },
 );
 

@@ -6,7 +6,7 @@ import {
   UPDATE_ERROR_POPUP, UPDATE_ME, RESET_STATE,
 } from '@/types/actionTypes';
 import {
-  STX_TST_STR, PDG, ABT_BY_NF, ERR_NOT_FOUND, ERR_NO_ACCOUNT, ENRL_ID_SUFFIX,
+  STX_TST_STR, PDG, ABT_BY_NF, ERR_NOT_FOUND, ERR_USER_NOT_FOUND, ENRL_ID_SUFFIX,
 } from '@/types/const';
 import {
   isObject, isNumber, throttle, getWindowInsets, getWalletErrorText, getSignInStatus,
@@ -89,7 +89,7 @@ export const connectWallet = (walletId) => async (
     console.log('In connectWallet, error:', error);
     if (isObject(error.error) && [4001, -32000].includes(error.error.code)) return;
     if (isObject(error.error) && [-32603].includes(error.error.code)) {
-      dispatch(updateErrorPopup(getWalletErrorText(ERR_NO_ACCOUNT)));
+      dispatch(updateErrorPopup(getWalletErrorText(ERR_USER_NOT_FOUND)));
       return;
     }
 
@@ -200,6 +200,10 @@ export const applyEnroll = (doForce = false) => async (
   if (enrlFthSts === 0) return;
   if (!doForce && enrlFthSts !== null) return;
   dispatch(updateMe({ enrlFthSts: 0 }));
+  dispatch(updateNotiPopup({
+    title: 'Welcome to the game!',
+    body: 'Your sign-up bonus of ₳1,000 is on the way. In 5 seconds!',
+  }));
 
   let data, isError;
   try {
@@ -213,6 +217,10 @@ export const applyEnroll = (doForce = false) => async (
 
   if (isError) {
     dispatch(updateMe({ enrlFthSts: 2 }));
+    dispatch(updateErrorPopup({
+      title: 'There is an error with your sign-up bonus!',
+      body: 'We\'ll sort it out. Please wait for a while and refresh the page.',
+    }));
     return;
   }
 
@@ -236,7 +244,7 @@ const refreshEnroll = (doForce = false) => async (
 
   const enrlId = `${stxAddr}${ENRL_ID_SUFFIX}`;
   const enrlTx = getState().me.txs[enrlId];
-  if (enrlTx.cTxSts !== PDG) return;
+  if (!isObject(enrlTx) || enrlTx.cTxSts !== PDG) return;
 
   vars.refreshEnroll.timeId = PDG;
 
@@ -274,9 +282,9 @@ const refreshEnroll = (doForce = false) => async (
 
   const newTx = mergeTxs(enrlTx, { cTxSts: txInfo.status });
   try {
-    await idxApi.patchEnroll(newTx);
+    await idxApi.patchTx(newTx);
   } catch (error) {
-    console.log('refreshEnroll.patchEnroll error:', error);
+    console.log('refreshEnroll.patchTx error:', error);
     isError = true;
   }
 
@@ -291,6 +299,10 @@ const refreshEnroll = (doForce = false) => async (
   }
 
   dispatch(updateMe({ tx: newTx }));
+  dispatch(updateNotiPopup({
+    title: '₳1,000 Added!',
+    body: 'We\'ve just dropped ₳1,000 into your account. Have fun!',
+  }));
   [vars.refreshEnroll.timeId, vars.refreshEnroll.seq] = [null, 0];
 };
 

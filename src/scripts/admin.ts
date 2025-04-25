@@ -1,11 +1,11 @@
 import { slugifyWithCounter } from '@sindresorhus/slugify';
 
+import { info } from '@/info';
 import scApi from '@/apis/server/sc';
 import dataApi from '@/apis/server/data';
 import { randomString } from '@/utils';
 
 const now = Date.now(), logKey = `${now}-${randomString(4)}`;
-const info = scApi.getStacksInfo();
 const slugify = slugifyWithCounter();
 
 const uploadImage = async () => {

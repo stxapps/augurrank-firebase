@@ -85,11 +85,14 @@ export const ABT_BY_RES = 'abort_by_response';
 export const ABT_BY_PC = 'abort_by_post_condition';
 export const ABT_BY_NF = 'abort_by_not_found';
 
-export const ERR_INVALID_ARGS = 'ERR_INVALID_ARGS';
 export const ERR_NOT_FOUND = 'ERR_NOT_FOUND';
-export const ERR_NO_ACCOUNT = 'ERR_NO_ACCOUNT';
+export const ERR_USER_NOT_FOUND = 'ERR_USER_NOT_FOUND';
+export const ERR_BALANCE_NOT_FOUND = 'ERR_BALANCE_NOT_FOUND';
+export const ERR_INVALID_ARGS = 'ERR_INVALID_ARGS';
 export const ERR_INVALID_RES = 'ERR_INVALID_RES';
+export const ERR_INVALID_AMT = 'ERR_INVALID_AMT';
 export const ERR_VRF_SIG = 'ERR_VRF_SIG';
+export const ERR_COST_TOO_LOW = 'ERR_COST_TOO_LOW';
 export const ERR_BALANCE_TOO_LOW = 'ERR_BALANCE_TOO_LOW';
 export const ERR_SHARES_TOO_LOW = 'ERR_SHARES_TOO_LOW';
 

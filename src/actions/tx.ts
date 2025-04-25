@@ -1,13 +1,24 @@
+import { PostConditionMode, Cl, Pc } from '@stacks/transactions/dist/esm';
+
 import { AppDispatch, AppGetState } from '@/store';
+import { info } from '@/info';
+import walletApi from '@/apis/wallet';
 //import idxApi from '@/apis';
 //import txApi from '@/apis/tx';
-import { chooseWallet, signStxTstStr } from '@/actions';
+import {
+  chooseWallet, signStxTstStr, updateNotiPopup, updateErrorPopup, updateMe,
+} from '@/actions';
 import { UPDATE_TRADE_EDITOR } from '@/types/actionTypes';
 import {
-  EVT_OPENED, TX_BUY, TX_SELL, ERROR, ERR_INVALID_ARGS, ERR_BALANCE_TOO_LOW,
-  ERR_SHARES_TOO_LOW,
+  EVT_OPENED, TX_BUY, TX_SELL, ERROR, ERR_BALANCE_NOT_FOUND, ERR_INVALID_ARGS,
+  ERR_INVALID_AMT, ERR_COST_TOO_LOW, ERR_BALANCE_TOO_LOW, ERR_SHARES_TOO_LOW, SCALE,
+  SCS,
 } from '@/types/const';
-import { isObject, isNumber, isFldStr, getSignInStatus } from '@/utils';
+import {
+  isObject, isNumber, isFldStr, randomString, getSignInStatus, getWalletErrorText,
+  getShare,
+} from '@/utils';
+import { getShareCosts } from '@/utils/lmsr';
 
 export const agreeTerms = () => async (
   dispatch: AppDispatch, getState: AppGetState,
@@ -61,11 +72,11 @@ export const trade = () => async (
     return;
   }
 
+  const { stxAddr, stxPubKey, balance, shares } = getState().me;
+
   if (type === TX_BUY) {
-    const { balance } = getState().me;
     if (!isNumber(balance)) {
-      // show message telling 1000 tokens incoming
-      dispatch(updateNotiPopup());
+      dispatch(updateTradeEditor({ msg: ERR_BALANCE_NOT_FOUND }));
       return;
     }
     if (balance < prsdValue) {
@@ -73,29 +84,112 @@ export const trade = () => async (
       return;
     }
   } else if (type === TX_SELL) {
-    const shares = getState().me.shares;
-
-    let share;
-    for (const shr of Object.values<any>(shares)) {
-      if (shr.evtId === evtId && shr.ocId === ocId) {
-        share = shr;
-        break;
-      }
-    }
+    const share = getShare(shares, evtId, ocId);
     if (!isObject(share) || share.amount < prsdValue) {
       dispatch(updateTradeEditor({ msg: ERR_SHARES_TOO_LOW }));
       return;
     }
   }
 
-  dispatch(updateTradeEditor({ doLoad: true }));
+  const now = Date.now();
+  const id = `${stxAddr}-${now}${randomString(7)}`;
+  const [contract, createDate, updateDate] = [info.marketsContract, now, now];
 
+  const shareCosts = getShareCosts(evt).map(cost => cost / SCALE);
+  const shareCost = shareCosts[ocId];
+  const scldValue = prsdValue * SCALE;
 
+  let functionName, functionArgs, postConditions;
+  if (type === TX_BUY) {
+    const amt1 = Math.floor(prsdValue / shareCost);
+    const amt2 = Math.min(Math.floor(amt1 * 0.985), amt1 - 1);
+    const amt3 = Math.min(Math.floor(amt1 * 0.95), amt2 - 1);
+    if (amt1 <= 0) {
+      dispatch(updateTradeEditor({ msg: ERR_INVALID_AMT }));
+      return;
+    }
 
-  // if buy, convert cost to amount and slippage
+    functionName = 'buy-shares-a';
+    functionArgs = [Cl.uint(evtId), Cl.uint(ocId), Cl.uint(amt1 * SCALE)];
+    if (amt2 > 0) {
+      functionName = 'buy-shares-b';
+      functionArgs.push(Cl.uint(amt2 * SCALE));
+    }
+    if (amt3 > 0) {
+      functionName = 'buy-shares-c';
+      functionArgs.push(Cl.uint(amt3 * SCALE));
+    }
+    functionArgs.push(Cl.uint(scldValue));
 
-  // if sell, set min cost?
+    const condition = Pc.principal(stxAddr).willSendLte(scldValue).ft(
+      `${info.stxAddr}.${info.tokenContract}`, 'Augur',
+    );
+    postConditions = [condition];
+  } else if (type === TX_SELL) {
+    const cost = prsdValue * shareCost;
+    const slpgCost = Math.floor(cost * 0.95); // slippage 5%
+    const minCost = slpgCost > 0 ? slpgCost : cost;
+    if (minCost <= 0) {
+      dispatch(updateTradeEditor({ msg: ERR_COST_TOO_LOW }));
+      return;
+    }
 
+    const scldMinCost = minCost * SCALE;
+    const condition = Pc.principal(info.stxAddr).willSendGte(scldMinCost).ft(
+      `${info.stxAddr}.${info.tokenContract}`, 'Augur',
+    );
 
+    functionName = 'sell-shares-a';
+    functionArgs = [
+      Cl.uint(evtId), Cl.uint(ocId), Cl.uint(scldValue), Cl.uint(scldMinCost),
+    ];
+    postConditions = [condition];
+  }
+
+  const tx = { id, type, contract, createDate, updateDate };
+  dispatch(updateTradeEditor({ msg: '', doLoad: true }));
+  dispatch(updateMe({ tx }));
+
+  let data, isError, error;
+  try {
+    data = await walletApi.contractCall({
+      stxAddress: stxAddr,
+      publicKey: stxPubKey,
+      sponsored: false,
+      network: info.network,
+      contractAddress: info.stxAddr,
+      contractName: contract,
+      functionName,
+      functionArgs,
+      postConditionMode: PostConditionMode.Deny,
+      postConditions,
+    });
+  } catch (err) {
+    console.log('In trade, error:', err);
+    [isError, error] = [true, err];
+  }
+
+  if (getState().me.stxAddr !== stxAddr) return;
+
+  if (isError) {
+    dispatch(updateTradeEditor({ doLoad: false }));
+    dispatch(updateMe({ removeTxIds: [tx.id] }));
+    if (
+      (isObject(error.error) && [4001, -32000].includes(error.error.code)) ||
+      error === 'cancel'
+    ) {
+      return;
+    }
+
+    dispatch(updateErrorPopup(getWalletErrorText(error)));
+    return;
+  }
+
+  const newTx: any = { ...tx, cTxId: data.txId };
   dispatch(updateTradeEditor({ evtId: null }));
+  dispatch(updateMe({ tx: newTx }));
+  dispatch(updateNotiPopup({ title: '', body: '' }));
+
+  newTx.pTxSts = SCS;
+
 };

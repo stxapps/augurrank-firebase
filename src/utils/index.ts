@@ -1,7 +1,7 @@
 import Url from 'url-parse';
 import {
   HTTP, TX_INIT, TX_IN_MEMPOOL, TX_PUT_OK, TX_PUT_ERROR, TX_CONFIRMED_OK,
-  TX_CONFIRMED_ERROR, PDG, SCS, ERR_INVALID_ARGS, ERR_NOT_FOUND, ERR_NO_ACCOUNT,
+  TX_CONFIRMED_ERROR, PDG, SCS, ERR_INVALID_ARGS, ERR_NOT_FOUND, ERR_USER_NOT_FOUND,
   ERR_VRF_SIG,
 } from '@/types/const';
 
@@ -224,12 +224,19 @@ export const getSignInStatus = (me) => {
   return 1; // not signed in
 };
 
-export const getWalletErrorText = (error) => {
-  let msg = isFldStr(error) ? error : 'There is an unknown error.';
+const getWalletErrorMsg = (error) => {
+  if (isFldStr(error)) return error;
   if (isObject(error)) {
-    if (isFldStr(error.message)) msg = error.message;
-    else if (isObject(error.error)) msg = error.error.message;
+    if (isFldStr(error.message)) return error.message;
+    if (isObject(error.error)) {
+      if (isFldStr(error.error.message)) return error.error.message;
+    }
   }
+  return 'There is an unknown error.';
+};
+
+export const getWalletErrorText = (error) => {
+  const msg = getWalletErrorMsg(error);
 
   let title = 'Error', body = msg;
   if (msg === ERR_INVALID_ARGS) {
@@ -238,7 +245,7 @@ export const getWalletErrorText = (error) => {
   } else if (msg === ERR_NOT_FOUND) {
     title = 'Wallet Not Found';
     body = 'Please make sure the wallet is installed and enabled.';
-  } else if (msg === ERR_NO_ACCOUNT) {
+  } else if (msg === ERR_USER_NOT_FOUND) {
     title = 'Account Not Found';
     body = 'Please ensure that you are signed in to your wallet.';
   } else if (msg === ERR_VRF_SIG) {
@@ -247,6 +254,15 @@ export const getWalletErrorText = (error) => {
   }
 
   return { title, body };
+};
+
+export const getShare = (shares, evtId, ocId) => {
+  for (const shr of Object.values<any>(shares)) {
+    if (shr.evtId === evtId && shr.ocId === ocId) {
+      return shr;
+    }
+  }
+  return null;
 };
 
 export const validateEmail = (email) => {

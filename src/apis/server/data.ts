@@ -5,7 +5,7 @@ import {
   fstoreAdmin as db, evtToDoc, syncToDoc, userToDoc, shareToDoc, txToDoc,
 } from '@/apis/server/fbaseAdmin';
 import {
-  LETTER_JOINS, USERS, SHARES, TXS, EVENTS, SYNCS, ACTIVE, INDEX, N_DOCS,
+  LETTER_JOINS, USERS, SHARES, TXS, EVENTS, SYNCS, ACTIVE, INDEX, N_DOCS, SCS,
 } from '@/types/const';
 import {
   isObject, isFldStr, newObject, isAvatarEqual, mergeTxs, rectifyUser, rectifyShare,
@@ -125,18 +125,19 @@ const updateTx = async (logKey, stxAddr, tx) => {
   const ref = db.collection(USERS).doc(stxAddr).collection(TXS).doc(tx.id);
 
   await db.runTransaction(async (t) => {
-    let newTx;
+    let oldTx, newTx;
     const now = Date.now();
 
     const snapshot = await t.get(ref);
     if (snapshot.exists) {
-      const oldTx = docToTx(tx.id, snapshot.data());
+      oldTx = docToTx(tx.id, snapshot.data());
       newTx = mergeTxs(oldTx, { tx, updateDate: now });
     } else {
       newTx = { ...tx, createDate: now, updateDate: now };
     }
 
-    t.set(ref, txToDoc(newTx));
+    const rctdTx = rectifyTx(oldTx, newTx);
+    t.set(ref, txToDoc(rctdTx));
     console.log(`(${logKey}) Updated to Firestore`);
   });
 };
@@ -187,14 +188,17 @@ const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
       newTx = { ...tx, createDate: now, updateDate: now };
     }
 
-    if (isObject(userRef)) {
-      const rctdUser = rectifyUser(oldUser, newUser);
-      t.set(userRef, userToDoc(rctdUser));
+    if ((!isObject(oldTx) || oldTx.cTxSts !== SCS) && newTx.cTxSts === SCS) {
+      if (isObject(userRef)) {
+        const rctdUser = rectifyUser(oldUser, newUser);
+        t.set(userRef, userToDoc(rctdUser));
+      }
+      if (isObject(shareRef)) {
+        const rctdShare = rectifyShare(oldShare, newShare);
+        t.set(shareRef, shareToDoc(rctdShare));
+      }
     }
-    if (isObject(shareRef)) {
-      const rctdShare = rectifyShare(oldShare, newShare);
-      t.set(shareRef, shareToDoc(rctdShare));
-    }
+
     const rctdTx = rectifyTx(oldTx, newTx);
     t.set(txRef, txToDoc(rctdTx));
     console.log(`(${logKey}) Updated to Firestore`);
@@ -370,8 +374,8 @@ const uploadFile = async (src, bucket, options) => {
 };
 
 const data = {
-  addLetterJoin, updateProfile, updateTx, updateUsrShrTx, getUser, getShares,
-  getTx, getTxs, queryTxs, updateEvent, getEventBySlug, getEventById, updateSyncEvt,
+  addLetterJoin, updateProfile, updateTx, updateUsrShrTx, getUser, getShares, getTx,
+  getTxs, queryTxs, updateEvent, getEventBySlug, getEventById, updateSyncEvt,
   deleteSyncEvt, uploadFile,
 };
 
