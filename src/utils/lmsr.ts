@@ -16,6 +16,23 @@ const getSumExp = (qqbs) => {
   return sum;
 };
 
+const getCost = (beta, qqbs) => {
+  const sumExp = getSumExp(qqbs);
+  const cost = (beta * ln(sumExp)) / SCALE;
+  return cost;
+};
+
+const getDeltaCost = (beta, qqbs, id, isBuy, amount) => {
+  const nQqbs = getNewQqbs(beta, qqbs, id, isBuy, amount);
+  const costBefore = getCost(beta, qqbs);
+  const costAfter = getCost(beta, nQqbs);
+
+  let deltaCost = costAfter - costBefore;
+  if (costAfter < costBefore) deltaCost = costBefore - costAfter;
+
+  return deltaCost > amount ? amount : deltaCost;
+};
+
 const getShareCost = (sumExp, qqb) => {
   const expQkb = exp(qqb.qb);
   return (expQkb * SCALE) / sumExp;
@@ -34,6 +51,21 @@ const getQqbs = (beta, outcomes) => {
   });
 };
 
+const getNewQqbs = (beta, qqbs, id, isBuy, amount) => {
+  const cQqbs = qqbs.map(qqb => ({ ...qqb }));
+
+  let nQ;
+  if (isBuy) {
+    nQ = cQqbs[id].q + amount;
+  } else {
+    nQ = cQqbs[id].q > amount ? cQqbs[id].q - amount : u('0');
+  }
+  cQqbs[id].q = nQ;
+  cQqbs[id].qb = (nQ * SCALE) / beta;
+
+  return cQqbs;
+};
+
 export const getShareCosts = (evt) => {
   const beta = u(evt.beta);
   const qqbs = getQqbs(beta, evt.outcomes);
@@ -41,6 +73,50 @@ export const getShareCosts = (evt) => {
   const costs = qqbs.map(qqb => getShareCost(sumExp, qqb));
   const norms = costs.map(cost => Number(cost));
   return norms;
+};
+
+export const getBuyAmount = (evt, id, maxCost, startAmt) => {
+  const beta = u(evt.beta);
+  const qqbs = getQqbs(beta, evt.outcomes);
+
+  let amt = u(startAmt);
+  const startCost = getDeltaCost(beta, qqbs, id, true, amt);
+  if (startCost === maxCost) return Number(amt);
+
+  const isInc = startCost < maxCost ? true : false;
+
+  let prevAmt = amt;
+  amt = isInc ? prevAmt + u('1') : prevAmt - u('1');
+
+  for (let i = 0; i < 1000000; i++) {
+    const cost = getDeltaCost(beta, qqbs, id, true, amt);
+    if (cost < maxCost) {
+      if (isInc) {
+        prevAmt = amt;
+        amt = amt + u('1');
+      } else {
+        return Number(prevAmt);
+      }
+    } else if (cost > maxCost) {
+      if (isInc) {
+        return Number(prevAmt);
+      } else {
+        prevAmt = amt;
+        amt = amt - u('1');
+      }
+    } else {
+      return Number(amt);
+    }
+  }
+
+  throw new Error(`In lmsr.getBuyAmout, invalid cost of evt id: ${evt.id}`);
+};
+
+export const getSellCost = (evt, id, amount) => {
+  const beta = u(evt.beta);
+  const qqbs = getQqbs(beta, evt.outcomes);
+  const cost = getDeltaCost(beta, qqbs, id, false, u(amount));
+  return Number(cost);
 };
 
 // ---------------------------------------------------------

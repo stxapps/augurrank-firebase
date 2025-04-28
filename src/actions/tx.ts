@@ -3,8 +3,7 @@ import { PostConditionMode, Cl, Pc } from '@stacks/transactions/dist/esm';
 import { AppDispatch, AppGetState } from '@/store';
 import { info } from '@/info';
 import walletApi from '@/apis/wallet';
-//import idxApi from '@/apis';
-//import txApi from '@/apis/tx';
+import idxApi from '@/apis';
 import {
   chooseWallet, signStxTstStr, updateNotiPopup, updateErrorPopup, updateMe,
 } from '@/actions';
@@ -12,13 +11,13 @@ import { UPDATE_TRADE_EDITOR } from '@/types/actionTypes';
 import {
   EVT_OPENED, TX_BUY, TX_SELL, ERROR, ERR_BALANCE_NOT_FOUND, ERR_INVALID_ARGS,
   ERR_INVALID_AMT, ERR_COST_TOO_LOW, ERR_BALANCE_TOO_LOW, ERR_SHARES_TOO_LOW, SCALE,
-  SCS,
+  SCS, ABT_BY_RES,
 } from '@/types/const';
 import {
   isObject, isNumber, isFldStr, randomString, getSignInStatus, getWalletErrorText,
   getShare,
 } from '@/utils';
-import { getShareCosts } from '@/utils/lmsr';
+import { getShareCosts, getBuyAmount, getSellCost } from '@/utils/lmsr';
 
 export const agreeTerms = () => async (
   dispatch: AppDispatch, getState: AppGetState,
@@ -95,13 +94,16 @@ export const trade = () => async (
   const id = `${stxAddr}-${now}${randomString(7)}`;
   const [contract, createDate, updateDate] = [info.marketsContract, now, now];
 
-  const shareCosts = getShareCosts(evt).map(cost => cost / SCALE);
-  const shareCost = shareCosts[ocId];
   const scldValue = prsdValue * SCALE;
 
   let functionName, functionArgs, postConditions;
   if (type === TX_BUY) {
-    const amt1 = Math.floor(prsdValue / shareCost);
+    const shareCosts = getShareCosts(evt);
+    const shareCost = shareCosts[ocId];
+    const startAmt = Math.floor(scldValue / shareCost) * SCALE;
+
+    const scldAmt1 = getBuyAmount(evt, ocId, scldValue, startAmt);
+    const amt1 = scldAmt1 / SCALE;
     const amt2 = Math.min(Math.floor(amt1 * 0.985), amt1 - 1);
     const amt3 = Math.min(Math.floor(amt1 * 0.95), amt2 - 1);
     if (amt1 <= 0) {
@@ -110,7 +112,7 @@ export const trade = () => async (
     }
 
     functionName = 'buy-shares-a';
-    functionArgs = [Cl.uint(evtId), Cl.uint(ocId), Cl.uint(amt1 * SCALE)];
+    functionArgs = [Cl.uint(evtId), Cl.uint(ocId), Cl.uint(scldAmt1)];
     if (amt2 > 0) {
       functionName = 'buy-shares-b';
       functionArgs.push(Cl.uint(amt2 * SCALE));
@@ -126,15 +128,15 @@ export const trade = () => async (
     );
     postConditions = [condition];
   } else if (type === TX_SELL) {
-    const cost = prsdValue * shareCost;
-    const slpgCost = Math.floor(cost * 0.95); // slippage 5%
+    const cost = getSellCost(evt, ocId, scldValue) / SCALE;
+    const slpgCost = cost * 0.95; // slippage 5%
     const minCost = slpgCost > 0 ? slpgCost : cost;
     if (minCost <= 0) {
       dispatch(updateTradeEditor({ msg: ERR_COST_TOO_LOW }));
       return;
     }
 
-    const scldMinCost = minCost * SCALE;
+    const scldMinCost = Math.floor(minCost * SCALE);
     const condition = Pc.principal(info.stxAddr).willSendGte(scldMinCost).ft(
       `${info.stxAddr}.${info.tokenContract}`, 'Augur',
     );
@@ -165,7 +167,7 @@ export const trade = () => async (
       postConditions,
     });
   } catch (err) {
-    console.log('In trade, error:', err);
+    console.log('trade.contractCall error:', err);
     [isError, error] = [true, err];
   }
 
@@ -191,5 +193,31 @@ export const trade = () => async (
   dispatch(updateNotiPopup({ title: '', body: '' }));
 
   newTx.pTxSts = SCS;
+  try {
+    await idxApi.patchTx(newTx);
+  } catch (error) {
+    console.log('trade.patchTx error:', error);
+    isError = true;
+  }
+
+  if (getState().me.stxAddr !== stxAddr) return;
+
+  if (isError) {
+    newTx.pTxSts = ABT_BY_RES;
+    dispatch(updateMe({ tx: newTx }));
+    dispatch(updateErrorPopup({ title: '', body: '' }));
+    return;
+  }
+
+  dispatch(updateMe({ tx: newTx }));
+
+  setTimeout(() => {
+    dispatch(refreshTxs());
+  }, 5 * 1000); // Wait a while before calling refreshPreds.
+};
+
+const refreshTxs = () => async (
+  dispatch: AppDispatch, getState: AppGetState,
+) => {
 
 };
