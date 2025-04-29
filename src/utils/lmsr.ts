@@ -86,14 +86,14 @@ export const getBuyAmount = (evt, id, maxCost, startAmt) => {
   const isInc = startCost < maxCost ? true : false;
 
   let prevAmt = amt;
-  amt = isInc ? prevAmt + u('1') : prevAmt - u('1');
+  amt = isInc ? prevAmt + u('1000000') : prevAmt - u('1000000');
 
   for (let i = 0; i < 1000000; i++) {
     const cost = getDeltaCost(beta, qqbs, id, true, amt);
     if (cost < maxCost) {
       if (isInc) {
         prevAmt = amt;
-        amt = amt + u('1');
+        amt = amt + u('1000000');
       } else {
         return Number(prevAmt);
       }
@@ -102,14 +102,15 @@ export const getBuyAmount = (evt, id, maxCost, startAmt) => {
         return Number(prevAmt);
       } else {
         prevAmt = amt;
-        amt = amt - u('1');
+        amt = amt - u('1000000');
       }
     } else {
       return Number(amt);
     }
   }
 
-  throw new Error(`In lmsr.getBuyAmout, invalid cost of evt id: ${evt.id}`);
+  console.log('In lmsr.getBuyAmount, invalid cost of evt:', evt);
+  return -1;
 };
 
 export const getSellCost = (evt, id, amount) => {

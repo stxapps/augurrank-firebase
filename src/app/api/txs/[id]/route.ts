@@ -3,7 +3,9 @@ import { NextResponse } from 'next/server';
 
 import authApi from '@/apis/server/auth';
 import dataApi from '@/apis/server/data';
-import { ALLOWED_ORIGINS, PDG, ENRL_ID_SUFFIX, TX_ENROLL } from '@/types/const';
+import {
+  ALLOWED_ORIGINS, PDG, SCS, ENRL_ID_SUFFIX, TX_ENROLL, TX_BUY, TX_SELL,
+} from '@/types/const';
 import {
   isObject, areAllString, getReferrer, randomString, removeTailingSlash, validateTx,
 } from '@/utils';
@@ -56,19 +58,38 @@ export async function PATCH(
   if (tx.type === TX_ENROLL) {
     const enrlId = `${stxAddr}${ENRL_ID_SUFFIX}`;
     if (tx.id !== enrlId || tx.cTxSts === PDG) {
-      const error = 'Invalid tx';
+      const error = 'Invalid enroll tx';
       console.log(`(${logKey}) ${error}, return ERROR`);
       return NextResponse.json({ error }, { status: 400 });
     }
 
     const user = { balance: 1000000000 };
     await dataApi.updateUsrShrTx(logKey, stxAddr, user, null, tx);
+  } else if (tx.type === TX_BUY) {
+    const { evtId, ocId, amount, cost } = tx;
+    const shrId = `${stxAddr}-${evtId}-${ocId}`;
+
+    let user = null, share = null;
+    if (tx.cTxSts === SCS) {
+      user = { balance: cost * -1 };
+      share = { id: shrId, evtId, ocId, amount, cost };
+    }
+    await dataApi.updateUsrShrTx(logKey, stxAddr, user, share, tx);
+  } else if (tx.type === TX_SELL) {
+    const { evtId, ocId, amount, cost } = tx;
+    const shrId = `${stxAddr}-${evtId}-${ocId}`;
+
+    let user = null, share = null;
+    if (tx.cTxSts === SCS) {
+      user = { balance: cost };
+      share = { id: shrId, evtId, ocId, amount: amount * -1, cost: cost * -1 };
+    }
+    await dataApi.updateUsrShrTx(logKey, stxAddr, user, share, tx);
+  } else {
+    const error = 'Invalid tx type';
+    console.log(`(${logKey}) ${error}, return ERROR`);
+    return NextResponse.json({ error }, { status: 400 });
   }
-
-  // tx types: enroll, buy, sell, iap
-
-  //await dataApi.updateUsrShrTx(logKey, stxAddr, user, null, tx);
-
 
   console.log(`(${logKey}) /api/txs/[id] finished`);
   return new NextResponse(null, { status: 204 });

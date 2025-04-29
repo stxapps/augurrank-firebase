@@ -314,6 +314,30 @@ export const deriveTxInfo = (txInfo) => {
   return obj;
 };
 
+const getTxNumber = (regex, txInfo) => {
+  try {
+    const match = txInfo.result.match(regex);
+    if (match) {
+      const nmbr = parseInt(match[1]);
+      if (isNumber(nmbr)) return nmbr;
+    }
+  } catch (error) {
+    // txInfo.result might not be string.
+  }
+
+  return -1;
+};
+
+export const getTxAmount = (txInfo) => {
+  const regex = /amount\s+u(\d+)/; // (ok (tuple (amount u10, cost u5)))
+  return getTxNumber(regex, txInfo);
+};
+
+export const getTxCost = (txInfo) => {
+  const regex = /cost\s+u(\d+)/; // (ok (tuple (amount u10, cost u5)))
+  return getTxNumber(regex, txInfo);
+};
+
 export const validateTx = (stxAddr, tx) => {
   if (!isObject(tx)) return false;
 
