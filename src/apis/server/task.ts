@@ -1,18 +1,11 @@
 import { funcsAdmin } from '@/apis/server/fbaseAdmin';
 
 const addSyncEvtTask = async (evtId) => {
+  const name = process.env.FUNCTION_SYNC_EVT_NAME;
+  const uri = process.env.FUNCTION_SYNC_EVT_URI;
 
-  // emu vs. test vs. prod?
-
-
-  const queue = funcsAdmin.taskQueue('syncEvent');
-  const targetUri = keys['syncEvent'];
-
-  await queue.enqueue({ evtId }, {
-    scheduleDelaySeconds,
-    dispatchDeadlineSeconds: 60 * 5, // 5 minutes
-    uri: targetUri,
-  });
+  const queue = funcsAdmin.taskQueue(name);
+  await queue.enqueue({ evtId }, { uri: uri });
 };
 
 const task = { addSyncEvtTask };

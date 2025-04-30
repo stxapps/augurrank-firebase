@@ -319,14 +319,6 @@ const updateEvent = async (logKey, evt, doAdd) => {
   });
 };
 
-const getEventBySlug = async (logKey, slug) => {
-
-};
-
-const getEventById = async (logKey, contract, id) => {
-
-};
-
 const updateSyncEvt = async (logKey, evtId) => {
   const evtRef = db.collection(EVENTS).doc(evtId);
   const syncRef = db.collection(SYNCS).doc(INDEX);
@@ -355,6 +347,34 @@ const updateSyncEvt = async (logKey, evtId) => {
   });
 };
 
+const updateEvtSyncEvt = async (logKey, evt) => {
+  const evtRef = db.collection(EVENTS).doc(evt.id);
+  const syncRef = db.collection(SYNCS).doc(INDEX);
+
+  await db.runTransaction(async (t) => {
+    const evtSs = await t.get(evtRef);
+    if (!evtSs.exists) throw new Error(`Evt does not exist: ${evt.id}`);
+
+    const oldEvt = docToEvt(evt.id, evtSs.data());
+    const newEvt = structuredClone(oldEvt);
+    for (let i = 0; i < evt.outcomes.length; i++) {
+      const oc = newEvt.outcomes[i];
+      if (!isObject(oc)) throw new Error(`Invalid outcome: ${i} for evtId: ${evt.id}`);
+      oc.shareAmount = evt.outcomes[i].shareAmount;
+    }
+
+    const syncSs = await t.get(syncRef);
+    if (!syncSs.exists) throw new Error(`Sync does not exist: INDEX`);
+
+    const newSync = docToSync(INDEX, syncSs.data());
+    newSync.evts[newEvt.id] = newEvt;
+
+    t.set(evtRef, evtToDoc(newEvt));
+    t.set(syncRef, syncToDoc(newSync));
+    console.log(`(${logKey}) Updated to Firestore`);
+  });
+};
+
 const deleteSyncEvt = async (logKey, evtId) => {
   const ref = db.collection(SYNCS).doc(INDEX);
 
@@ -376,14 +396,22 @@ const deleteSyncEvt = async (logKey, evtId) => {
   });
 };
 
+const getEventBySlug = async (logKey, slug) => {
+
+};
+
+const getEventById = async (logKey, contract, id) => {
+
+};
+
 const uploadFile = async (src, bucket, options) => {
   await getStorage().bucket(bucket).upload(src, options);
 };
 
 const data = {
   addLetterJoin, updateProfile, updateTx, updateUsrShrTx, getUser, getShares, getTx,
-  getTxs, queryTxs, updateEvent, getEventBySlug, getEventById, updateSyncEvt,
-  deleteSyncEvt, uploadFile,
+  getTxs, queryTxs, updateEvent, updateSyncEvt, updateEvtSyncEvt, deleteSyncEvt,
+  getEventBySlug, getEventById, uploadFile,
 };
 
 export default data;
