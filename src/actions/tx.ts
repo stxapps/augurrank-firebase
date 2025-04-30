@@ -2,8 +2,9 @@ import { PostConditionMode, Cl, Pc } from '@stacks/transactions/dist/esm';
 
 import { AppDispatch, AppGetState } from '@/store';
 import { info } from '@/info';
-import walletApi from '@/apis/wallet';
 import idxApi from '@/apis';
+import walletApi from '@/apis/wallet';
+import hiroApi from '@/apis/hiro';
 import {
   chooseWallet, signStxTstStr, updateNotiPopup, updateErrorPopup, updateMe,
 } from '@/actions';
@@ -286,7 +287,7 @@ const refreshUnconfirmedTxs = async (
   for (const tx of txs) {
     let txInfo;
     try {
-      txInfo = await idxApi.fetchTxInfo(tx.cTxId);
+      txInfo = await hiroApi.fetchTxInfo(tx.cTxId);
     } catch (error) {
       if (error.message !== ERR_NOT_FOUND) {
         console.log('refreshUnconfirmedTxs.fetchTxInfo error:', error);

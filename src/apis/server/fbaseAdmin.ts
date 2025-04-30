@@ -1,5 +1,6 @@
 import { initializeApp, getApps, applicationDefault } from 'firebase-admin/app';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { getFunctions } from 'firebase-admin/functions';
 
 import { isNumber, isFldStr } from '@/utils';
 
@@ -12,6 +13,7 @@ if (isFldStr(process.env.FIRESTORE_EMULATOR_HOST)) {
 }
 
 export const fstoreAdmin = getFirestore();
+export const funcsAdmin = getFunctions();
 
 export const evtToDoc = (evt) => {
   const doc = {

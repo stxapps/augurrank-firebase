@@ -4,8 +4,9 @@ import {
 
 import { info } from '@/info';
 import stxAccApi from '@/apis/server/stxAcc';
-import { SENDER_KEY } from '@/keys';
 import { isFldStr, isNumber } from '@/utils';
+
+const SENDER_KEY = process.env.SC_SENDER_KEY;
 
 const prepend0x = (txId) => {
   if (!txId.startsWith('0x')) return '0x' + txId;

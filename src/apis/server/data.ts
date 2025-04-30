@@ -149,7 +149,7 @@ const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
   const shareRef = isObject(share) ? rRef.collection(SHARES).doc(share.id) : null;
   const txRef = rRef.collection(TXS).doc(tx.id);
 
-  await db.runTransaction(async (t) => {
+  const { isToScs } = await db.runTransaction(async (t) => {
     let oldUser, newUser, oldShare, newShare, oldTx, newTx;
     const now = Date.now();
 
@@ -188,6 +188,7 @@ const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
       newTx = { ...tx, createDate: now, updateDate: now };
     }
 
+    let isToScs = false;
     if ((!isObject(oldTx) || oldTx.cTxSts !== SCS) && newTx.cTxSts === SCS) {
       if (isObject(userRef)) {
         const rctdUser = rectifyUser(oldUser, newUser);
@@ -197,12 +198,18 @@ const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
         const rctdShare = rectifyShare(oldShare, newShare);
         t.set(shareRef, shareToDoc(rctdShare));
       }
+
+      isToScs = true;
     }
 
     const rctdTx = rectifyTx(oldTx, newTx);
     t.set(txRef, txToDoc(rctdTx));
     console.log(`(${logKey}) Updated to Firestore`);
+
+    return { isToScs };
   });
+
+  return { isToScs };
 };
 
 const getUser = async (stxAddr) => {

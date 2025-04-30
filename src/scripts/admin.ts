@@ -1,8 +1,8 @@
 import { slugifyWithCounter } from '@sindresorhus/slugify';
 
 import { info } from '@/info';
-import scApi from '@/apis/server/sc';
 import dataApi from '@/apis/server/data';
+import scApi from '@/apis/server/sc';
 import { randomString } from '@/utils';
 
 const now = Date.now(), logKey = `${now}-${randomString(4)}`;

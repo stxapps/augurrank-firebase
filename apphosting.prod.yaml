@@ -22,3 +22,6 @@ env:
 
   - variable: NEXT_PUBLIC_STACKS_NETWORK
     value: "mainnet"
+
+  - variable: SC_SENDER_KEY
+    secret: SC_SENDER_KEY

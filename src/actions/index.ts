@@ -1,6 +1,7 @@
 import { AppDispatch, AppGetState } from '@/store';
 import idxApi from '@/apis';
 import walletApi from '@/apis/wallet';
+import hiroApi from '@/apis/hiro';
 import {
   INIT, UPDATE_WINDOW, UPDATE_POPUP, UPDATE_WALLET_POPUP, UPDATE_NOTI_POPUP,
   UPDATE_ERROR_POPUP, UPDATE_ME, RESET_STATE,
@@ -250,7 +251,7 @@ const refreshEnroll = (doForce = false) => async (
 
   let txInfo, isError;
   try {
-    txInfo = await idxApi.fetchTxInfo(enrlTx.cTxId);
+    txInfo = await hiroApi.fetchTxInfo(enrlTx.cTxId);
   } catch (error) {
     if (error.message !== ERR_NOT_FOUND) {
       console.log('refreshEnroll.fetchTxInfo error:', error);

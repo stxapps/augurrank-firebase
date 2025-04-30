@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 
 import authApi from '@/apis/server/auth';
 import dataApi from '@/apis/server/data';
+import taskApi from '@/apis/server/task';
 import {
   ALLOWED_ORIGINS, PDG, SCS, ENRL_ID_SUFFIX, TX_ENROLL, TX_BUY, TX_SELL,
 } from '@/types/const';
@@ -65,26 +66,28 @@ export async function PATCH(
 
     const user = { balance: 1000000000 };
     await dataApi.updateUsrShrTx(logKey, stxAddr, user, null, tx);
-  } else if (tx.type === TX_BUY) {
-    const { evtId, ocId, amount, cost } = tx;
-    const shrId = `${stxAddr}-${evtId}-${ocId}`;
-
-    let user = null, share = null;
-    if (tx.cTxSts === SCS) {
-      user = { balance: cost * -1 };
-      share = { id: shrId, evtId, ocId, amount, cost };
-    }
-    await dataApi.updateUsrShrTx(logKey, stxAddr, user, share, tx);
-  } else if (tx.type === TX_SELL) {
+  } else if ([TX_BUY, TX_SELL].includes(tx.type)) {
     const { evtId, ocId, amount, cost } = tx;
     const shrId = `${stxAddr}-${evtId}-${ocId}`;
 
     let user = null, share = null;
     if (tx.cTxSts === SCS) {
       user = { balance: cost };
-      share = { id: shrId, evtId, ocId, amount: amount * -1, cost: cost * -1 };
+      if (tx.type === TX_BUY) user.balance *= -1;
+
+      share = { id: shrId, evtId, ocId, amount, cost };
+      if (tx.type === TX_SELL) {
+        share.amount *= -1;
+        share.cost *= -1;
+      }
     }
-    await dataApi.updateUsrShrTx(logKey, stxAddr, user, share, tx);
+
+    const { isToScs } = await dataApi.updateUsrShrTx(
+      logKey, stxAddr, user, share, tx,
+    );
+    if (isToScs) { // if buy or sell with SCS, submit a task
+      await taskApi.addSyncEvtTask(evtId);
+    }
   } else {
     const error = 'Invalid tx type';
     console.log(`(${logKey}) ${error}, return ERROR`);
