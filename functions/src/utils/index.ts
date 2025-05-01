@@ -518,3 +518,13 @@ export const getTxState = (tx) => {
   if ('cTxId' in tx) return TX_IN_MEMPOOL;
   return TX_INIT;
 };
+
+export const getScEvtId = (evtId) => {
+  if (!isFldStr(evtId)) return NaN;
+
+  const match = evtId.match(/\d+$/);
+  if (!match) return NaN;
+
+  const id = parseInt(match[0], 10);
+  return id;
+};

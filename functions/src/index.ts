@@ -5,7 +5,7 @@ import { Cl } from '@stacks/transactions';
 import { getInfo } from '@/info';
 import hiroApi from '@/apis/hiro';
 import dataApi from '@/apis/server/data';
-import { isFldStr, randomString } from '@/utils';
+import { isFldStr, randomString, getScEvtId } from '@/utils';
 
 export const syncEvt = onTaskDispatched(
   {
@@ -30,6 +30,7 @@ export const syncEvt = onTaskDispatched(
     }
 
     const info = getInfo();
+    const scEvtId = getScEvtId(evtId);
 
     let data;
     try {
@@ -38,7 +39,7 @@ export const syncEvt = onTaskDispatched(
         info.marketsContract,
         'get-b-and-ocs',
         info.stxAddr,
-        [Cl.uint(evtId), Cl.list([Cl.uint(0), Cl.uint(1)])],
+        [Cl.uint(scEvtId), Cl.list([Cl.uint(0), Cl.uint(1)])],
       );
     } catch (error) {
       logger.error(`(${logKey}) hiroApi.callReadOnly error: ${error}`);
@@ -59,8 +60,8 @@ const parseData = (id, data) => {
   return {
     id,
     outcomes: data.value.ocs.value.map(ocv => {
-      const shareAmout = Number(ocv.value.value['share-amout'].value);
-      return { shareAmout };
+      const shareAmount = Number(ocv.value.value['share-amount'].value);
+      return { shareAmount };
     }),
   };
 };
