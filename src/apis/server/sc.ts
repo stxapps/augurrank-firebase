@@ -2,11 +2,9 @@ import {
   makeContractCall, broadcastTransaction, PostConditionMode, Cl,
 } from '@stacks/transactions';
 
-import { info } from '@/info';
+import { getInfo } from '@/info';
 import stxAccApi from '@/apis/server/stxAcc';
 import { isFldStr, isNumber } from '@/utils';
-
-const SENDER_KEY = process.env.SC_SENDER_KEY;
 
 const prepend0x = (txId) => {
   if (!txId.startsWith('0x')) return '0x' + txId;
@@ -14,10 +12,11 @@ const prepend0x = (txId) => {
 };
 
 const setMarketsContract = async () => {
+  const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.tokenContract,
     functionName: 'set-markets-contract',
@@ -34,10 +33,11 @@ const setMarketsContract = async () => {
 };
 
 const setStoreContract = async () => {
+  const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.tokenContract,
     functionName: 'set-store-contract',
@@ -54,10 +54,11 @@ const setStoreContract = async () => {
 };
 
 const setTokenUri = async (uri) => {
+  const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.tokenContract,
     functionName: 'set-token-uri',
@@ -74,12 +75,13 @@ const setTokenUri = async (uri) => {
 };
 
 const mint = async (amount, recipient = null) => {
+  const info = getInfo();
   if (!isFldStr(recipient)) recipient = info.stxAddr;
 
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.tokenContract,
     functionName: 'mint',
@@ -109,10 +111,11 @@ const createEvent = async (evt) => {
     })),
   ];
 
+  const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.marketsContract,
     functionName: 'create-event',
@@ -129,10 +132,11 @@ const createEvent = async (evt) => {
 };
 
 const setEventBeta = async (evtId, beta) => {
+  const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.marketsContract,
     functionName: 'set-event-beta',
@@ -151,10 +155,11 @@ const setEventBeta = async (evtId, beta) => {
 const setEventStatus = async (evtId, status, winOcId = null) => {
   const clWinOcId = isNumber(winOcId) ? Cl.uint(winOcId) : Cl.none();
 
+  const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.marketsContract,
     functionName: 'set-event-status',
@@ -179,10 +184,11 @@ const refundFunds = async () => {
 };
 
 const enroll = async (stxAddr) => {
+  const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.enrollContract,
     functionName: 'enroll',

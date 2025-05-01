@@ -1,7 +1,7 @@
 import { PostConditionMode, Cl, Pc } from '@stacks/transactions/dist/esm';
 
 import { AppDispatch, AppGetState } from '@/store';
-import { info } from '@/info';
+import { getInfo } from '@/info';
 import idxApi from '@/apis';
 import walletApi from '@/apis/wallet';
 import hiroApi from '@/apis/hiro';
@@ -92,7 +92,7 @@ export const trade = () => async (
     }
   }
 
-  const now = Date.now();
+  const info = getInfo(), now = Date.now();
   const id = `${stxAddr}-${now}${randomString(7)}`;
   const [contract, createDate, updateDate] = [info.marketsContract, now, now];
 
@@ -263,7 +263,7 @@ const refreshTxs = (doForce = false) => async (
 };
 
 const retryPutErrorTxs = async (
-  stxAddr, txs, dispatch: AppDispatch, getState: AppGetState
+  stxAddr, txs, dispatch: AppDispatch, getState: AppGetState,
 ) => {
   for (const tx of txs) {
     const newTx = { ...tx, pTxSts: SCS };
@@ -281,7 +281,7 @@ const retryPutErrorTxs = async (
 };
 
 const refreshUnconfirmedTxs = async (
-  stxAddr, txs, dispatch: AppDispatch, getState: AppGetState
+  stxAddr, txs, dispatch: AppDispatch, getState: AppGetState,
 ) => {
   let doNoti = false;
   for (const tx of txs) {

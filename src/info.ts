@@ -1,6 +1,6 @@
 import { STACKS_MAINNET, STACKS_TESTNET } from '@stacks/network';
 
-const getInfo = () => {
+export const getInfo = () => {
   const network = process.env.NEXT_PUBLIC_STACKS_NETWORK;
   if (network === 'mainnet') {
     return {
@@ -27,5 +27,3 @@ const getInfo = () => {
 
   throw new Error(`Invalid Stacks network: ${network}`);
 };
-
-export const info = getInfo();
