@@ -74,15 +74,15 @@ export const areAllString = (...vals) => {
 export const throttle = (func, limit) => {
   let lastFunc;
   let lastRan;
-  return function () {
-    const context = this;
-    const args = arguments;
+  return function () { // eslint-disable-line
+    const context = this; // eslint-disable-line
+    const args = arguments; // eslint-disable-line
     if (!lastRan) {
       func.apply(context, args);
       lastRan = Date.now();
     } else {
       clearTimeout(lastFunc);
-      lastFunc = setTimeout(function () {
+      lastFunc = setTimeout(function () { // eslint-disable-line
         if ((Date.now() - lastRan) >= limit) {
           func.apply(context, args);
           lastRan = Date.now();

@@ -364,7 +364,7 @@ const updateEvtSyncEvt = async (logKey, evt) => {
     }
 
     const syncSs = await t.get(syncRef);
-    if (!syncSs.exists) throw new Error(`Sync does not exist: INDEX`);
+    if (!syncSs.exists) throw new Error('Sync does not exist: INDEX');
 
     const newSync = docToSync(INDEX, syncSs.data());
     newSync.evts[newEvt.id] = newEvt;
@@ -397,11 +397,11 @@ const deleteSyncEvt = async (logKey, evtId) => {
 };
 
 const getEventBySlug = async (logKey, slug) => {
-
+  console.log(logKey, slug);
 };
 
 const getEventById = async (logKey, contract, id) => {
-
+  console.log(logKey, contract, id);
 };
 
 const uploadFile = async (src, bucket, options) => {

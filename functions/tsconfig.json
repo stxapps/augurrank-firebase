@@ -3,12 +3,12 @@
     "module": "NodeNext",
     "esModuleInterop": true,
     "moduleResolution": "nodenext",
-    "noImplicitReturns": false,
-    "noUnusedLocals": true,
     "outDir": "lib",
     "sourceMap": true,
-    "strict": false,
     "target": "es2017",
+    "strict": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
@@ -17,8 +17,5 @@
     "typeRoots": ["./node_modules/@types"],
     "types": []
   },
-  "compileOnSave": true,
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

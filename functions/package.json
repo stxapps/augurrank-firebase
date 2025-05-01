@@ -3,10 +3,10 @@
   "scripts": {
     "dup": "bash bin/dup-src.sh",
     "lint": "eslint .",
-    "build": "tsc",
-    "build:watch": "tsc --watch",
-    "serve": "npm run build && firebase emulators:start --only functions",
-    "shell": "npm run build && firebase functions:shell",
+    "build": "tsc && tsc-alias",
+    "build:watch": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
+    "serve": "npm run build && firebase emulators:start --only functions --project demo-augurrank",
+    "shell": "npm run build && firebase functions:shell --project demo-augurrank",
     "start": "npm run shell",
     "deploy-test": "firebase deploy --only functions --project augurrank-test",
     "deploy-prod": "firebase deploy --only functions --project augurrank-prod",
@@ -26,11 +26,13 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.12.0",
+    "concurrently": "^9.1.2",
     "eslint": "^8.9.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.25.4",
     "firebase-functions-test": "^3.1.0",
-    "typescript": "^4.9.0"
+    "tsc-alias": "^1.8.15",
+    "typescript": "^5"
   },
   "private": true
 }

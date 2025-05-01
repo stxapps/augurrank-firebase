@@ -2,7 +2,7 @@ import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import { logger } from 'firebase-functions/v2';
 import { Cl } from '@stacks/transactions';
 
-import { info } from '@/info';
+import { getInfo } from '@/info';
 import hiroApi from '@/apis/hiro';
 import dataApi from '@/apis/server/data';
 import { isFldStr, randomString } from '@/utils';
@@ -28,6 +28,8 @@ export const syncEvt = onTaskDispatched(
       logger.error(`(${logKey}) Invalid evtId, just end`);
       return;
     }
+
+    const info = getInfo();
 
     let data;
     try {

@@ -1,7 +1,7 @@
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { FlatCompat } from '@eslint/eslintrc';
-import js from '@eslint/js';
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
+import js from "@eslint/js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -19,39 +19,42 @@ const eslintConfig = [
       node: true,
     },
     extends: [
-      'eslint:recommended',
-      'plugin:import/errors',
-      'plugin:import/warnings',
-      'plugin:import/typescript',
-      'google',
-      'plugin:@typescript-eslint/recommended',
+      "eslint:recommended",
+      "plugin:import/errors",
+      "plugin:import/warnings",
+      "plugin:import/typescript",
+      "google",
+      "plugin:@typescript-eslint/recommended",
     ],
-    parser: '@typescript-eslint/parser',
+    parser: "@typescript-eslint/parser",
     parserOptions: {
-      project: ['tsconfig.json', 'tsconfig.dev.json'],
-      sourceType: 'module',
+      project: ["tsconfig.json"],
+      sourceType: "module",
     },
+    ignorePatterns: [
+      "/lib/**/*", // Ignore built files.
+      "/generated/**/*", // Ignore generated files.
+      "eslint.config.mjs",
+    ],
     plugins: [
-      '@typescript-eslint',
-      'import',
+      "@typescript-eslint",
+      "import",
     ],
   }),
   {
-    files: ['**/*.js', '**/*.ts'],
-    ignores: [
-      '/lib/**/*', // Ignore built files.
-      '/generated/**/*', // Ignore generated files.
-    ],
+    files: ["**/*.js", "**/*.ts"],
     rules: {
-      'quotes': ['error', 'single'],
-      'import/no-unresolved': 0,
-      'indent': ['error', 2],
-      'max-len': 0,
-      '@typescript-eslint/no-explicit-any': 0,
-      'object-curly-spacing': 0,
-      'one-var': 0,
-      'no-prototype-builtins': 0,
-      'arrow-parens': 0,
+      "quotes": ["error", "single"],
+      "indent": ["error", 2],
+      "import/no-unresolved": 0,
+      "max-len": 0,
+      "@typescript-eslint/no-explicit-any": 0,
+      "object-curly-spacing": 0,
+      "one-var": 0,
+      "no-prototype-builtins": 0,
+      "arrow-parens": 0,
+      "no-invalid-this": 0,
+      "@typescript-eslint/no-this-alias": 0,
     },
   },
 ];
