@@ -3,7 +3,7 @@ import { logger } from 'firebase-functions/v2';
 import { Cl } from '@stacks/transactions';
 
 import { getInfo } from '@/info';
-import hiroApi from '@/apis/hiro';
+import hrAmApi from '@/apis/server/hiroAdmin';
 import dataApi from '@/apis/server/data';
 import { isFldStr, randomString, getScEvtId } from '@/utils';
 
@@ -34,7 +34,7 @@ export const syncEvt = onTaskDispatched(
 
     let data;
     try {
-      data = await hiroApi.callReadOnly(
+      data = await hrAmApi.callReadOnly(
         info.stxAddr,
         info.marketsContract,
         'get-b-and-ocs',

@@ -1,7 +1,8 @@
 import { Cl } from '@stacks/transactions';
+import { GoogleAuth } from 'google-auth-library';
 
 import { getInfo } from '@/info';
-import hiroApi from '@/apis/hiro';
+import hrAmApi from '@/apis/server/hiroAdmin';
 import dataApi from '@/apis/server/data';
 import { randomString, getScEvtId } from '@/utils';
 
@@ -16,7 +17,7 @@ const syncEvt = async () => {
 
   let data;
   try {
-    data = await hiroApi.callReadOnly(
+    data = await hrAmApi.callReadOnly(
       info.stxAddr,
       info.marketsContract,
       'get-b-and-ocs',
@@ -45,4 +46,20 @@ const parseData = (id, data) => {
     }),
   };
 };
-syncEvt();
+//syncEvt();
+
+async function getFunctionUrl(name, location = "us-central1") {
+  const auth = new GoogleAuth({
+    scopes: "https://www.googleapis.com/auth/cloud-platform",
+  });
+
+  const projectId = await auth.getProjectId();
+  const url = "https://cloudfunctions.googleapis.com/v2beta/" +
+    `projects/${projectId}/locations/${location}/functions/${name}`;
+
+  const client = await auth.getClient();
+  const res: any = await client.request({ url });
+  const uri = res.data?.serviceConfig?.uri;
+  console.log('uri', uri);
+}
+//getFunctionUrl('syncEvt');

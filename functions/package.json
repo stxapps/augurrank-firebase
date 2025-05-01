@@ -8,7 +8,7 @@
     "serve": "npm run build && firebase emulators:start --only functions --project demo-augurrank",
     "shell": "npm run build && firebase functions:shell --project demo-augurrank",
     "start": "npm run shell",
-    "play-test": "npx tsx --inspect-brk --env-file=.env.local src/play.ts",
+    "play-test": "npx tsx --env-file=.env.local src/play.ts",
     "deploy-test": "firebase deploy --only functions --project augurrank-test",
     "deploy-prod": "firebase deploy --only functions --project augurrank-prod",
     "logs": "firebase functions:log"

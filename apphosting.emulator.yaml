@@ -5,5 +5,11 @@ env:
   - variable: NEXT_PUBLIC_STACKS_NETWORK
     value: "testnet"
 
+  - variable: FUNCTION_SYNC_EVT_NAME
+    value: ""
+
+  - variable: FUNCTION_SYNC_EVT_URI
+    value: ""
+
   - variable: SC_SENDER_KEY
     secret: SC_SENDER_KEY
