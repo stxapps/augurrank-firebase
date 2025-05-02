@@ -4,16 +4,40 @@ import { getFunctions } from 'firebase-admin/functions';
 
 import { isNumber, isFldStr } from '@/utils';
 
-if (isFldStr(process.env.FIRESTORE_EMULATOR_HOST)) {
-  if (getApps().length === 0) initializeApp();
-} else {
-  if (getApps().length === 0) {
-    initializeApp({ credential: applicationDefault() });
-  }
-}
+let fstoreAdmin, funcsAdmin;
 
-export const fstoreAdmin = getFirestore();
-export const funcsAdmin = getFunctions();
+const init = () => {
+  let fbase;
+
+  const apps = getApps();
+  if (apps.length === 0) {
+    if (isFldStr(process.env.FIRESTORE_EMULATOR_HOST)) {
+      fbase = initializeApp();
+    } else {
+      fbase = initializeApp({ credential: applicationDefault() });
+    }
+  } else {
+    fbase = apps[0];
+  }
+
+  return fbase;
+};
+
+export const getFstoreAdmin = () => {
+  if (fstoreAdmin) return fstoreAdmin;
+
+  init();
+  fstoreAdmin = getFirestore();
+  return fstoreAdmin;
+};
+
+export const getFuncsAdmin = () => {
+  if (funcsAdmin) return funcsAdmin;
+
+  init();
+  funcsAdmin = getFunctions();
+  return funcsAdmin;
+};
 
 export const evtToDoc = (evt) => {
   const doc = {

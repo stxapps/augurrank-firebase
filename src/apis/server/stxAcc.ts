@@ -1,10 +1,11 @@
 import { fetchNonce } from '@stacks/transactions';
 
-import { fstoreAdmin as db, stxAccToDoc } from '@/apis/server/fbaseAdmin';
+import { getFstoreAdmin, stxAccToDoc } from '@/apis/server/fbaseAdmin';
 import { STX_ACCS } from '@/types/const';
 import { docToStxAcc } from '@/utils/fbase';
 
 const reserveNonce = async (stxAddr, network) => {
+  const db = getFstoreAdmin();
   const ref = db.collection(STX_ACCS).doc(stxAddr);
 
   const value = await db.runTransaction(async (t) => {

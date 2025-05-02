@@ -2,7 +2,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 
 import {
-  fstoreAdmin as db, evtToDoc, syncToDoc, userToDoc, shareToDoc, txToDoc,
+  getFstoreAdmin, evtToDoc, syncToDoc, userToDoc, shareToDoc, txToDoc,
 } from '@/apis/server/fbaseAdmin';
 import {
   LETTER_JOINS, USERS, SHARES, TXS, EVENTS, SYNCS, ACTIVE, INDEX, N_DOCS, SCS,
@@ -14,6 +14,7 @@ import {
 import { docToEvt, docToSync, docToUser, docToShare, docToTx } from '@/utils/fbase';
 
 const addLetterJoin = async (logKey, email) => {
+  const db = getFstoreAdmin();
   const ref = db.collection(LETTER_JOINS).doc(email);
 
   const snapshot = await ref.get();
@@ -31,6 +32,7 @@ const addLetterJoin = async (logKey, email) => {
 };
 
 const updateProfile = async (logKey, stxAddr, profile) => {
+  const db = getFstoreAdmin();
   const ref = db.collection(USERS).doc(stxAddr);
 
   await db.runTransaction(async (t) => {
@@ -122,6 +124,7 @@ const updateProfile = async (logKey, stxAddr, profile) => {
 };
 
 const updateTx = async (logKey, stxAddr, tx) => {
+  const db = getFstoreAdmin();
   const ref = db.collection(USERS).doc(stxAddr).collection(TXS).doc(tx.id);
 
   await db.runTransaction(async (t) => {
@@ -143,6 +146,7 @@ const updateTx = async (logKey, stxAddr, tx) => {
 };
 
 const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
+  const db = getFstoreAdmin();
   const rRef = db.collection(USERS).doc(stxAddr);
 
   const userRef = isObject(user) ? rRef : null;
@@ -213,6 +217,7 @@ const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
 };
 
 const getUser = async (stxAddr) => {
+  const db = getFstoreAdmin();
   const ref = db.collection(USERS).doc(stxAddr);
   const snapshot = await ref.get();
   if (snapshot.exists) {
@@ -223,6 +228,7 @@ const getUser = async (stxAddr) => {
 };
 
 const getShares = async (stxAddr) => {
+  const db = getFstoreAdmin();
   const clt = db.collection(USERS).doc(stxAddr).collection(SHARES);
   const q = clt.where('amount', '>', 0);
 
@@ -236,6 +242,7 @@ const getShares = async (stxAddr) => {
 };
 
 const getTx = async (stxAddr, id) => {
+  const db = getFstoreAdmin();
   const ref = db.collection(USERS).doc(stxAddr).collection(TXS).doc(id);
   const snapshot = await ref.get();
   if (snapshot.exists) {
@@ -246,6 +253,7 @@ const getTx = async (stxAddr, id) => {
 };
 
 const getTxs = async (stxAddr, ids) => {
+  const db = getFstoreAdmin();
   const refs = ids.map(id => {
     return db.collection(USERS).doc(stxAddr).collection(TXS).doc(id);
   });
@@ -268,6 +276,7 @@ const getTxs = async (stxAddr, ids) => {
 };
 
 const queryTxs = async (stxAddr: string, quryCrsr: string | null) => {
+  const db = getFstoreAdmin();
   const clt = db.collection(USERS).doc(stxAddr).collection(TXS);
   const by = clt.orderBy('createDate', 'desc');
 
@@ -298,6 +307,7 @@ const queryTxs = async (stxAddr: string, quryCrsr: string | null) => {
 };
 
 const updateEvent = async (logKey, evt, doAdd) => {
+  const db = getFstoreAdmin();
   const ref = db.collection(EVENTS).doc(evt.id);
 
   await db.runTransaction(async (t) => {
@@ -320,6 +330,7 @@ const updateEvent = async (logKey, evt, doAdd) => {
 };
 
 const updateSyncEvt = async (logKey, evtId) => {
+  const db = getFstoreAdmin();
   const evtRef = db.collection(EVENTS).doc(evtId);
   const syncRef = db.collection(SYNCS).doc(INDEX);
 
@@ -348,6 +359,7 @@ const updateSyncEvt = async (logKey, evtId) => {
 };
 
 const updateEvtSyncEvt = async (logKey, evt) => {
+  const db = getFstoreAdmin();
   const evtRef = db.collection(EVENTS).doc(evt.id);
   const syncRef = db.collection(SYNCS).doc(INDEX);
 
@@ -376,6 +388,7 @@ const updateEvtSyncEvt = async (logKey, evt) => {
 };
 
 const deleteSyncEvt = async (logKey, evtId) => {
+  const db = getFstoreAdmin();
   const ref = db.collection(SYNCS).doc(INDEX);
 
   await db.runTransaction(async (t) => {

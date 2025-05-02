@@ -2,14 +2,14 @@ import {
   collection, query, orderBy, startAt, limit, getDocs, doc, onSnapshot,
 } from 'firebase/firestore';
 
-import { fstore as db } from '@/apis/fbase';
+import { getFstore } from '@/apis/fbase';
 import { LETTERS_JOINS_PATH, EVENTS, SYNCS, INDEX, N_DOCS } from '@/types/const';
 import { isFldStr, getResErrMsg } from '@/utils';
 import { docToEvt, docToSync } from '@/utils/fbase';
 import vars from '@/vars';
 
 const fetchEvents = async (quryCrsr: string) => {
-  const clt = collection(db, EVENTS);
+  const clt = collection(getFstore(), EVENTS);
   const by = orderBy('createDate', 'desc');
   const lmt = limit(N_DOCS + 1);
 
@@ -50,7 +50,7 @@ const fetchEvent = async (slug: string) => {
 
 const listenSync = async (onSuccess, onError) => {
   const removeListener = onSnapshot(
-    doc(db, SYNCS, INDEX),
+    doc(getFstore(), SYNCS, INDEX),
     (snapshot) => {
       if (!snapshot.exists()) return;
 
