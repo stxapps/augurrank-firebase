@@ -1,6 +1,18 @@
 import { serializeCV, deserializeCV } from '@stacks/transactions';
+import { createApiKeyMiddleware, createFetchFn } from "@stacks/common";
 
 import { getResErrMsg } from '@/utils';
+
+let fetchFn;
+const getFetchFn = () => {
+  if (fetchFn) return fetchFn;
+
+  const apiMiddleware = createApiKeyMiddleware({
+    apiKey: process.env.HIRO_API_KEY,
+  });
+  fetchFn = createFetchFn(apiMiddleware);
+  return fetchFn
+};
 
 const callReadOnly = async (cntrcAddr, cntrcName, funcName, sdrAddr, args) => {
   let url = 'https://api.hiro.so/v2/contracts/call-read/';
@@ -15,6 +27,7 @@ const callReadOnly = async (cntrcAddr, cntrcName, funcName, sdrAddr, args) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'x-api-key': process.env.HIRO_API_KEY,
     },
     body: JSON.stringify({
       sender: sdrAddr, arguments: args.map(arg => serializeCV(arg)),
@@ -33,6 +46,6 @@ const callReadOnly = async (cntrcAddr, cntrcName, funcName, sdrAddr, args) => {
   return deserializeCV(obj.result);
 };
 
-const hiroAdmin = { callReadOnly };
+const hiroAdmin = { getFetchFn, callReadOnly };
 
 export default hiroAdmin;

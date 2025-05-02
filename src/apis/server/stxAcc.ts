@@ -1,5 +1,6 @@
 import { fetchNonce } from '@stacks/transactions';
 
+import hrAmApi from '@/apis/server/hiroAdmin';
 import { getFstoreAdmin, stxAccToDoc } from '@/apis/server/fbaseAdmin';
 import { STX_ACCS } from '@/types/const';
 import { docToStxAcc } from '@/utils/fbase';
@@ -22,7 +23,9 @@ const reserveNonce = async (stxAddr, network) => {
       newStxAcc = { stxAddr, createDate: now, updateDate: now };
     }
 
-    const fNonce = await fetchNonce({ address: stxAddr, network });
+    const fNonce = await fetchNonce({
+      address: stxAddr, network, client: { fetch: hrAmApi.getFetchFn() },
+    });
     if (fNonce > cNonce) cNonce = fNonce;
 
     newStxAcc.nonce = cNonce + BigInt(1);

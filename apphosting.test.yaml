@@ -31,3 +31,6 @@ env:
 
   - variable: SC_SENDER_KEY
     secret: SC_SENDER_KEY
+
+  - variable: HIRO_API_KEY
+    secret: HIRO_API_KEY

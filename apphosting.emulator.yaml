@@ -6,10 +6,13 @@ env:
     value: "testnet"
 
   - variable: FUNCTION_SYNC_EVT_NAME
-    value: ""
+    value: "syncEvt"
 
   - variable: FUNCTION_SYNC_EVT_URI
     value: ""
 
   - variable: SC_SENDER_KEY
     secret: SC_SENDER_KEY
+
+  - variable: HIRO_API_KEY
+    secret: HIRO_API_KEY

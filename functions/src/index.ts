@@ -17,6 +17,7 @@ export const syncEvt = onTaskDispatched(
       maxConcurrentDispatches: 1,
       maxDispatchesPerSecond: 1,
     },
+    secrets: ['HIRO_API_KEY'],
   },
   async (req) => {
     const logKey = randomString(12);

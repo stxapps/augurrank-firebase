@@ -3,6 +3,7 @@ import {
 } from '@stacks/transactions';
 
 import { getInfo } from '@/info';
+import hrAmApi from '@/apis/server/hiroAdmin';
 import stxAccApi from '@/apis/server/stxAcc';
 import { isFldStr, isNumber } from '@/utils';
 
@@ -198,6 +199,7 @@ const enroll = async (stxAddr) => {
     fee: 3261,
     nonce,
     validateWithAbi: true,
+    client: { fetch: hrAmApi.getFetchFn() },
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
