@@ -1,9 +1,10 @@
 import { STACKS_MAINNET, STACKS_TESTNET } from '@stacks/network';
 
 export const getInfo = () => {
-  const network = process.env.NEXT_PUBLIC_STACKS_NETWORK;
-  if (network === 'mainnet') {
+  const networkName = process.env.NEXT_PUBLIC_STACKS_NETWORK;
+  if (networkName === 'mainnet') {
     return {
+      networkName,
       network: STACKS_MAINNET,
       stxAddr: 'SP1ARJX5XDEYWNDX8JEKGTZNZ0YJHQAYDWVNBRXGM',
       tokenContract: 'augur-token-v1',
@@ -14,8 +15,9 @@ export const getInfo = () => {
       bucket: 'augurrank-prod.firebasestorage.app',
     };
   }
-  if (network === 'testnet') {
+  if (networkName === 'testnet') {
     return {
+      networkName,
       network: STACKS_TESTNET,
       stxAddr: 'ST1ARJX5XDEYWNDX8JEKGTZNZ0YJHQAYDWRSAB44M',
       tokenContract: 'augur-token-t1',
@@ -27,5 +29,5 @@ export const getInfo = () => {
     };
   }
 
-  throw new Error(`Invalid Stacks network: ${network}`);
+  throw new Error(`Invalid Stacks network: ${networkName}`);
 };

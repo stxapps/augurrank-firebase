@@ -16,8 +16,8 @@ const getFetchFn = () => {
 
 const callReadOnly = async (cntrcAddr, cntrcName, funcName, sdrAddr, args) => {
   let url = 'https://api.hiro.so/v2/contracts/call-read/';
-  const network = process.env.NEXT_PUBLIC_STACKS_NETWORK;
-  if (network === 'testnet') {
+  const networkName = process.env.NEXT_PUBLIC_STACKS_NETWORK;
+  if (networkName === 'testnet') {
     url = 'https://api.testnet.hiro.so/v2/contracts/call-read/';
   }
 

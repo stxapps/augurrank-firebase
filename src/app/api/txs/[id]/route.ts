@@ -68,12 +68,12 @@ export async function PATCH(
     }
 
     const user = { balance: getInfo().enrollBonus, updateDate: tx.updateDate };
-    const { isToScs, udtdUser, udtdTx } = await dataApi.updateUsrShrTx(
+    const { isToScs, rctdUser, rctdTx } = await dataApi.updateUsrShrTx(
       logKey, stxAddr, user, null, tx
     );
-    data = { tx: udtdTx };
+    data = { tx: rctdTx };
     if (isToScs) {
-      data = { balance: udtdUser.balance, tx: udtdTx };
+      data = { balance: rctdUser.balance, tx: rctdTx };
     }
   } else if ([TX_BUY, TX_SELL].includes(tx.type)) {
     const { evtId, ocId, amount, cost, updateDate } = tx;
@@ -91,12 +91,12 @@ export async function PATCH(
       }
     }
 
-    const { isToScs, udtdUser, udtdShare, utdtTx } = await dataApi.updateUsrShrTx(
+    const { isToScs, rctdUser, rctdShare, rctdTx } = await dataApi.updateUsrShrTx(
       logKey, stxAddr, user, share, tx,
     );
-    data = { tx: utdtTx };
+    data = { tx: rctdTx };
     if (isToScs) {
-      data = { balance: udtdUser.balance, share: udtdShare, tx: utdtTx };
+      data = { balance: rctdUser.balance, share: rctdShare, tx: rctdTx };
       await taskApi.addSyncEvtTask(evtId);
     }
   } else {
@@ -106,7 +106,7 @@ export async function PATCH(
   }
 
   console.log(`(${logKey}) /api/txs/[id] finished`);
-  return new NextResponse(data, {
+  return NextResponse.json(data, {
     status: 200, headers: { 'Cache-Control': 'private' },
   });
 }
