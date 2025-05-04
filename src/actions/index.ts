@@ -11,7 +11,7 @@ import {
 } from '@/types/const';
 import {
   isObject, isNumber, throttle, getWindowInsets, getWalletErrorText, getSignInStatus,
-  deriveTxInfo, mergeTxs,
+  deriveTxInfo, mergeTxs, isTxConfirmed,
 } from '@/utils';
 import vars from '@/vars';
 
@@ -225,7 +225,7 @@ export const applyEnroll = (doForce = false) => async (
     return;
   }
 
-  dispatch(updateMe({ tx: data, enrlFthSts: 1 }));
+  dispatch(updateMe({ ...data, enrlFthSts: 1 }));
   setTimeout(() => {
     dispatch(refreshEnroll());
   }, 1000);
@@ -245,11 +245,11 @@ const refreshEnroll = (doForce = false) => async (
 
   const enrlId = `${stxAddr}${ENRL_ID_SUFFIX}`;
   const enrlTx = getState().me.txs[enrlId];
-  if (!isObject(enrlTx) || enrlTx.cTxSts !== PDG) return;
+  if (!isObject(enrlTx) || isTxConfirmed(enrlTx)) return;
 
   vars.refreshEnroll.timeId = PDG;
 
-  let txInfo, isError;
+  let txInfo, data, isError;
   try {
     txInfo = await hiroApi.fetchTxInfo(enrlTx.cTxId);
   } catch (error) {
@@ -281,9 +281,9 @@ const refreshEnroll = (doForce = false) => async (
     return;
   }
 
-  const newTx = mergeTxs(enrlTx, { cTxSts: txInfo.status });
+  const newTx = mergeTxs(enrlTx, { cTxSts: txInfo.status, updateDate: Date.now() });
   try {
-    await idxApi.patchTx(newTx);
+    data = await idxApi.patchTx(newTx);
   } catch (error) {
     console.log('refreshEnroll.patchTx error:', error);
     isError = true;
@@ -299,7 +299,7 @@ const refreshEnroll = (doForce = false) => async (
     return;
   }
 
-  dispatch(updateMe({ tx: newTx }));
+  dispatch(updateMe({ ...data }));
   dispatch(updateNotiPopup({
     title: '₳1,000 Added!',
     body: 'We\'ve just dropped ₳1,000 into your account. Have fun!',

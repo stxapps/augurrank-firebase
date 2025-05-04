@@ -43,7 +43,8 @@ const callReadOnly = async (cntrcAddr, cntrcName, funcName, sdrAddr, args) => {
     throw new Error(obj.cause);
   }
 
-  return deserializeCV(obj.result);
+  const data = deserializeCV(obj.result);
+  return data;
 };
 
 const hiroAdmin = { getFetchFn, callReadOnly };

@@ -103,6 +103,9 @@ const patchTx = async (tx) => {
     const msg = await getResErrMsg(res);
     throw new Error(msg);
   }
+
+  const obj = await res.json();
+  return obj;
 };
 
 const index = {

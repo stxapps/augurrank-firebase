@@ -16,7 +16,7 @@ import {
 } from '@/types/const';
 import {
   isObject, isNumber, isFldStr, randomString, getSignInStatus, getWalletErrorText,
-  getShare, getTxState, deriveTxInfo, getTxAmount, getTxCost,
+  getShare, getTxState, deriveTxInfo, getTxAmount, getTxCost, mergeTxs,
 } from '@/utils';
 import { getShareCosts, getBuyAmount, getSellCost } from '@/utils/lmsr';
 import vars from '@/vars';
@@ -92,10 +92,7 @@ export const trade = () => async (
     }
   }
 
-  const info = getInfo(), now = Date.now();
-  const id = `${stxAddr}-${now}${randomString(7)}`;
-  const [contract, createDate, updateDate] = [info.marketsContract, now, now];
-
+  const info = getInfo();
   const scldValue = prsdValue * SCALE;
 
   let functionName, functionArgs, postConditions;
@@ -150,6 +147,9 @@ export const trade = () => async (
     postConditions = [condition];
   }
 
+  const now = Date.now();
+  const id = `${stxAddr}-${now}${randomString(7)}`;
+  const [contract, createDate, updateDate] = [info.marketsContract, now, now];
   const tx = { id, type, contract, createDate, updateDate };
   dispatch(updateTradeEditor({ msg: '', doLoad: true }));
   dispatch(updateMe({ tx }));
@@ -189,7 +189,7 @@ export const trade = () => async (
     return;
   }
 
-  const newTx: any = { ...tx, cTxId: data.txId };
+  const newTx = mergeTxs(tx, { cTxId: data.txId, updateDate: Date.now() });
   dispatch(updateTradeEditor({ evtId: null }));
   dispatch(updateMe({ tx: newTx }));
   dispatch(updateNotiPopup({
@@ -199,7 +199,7 @@ export const trade = () => async (
 
   newTx.pTxSts = SCS;
   try {
-    await idxApi.patchTx(newTx);
+    data = await idxApi.patchTx(newTx);
   } catch (error) {
     console.log('trade.patchTx error:', error);
     isError = true;
@@ -217,7 +217,7 @@ export const trade = () => async (
     return;
   }
 
-  dispatch(updateMe({ tx: newTx }));
+  dispatch(updateMe({ ...data }));
 
   setTimeout(() => {
     dispatch(refreshTxs());
@@ -266,7 +266,7 @@ const retryPutErrorTxs = async (
   stxAddr, txs, dispatch: AppDispatch, getState: AppGetState,
 ) => {
   for (const tx of txs) {
-    const newTx = { ...tx, pTxSts: SCS };
+    const newTx = mergeTxs(tx, { pTxSts: SCS, updateDate: Date.now() });
     try {
       await idxApi.patchTx(newTx);
     } catch (error) {
@@ -285,7 +285,7 @@ const refreshUnconfirmedTxs = async (
 ) => {
   let doNoti = false;
   for (const tx of txs) {
-    let txInfo;
+    let txInfo, data;
     try {
       txInfo = await hiroApi.fetchTxInfo(tx.cTxId);
     } catch (error) {
@@ -305,15 +305,14 @@ const refreshUnconfirmedTxs = async (
     txInfo = deriveTxInfo(txInfo);
     if (txInfo.status === PDG) continue;
 
-    const newTx = { ...tx };
-    newTx.cTxSts = txInfo.status;
+    const newTx = mergeTxs(tx, { cTxSts: txInfo.status, updateDate: Date.now() })
     if (newTx.cTxSts === SCS) {
       newTx.amount = getTxAmount(txInfo);
       newTx.cost = getTxCost(txInfo);
     }
 
     try {
-      await idxApi.patchTx(newTx);
+      data = await idxApi.patchTx(newTx);
     } catch (error) {
       console.log('refreshUnconfirmedTxs.patchTx error:', error);
       continue; // Do it later or by server.
@@ -321,7 +320,7 @@ const refreshUnconfirmedTxs = async (
 
     if (getState().me.stxAddr !== stxAddr) return;
 
-    dispatch(updateMe({ tx: newTx }));
+    dispatch(updateMe({ ...data }));
     doNoti = true;
   }
   if (doNoti) {

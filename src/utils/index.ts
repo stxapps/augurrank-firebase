@@ -347,6 +347,7 @@ export const validateTx = (stxAddr, tx) => {
 
   if (!isNumber(tx.createDate)) return false;
   if (!isNumber(tx.updateDate)) return false;
+  if (tx.createDate > tx.updateDate) return false;
 
   if ('evtId' in tx && !isFldStr(tx.evtId)) return false;
   if ('ocId' in tx && !isNumber(tx.ocId)) return false;
@@ -517,6 +518,11 @@ export const getTxState = (tx) => {
   if (tx.pTxSts === SCS) return TX_PUT_OK;
   if ('cTxId' in tx) return TX_IN_MEMPOOL;
   return TX_INIT;
+};
+
+export const isTxConfirmed = (tx) => {
+  const state = getTxState(tx);
+  return [TX_CONFIRMED_OK, TX_CONFIRMED_ERROR].includes(state);
 };
 
 export const getScEvtId = (evtId) => {

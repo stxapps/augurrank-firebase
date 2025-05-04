@@ -123,28 +123,6 @@ const updateProfile = async (logKey, stxAddr, profile) => {
   });
 };
 
-const updateTx = async (logKey, stxAddr, tx) => {
-  const db = getFstoreAdmin();
-  const ref = db.collection(USERS).doc(stxAddr).collection(TXS).doc(tx.id);
-
-  await db.runTransaction(async (t) => {
-    let oldTx, newTx;
-    const now = Date.now();
-
-    const snapshot = await t.get(ref);
-    if (snapshot.exists) {
-      oldTx = docToTx(tx.id, snapshot.data());
-      newTx = mergeTxs(oldTx, { tx, updateDate: now });
-    } else {
-      newTx = { ...tx, createDate: now, updateDate: now };
-    }
-
-    const rctdTx = rectifyTx(oldTx, newTx);
-    t.set(ref, txToDoc(rctdTx));
-    console.log(`(${logKey}) Updated to Firestore`);
-  });
-};
-
 const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
   const db = getFstoreAdmin();
   const rRef = db.collection(USERS).doc(stxAddr);
@@ -153,21 +131,19 @@ const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
   const shareRef = isObject(share) ? rRef.collection(SHARES).doc(share.id) : null;
   const txRef = rRef.collection(TXS).doc(tx.id);
 
-  const { isToScs } = await db.runTransaction(async (t) => {
+  const res = await db.runTransaction(async (t) => {
     let oldUser, newUser, oldShare, newShare, oldTx, newTx;
-    const now = Date.now();
 
     if (isObject(userRef)) {
       const snapshot = await t.get(userRef);
       if (snapshot.exists) {
         oldUser = docToUser(snapshot.id, snapshot.data());
         newUser = {
-          ...oldUser, balance: oldUser.balance + user.balance, updateDate: now,
+          ...oldUser,
+          balance: oldUser.balance + user.balance, updateDate: user.updateDate,
         };
       } else {
-        newUser = {
-          stxAddr, balance: user.balance, createDate: now, updateDate: now,
-        };
+        newUser = { ...user, stxAddr, createDate: user.updateDate };
       }
     }
     if (isObject(shareRef)) {
@@ -178,28 +154,28 @@ const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
           ...oldShare,
           amount: oldShare.amount + share.amount,
           cost: oldShare.cost + share.cost,
-          updateDate: now,
+          updateDate: share.updateDate,
         };
       } else {
-        newShare = { ...share, createDate: now, updateDate: now };
+        newShare = { ...share, createDate: share.updateDate };
       }
     }
     const snapshot = await t.get(txRef);
     if (snapshot.exists) {
       oldTx = docToTx(snapshot.id, snapshot.data());
-      newTx = mergeTxs(oldTx, { ...tx, updateDate: now });
+      newTx = mergeTxs(oldTx, tx);
     } else {
-      newTx = { ...tx, createDate: now, updateDate: now };
+      newTx = tx;
     }
 
-    let isToScs = false;
+    let isToScs = false, rctdUser, rctdShare;
     if ((!isObject(oldTx) || oldTx.cTxSts !== SCS) && newTx.cTxSts === SCS) {
       if (isObject(userRef)) {
-        const rctdUser = rectifyUser(oldUser, newUser);
+        rctdUser = rectifyUser(oldUser, newUser);
         t.set(userRef, userToDoc(rctdUser));
       }
       if (isObject(shareRef)) {
-        const rctdShare = rectifyShare(oldShare, newShare);
+        rctdShare = rectifyShare(oldShare, newShare);
         t.set(shareRef, shareToDoc(rctdShare));
       }
 
@@ -210,10 +186,10 @@ const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
     t.set(txRef, txToDoc(rctdTx));
     console.log(`(${logKey}) Updated to Firestore`);
 
-    return { isToScs };
+    return { isToScs, rctdUser, rctdShare, rctdTx };
   });
 
-  return { isToScs };
+  return res;
 };
 
 const getUser = async (stxAddr) => {
@@ -422,8 +398,8 @@ const uploadFile = async (src, bucket, options) => {
 };
 
 const data = {
-  addLetterJoin, updateProfile, updateTx, updateUsrShrTx, getUser, getShares, getTx,
-  getTxs, queryTxs, updateEvent, updateSyncEvt, updateEvtSyncEvt, deleteSyncEvt,
+  addLetterJoin, updateProfile, updateUsrShrTx, getUser, getShares, getTx, getTxs,
+  queryTxs, updateEvent, updateSyncEvt, updateEvtSyncEvt, deleteSyncEvt,
   getEventBySlug, getEventById, uploadFile,
 };
 

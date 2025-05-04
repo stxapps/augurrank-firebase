@@ -31,17 +31,17 @@ const fetchEvents = async (quryCrsr: string) => {
     snapshots.push(ss);
   });
 
-  const nEvents = snapshots.slice(0, N_DOCS).map(ss => docToEvt(ss.id, ss.data()));
+  const newEvents = snapshots.slice(0, N_DOCS).map(ss => docToEvt(ss.id, ss.data()));
 
-  let nQuryCrsr = null;
+  let newQuryCrsr = null;
   if (snapshots.length >= N_DOCS + 1) {
     const ss = snapshots[N_DOCS];
     vars.fetchEvents.quryCrsr.id = ss.id;
     vars.fetchEvents.quryCrsr.snapshot = ss;
-    nQuryCrsr = vars.fetchEvents.quryCrsr.id;
+    newQuryCrsr = vars.fetchEvents.quryCrsr.id;
   }
 
-  return { events: nEvents, quryCrsr: nQuryCrsr };
+  return { events: newEvents, quryCrsr: newQuryCrsr };
 };
 
 const fetchEvent = async (slug: string) => {

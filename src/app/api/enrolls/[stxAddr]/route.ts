@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import authApi from '@/apis/server/auth';
 import dataApi from '@/apis/server/data';
 import scApi from '@/apis/server/sc';
-import { ALLOWED_ORIGINS, SCS, PDG, ENRL_ID_SUFFIX, TX_ENROLL } from '@/types/const';
+import { ALLOWED_ORIGINS, SCS, ENRL_ID_SUFFIX, TX_ENROLL } from '@/types/const';
 import {
   isObject, areAllString, getReferrer, randomString, removeTailingSlash,
 } from '@/utils';
@@ -45,22 +45,24 @@ export async function POST(
     return NextResponse.json({ error }, { status: 401 });
   }
 
-  const enrlId = `${stxAddr}${ENRL_ID_SUFFIX}`;
-  let enrlTx = await dataApi.getTx(stxAddr, enrlId);
+  const id = `${stxAddr}${ENRL_ID_SUFFIX}`;
+  let tx = await dataApi.getTx(stxAddr, id);
 
-  if (!isObject(enrlTx)) {
+  if (!isObject(tx)) {
     const res = await scApi.enroll(stxAddr);
     console.log(`(${logKey}) enroll with txId: ${res.txId}`);
 
-    enrlTx = {
-      id: enrlId, type: TX_ENROLL, contract: res.contract, cTxId: res.txId,
-      pTxSts: SCS, cTxSts: PDG,
+    const now = Date.now();
+    tx = {
+      id, type: TX_ENROLL, contract: res.contract, createDate: now, updateDate: now,
+      cTxId: res.txId, pTxSts: SCS,
     };
-    await dataApi.updateTx(logKey, stxAddr, enrlTx);
+    const { rctdTx } = await dataApi.updateUsrShrTx(logKey, stxAddr, null, null, tx);
+    tx = rctdTx;
   }
 
   console.log(`(${logKey}) /api/enrolls/[stxAddr] finished`);
-  return NextResponse.json(enrlTx, {
+  return NextResponse.json({ tx }, {
     status: 200, headers: { 'Cache-Control': 'private' },
   });
 }

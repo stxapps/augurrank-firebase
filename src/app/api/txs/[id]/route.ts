@@ -1,14 +1,16 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
+import { getInfo } from '@/info';
 import authApi from '@/apis/server/auth';
 import dataApi from '@/apis/server/data';
 import taskApi from '@/apis/server/task';
 import {
-  ALLOWED_ORIGINS, PDG, SCS, ENRL_ID_SUFFIX, TX_ENROLL, TX_BUY, TX_SELL,
+  ALLOWED_ORIGINS, SCS, ENRL_ID_SUFFIX, TX_ENROLL, TX_BUY, TX_SELL,
 } from '@/types/const';
 import {
   isObject, areAllString, getReferrer, randomString, removeTailingSlash, validateTx,
+  isTxConfirmed,
 } from '@/utils';
 
 export async function PATCH(
@@ -56,36 +58,45 @@ export async function PATCH(
 
   tx.id = id;
 
+  let data;
   if (tx.type === TX_ENROLL) {
-    const enrlId = `${stxAddr}${ENRL_ID_SUFFIX}`;
-    if (tx.id !== enrlId || tx.cTxSts === PDG) {
+    const id = `${stxAddr}${ENRL_ID_SUFFIX}`;
+    if (tx.id !== id || !isTxConfirmed(tx)) {
       const error = 'Invalid enroll tx';
       console.log(`(${logKey}) ${error}, return ERROR`);
       return NextResponse.json({ error }, { status: 400 });
     }
 
-    const user = { balance: 1000000000 };
-    await dataApi.updateUsrShrTx(logKey, stxAddr, user, null, tx);
+    const user = { balance: getInfo().enrollBonus, updateDate: tx.updateDate };
+    const { isToScs, udtdUser, udtdTx } = await dataApi.updateUsrShrTx(
+      logKey, stxAddr, user, null, tx
+    );
+    data = { tx: udtdTx };
+    if (isToScs) {
+      data = { balance: udtdUser.balance, tx: udtdTx };
+    }
   } else if ([TX_BUY, TX_SELL].includes(tx.type)) {
-    const { evtId, ocId, amount, cost } = tx;
+    const { evtId, ocId, amount, cost, updateDate } = tx;
     const shrId = `${stxAddr}-${evtId}-${ocId}`;
 
     let user = null, share = null;
     if (tx.cTxSts === SCS) {
-      user = { balance: cost };
+      user = { balance: cost, updateDate };
       if (tx.type === TX_BUY) user.balance *= -1;
 
-      share = { id: shrId, evtId, ocId, amount, cost };
+      share = { id: shrId, evtId, ocId, amount, cost, updateDate };
       if (tx.type === TX_SELL) {
         share.amount *= -1;
         share.cost *= -1;
       }
     }
 
-    const { isToScs } = await dataApi.updateUsrShrTx(
+    const { isToScs, udtdUser, udtdShare, utdtTx } = await dataApi.updateUsrShrTx(
       logKey, stxAddr, user, share, tx,
     );
-    if (isToScs) { // if buy or sell with SCS, submit a task
+    data = { tx: utdtTx };
+    if (isToScs) {
+      data = { balance: udtdUser.balance, share: udtdShare, tx: utdtTx };
       await taskApi.addSyncEvtTask(evtId);
     }
   } else {
@@ -95,5 +106,7 @@ export async function PATCH(
   }
 
   console.log(`(${logKey}) /api/txs/[id] finished`);
-  return new NextResponse(null, { status: 204 });
+  return new NextResponse(data, {
+    status: 200, headers: { 'Cache-Control': 'private' },
+  });
 }
