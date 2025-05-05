@@ -2,16 +2,14 @@ import { PostConditionMode, Cl, Pc } from '@stacks/transactions/dist/esm';
 
 import { AppDispatch, AppGetState } from '@/store';
 import { getInfo } from '@/info';
-import idxApi from '@/apis';
 import walletApi from '@/apis/wallet';
 import {
   chooseWallet, signStxTstStr, updateNotiPopup, updateErrorPopup, updateMe, refreshTxs,
 } from '@/actions';
 import { UPDATE_TRADE_EDITOR } from '@/types/actionTypes';
 import {
-  EVT_OPENED, TX_BUY, TX_SELL, SCS, ABT_BY_RES, ERROR, ERR_BALANCE_NOT_FOUND,
-  ERR_INVALID_ARGS, ERR_INVALID_AMT, ERR_COST_TOO_LOW, ERR_BALANCE_TOO_LOW,
-  ERR_SHARES_TOO_LOW, SCALE,
+  EVT_OPENED, TX_BUY, TX_SELL, SCS, ERROR, ERR_BALANCE_NOT_FOUND, ERR_INVALID_ARGS,
+  ERR_INVALID_AMT, ERR_COST_TOO_LOW, ERR_BALANCE_TOO_LOW, ERR_SHARES_TOO_LOW, SCALE,
 } from '@/types/const';
 import {
   isObject, isNumber, isFldStr, randomString, getSignInStatus, getWalletErrorText,
@@ -192,30 +190,11 @@ export const trade = () => async (
   dispatch(updateTradeEditor({ evtId: null }));
   dispatch(updateMe({ tx: newTx }));
   dispatch(updateNotiPopup({
+    type: SCS,
     title: 'Call the smart contract successfully!',
     body: 'Your transaction should be committed within 5 seconds.',
   }));
 
-  newTx.pTxSts = SCS;
-  try {
-    data = await idxApi.patchTx(newTx);
-  } catch (error) {
-    console.log('trade.patchTx error:', error);
-    isError = true;
-  }
-
-  if (getState().me.stxAddr !== stxAddr) return;
-
-  if (isError) {
-    newTx.pTxSts = ABT_BY_RES;
-    dispatch(updateMe({ tx: newTx }));
-    setTimeout(() => {
-      dispatch(refreshTxs());
-    }, 5 * 1000); // Wait a while before calling refreshPreds.
-    return;
-  }
-
-  dispatch(updateMe({ ...data }));
   setTimeout(() => {
     dispatch(refreshTxs());
   }, 5 * 1000); // Wait a while before calling refreshPreds.
