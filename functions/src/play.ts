@@ -12,6 +12,10 @@ const syncEvt = async () => {
   logger.info(`(${logKey}) syncEvt receives a task`);
 
   const evtId = 'augur-markets-t1-0';
+  const isNwTrdr = true;
+  const amount = 15000000;
+  const cost = 9679082;
+
   const info = getInfo();
   const scEvtId = getScEvtId(evtId);
 
@@ -29,7 +33,7 @@ const syncEvt = async () => {
     return;
   }
 
-  const evt = parseData(evtId, data);
+  const evt = parseData(evtId, isNwTrdr, amount, cost, data);
   try {
     await dataApi.updateEvtSyncEvt(logKey, evt);
   } catch (error) {
@@ -37,24 +41,27 @@ const syncEvt = async () => {
     return;
   }
 };
-const parseData = (id, data) => {
+const parseData = (evtId, isNwTrdr, amount, cost, data) => {
   return {
-    id,
+    id: evtId,
     outcomes: data.value.ocs.value.map(ocv => {
       const shareAmount = Number(ocv.value.value['share-amount'].value);
       return { shareAmount };
     }),
+    qtyVol: amount,
+    valVol: cost,
+    nTraders: isNwTrdr ? 1 : 0,
   };
 };
-//syncEvt();
+// syncEvt();
 
-async function getFunctionUrl(name, location = "us-central1") {
+async function getFunctionUrl(name, location = 'us-central1') {
   const auth = new GoogleAuth({
-    scopes: "https://www.googleapis.com/auth/cloud-platform",
+    scopes: 'https://www.googleapis.com/auth/cloud-platform',
   });
 
   const projectId = await auth.getProjectId();
-  const url = "https://cloudfunctions.googleapis.com/v2beta/" +
+  const url = 'https://cloudfunctions.googleapis.com/v2beta/' +
     `projects/${projectId}/locations/${location}/functions/${name}`;
 
   const client = await auth.getClient();
@@ -62,4 +69,4 @@ async function getFunctionUrl(name, location = "us-central1") {
   const uri = res.data?.serviceConfig?.uri;
   console.log('uri', uri);
 }
-//getFunctionUrl('syncEvt');
+// getFunctionUrl('syncEvt');

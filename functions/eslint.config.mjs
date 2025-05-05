@@ -55,6 +55,8 @@ const eslintConfig = [
       "arrow-parens": 0,
       "no-invalid-this": 0,
       "@typescript-eslint/no-this-alias": 0,
+      "require-jsdoc": 0,
+      "@typescript-eslint/no-unused-vars": 0,
     },
   },
 ];

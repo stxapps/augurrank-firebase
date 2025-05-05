@@ -8,7 +8,7 @@
     "target": "es2017",
     "strict": false,
     "noImplicitReturns": false,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
