@@ -5,7 +5,7 @@ import { Cl } from '@stacks/transactions';
 import { getInfo } from '@/info';
 import hrAmApi from '@/apis/server/hiroAdmin';
 import dataApi from '@/apis/server/data';
-import { isFldStr, randomString, getScEvtId } from '@/utils';
+import { isNumber, isFldStr, randomString, getScEvtId } from '@/utils';
 
 export const syncEvt = onTaskDispatched(
   {
@@ -23,10 +23,15 @@ export const syncEvt = onTaskDispatched(
     const logKey = randomString(12);
     logger.info(`(${logKey}) syncEvt receives a task`);
 
-    const { evtId } = req.data;
-    logger.info(`(${logKey}) evtId: ${evtId}`);
-    if (!isFldStr(evtId)) {
-      logger.error(`(${logKey}) Invalid evtId, just end`);
+    const { evtId, isNwTrdr, amount, cost } = req.data;
+    logger.info(`(${logKey}) evtId: ${evtId}, isNwTrdr: ${isNwTrdr}`);
+    logger.info(`(${logKey}) amount: ${amount}, cost: ${cost}`);
+    if (!isFldStr(evtId) || ![true, false].includes(isNwTrdr)) {
+      logger.error(`(${logKey}) Invalid evtId or isNwTrdr, just end`);
+      return;
+    }
+    if (!isNumber(amount) || !isNumber(cost)) {
+      logger.error(`(${logKey}) Invalid amount or cost, just end`);
       return;
     }
 
@@ -47,7 +52,7 @@ export const syncEvt = onTaskDispatched(
       return;
     }
 
-    const evt = parseData(evtId, data);
+    const evt = parseData(evtId, isNwTrdr, amount, cost, data);
     try {
       await dataApi.updateEvtSyncEvt(logKey, evt);
     } catch (error) {
@@ -57,12 +62,15 @@ export const syncEvt = onTaskDispatched(
   },
 );
 
-const parseData = (id, data) => {
+const parseData = (evtId, isNwTrdr, amount, cost, data) => {
   return {
-    id,
+    id: evtId,
     outcomes: data.value.ocs.value.map(ocv => {
       const shareAmount = Number(ocv.value.value['share-amount'].value);
       return { shareAmount };
     }),
+    qtyVol: amount,
+    valVol: cost,
+    nTraders: isNwTrdr ? 1 : 0,
   };
 };

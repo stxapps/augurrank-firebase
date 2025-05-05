@@ -133,6 +133,7 @@ const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
 
   const res = await db.runTransaction(async (t) => {
     let oldUser, newUser, oldShare, newShare, oldTx, newTx;
+    let isToScs = false, isNwTrdr = false, rctdUser, rctdShare;
 
     if (isObject(userRef)) {
       const snapshot = await t.get(userRef);
@@ -158,6 +159,7 @@ const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
         };
       } else {
         newShare = { ...share, createDate: share.updateDate };
+        isNwTrdr = true;
       }
     }
     const snapshot = await t.get(txRef);
@@ -168,7 +170,6 @@ const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
       newTx = tx;
     }
 
-    let isToScs = false, rctdUser, rctdShare;
     if ((!isObject(oldTx) || oldTx.cTxSts !== SCS) && newTx.cTxSts === SCS) {
       if (isObject(userRef)) {
         rctdUser = rectifyUser(oldUser, newUser);
@@ -186,7 +187,7 @@ const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
     t.set(txRef, txToDoc(rctdTx));
     console.log(`(${logKey}) Updated to Firestore`);
 
-    return { isToScs, rctdUser, rctdShare, rctdTx };
+    return { isToScs, isNwTrdr, rctdUser, rctdShare, rctdTx };
   });
 
   return res;
@@ -350,6 +351,9 @@ const updateEvtSyncEvt = async (logKey, evt) => {
       if (!isObject(oc)) throw new Error(`Invalid outcome: ${i} for evtId: ${evt.id}`);
       oc.shareAmount = evt.outcomes[i].shareAmount;
     }
+    newEvt.qtyVol += evt.qtyVol;
+    newEvt.valVol += evt.valVol;
+    newEvt.nTraders += evt.nTraders;
 
     const syncSs = await t.get(syncRef);
     if (!syncSs.exists) throw new Error('Sync does not exist: INDEX');

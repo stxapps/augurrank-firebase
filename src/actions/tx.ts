@@ -120,7 +120,7 @@ export const trade = () => async (
     functionArgs.push(Cl.uint(scldValue));
 
     const condition = Pc.principal(stxAddr).willSendLte(scldValue).ft(
-      `${info.stxAddr}.${info.tokenContract}`, 'Augur',
+      `${info.stxAddr}.${info.tokenContract}`, 'augur-token',
     );
     postConditions = [condition];
   } else if (type === TX_SELL) {
@@ -134,7 +134,7 @@ export const trade = () => async (
 
     const scldMinCost = Math.floor(minCost * SCALE);
     const condition = Pc.principal(info.stxAddr).willSendGte(scldMinCost).ft(
-      `${info.stxAddr}.${info.tokenContract}`, 'Augur',
+      `${info.stxAddr}.${info.tokenContract}`, 'augur-token',
     );
 
     functionName = 'sell-shares-a';
@@ -147,7 +147,7 @@ export const trade = () => async (
   const now = Date.now();
   const id = `${stxAddr}-${now}${randomString(7)}`;
   const [contract, createDate, updateDate] = [info.marketsContract, now, now];
-  const tx = { id, type, contract, createDate, updateDate };
+  const tx = { id, type, contract, createDate, updateDate, evtId, ocId };
   dispatch(updateTradeEditor({ msg: '', doLoad: true }));
   dispatch(updateMe({ tx }));
 

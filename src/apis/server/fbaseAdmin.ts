@@ -125,7 +125,7 @@ export const shareToDoc = (share) => {
     evtId: share.evtId,
     ocId: share.ocId,
     amount: share.amount,
-    avgCost: share.avgCost,
+    cost: share.cost,
     createDate: Timestamp.fromDate(new Date(share.createDate)),
     updateDate: Timestamp.fromDate(new Date(share.updateDate)),
   };

@@ -91,13 +91,13 @@ export async function PATCH(
       }
     }
 
-    const { isToScs, rctdUser, rctdShare, rctdTx } = await dataApi.updateUsrShrTx(
-      logKey, stxAddr, user, share, tx,
-    );
+    const {
+      isToScs, isNwTrdr, rctdUser, rctdShare, rctdTx,
+    } = await dataApi.updateUsrShrTx(logKey, stxAddr, user, share, tx);
     data = { tx: rctdTx };
     if (isToScs) {
       data = { isToScs, balance: rctdUser.balance, share: rctdShare, tx: rctdTx };
-      await taskApi.addSyncEvtTask(evtId);
+      await taskApi.addSyncEvtTask(evtId, isNwTrdr, rctdTx.amount, rctdTx.cost);
     }
   } else {
     const error = 'Invalid tx type';
