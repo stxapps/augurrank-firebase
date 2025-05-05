@@ -2,14 +2,14 @@ import {
   collection, query, orderBy, startAt, limit, getDocs, doc, onSnapshot,
 } from 'firebase/firestore';
 
-import { fstore as db } from '@/apis/fbase';
+import { getFstore } from '@/apis/fbase';
 import { LETTERS_JOINS_PATH, EVENTS, SYNCS, INDEX, N_DOCS } from '@/types/const';
 import { isFldStr, getResErrMsg } from '@/utils';
 import { docToEvt, docToSync } from '@/utils/fbase';
 import vars from '@/vars';
 
 const fetchEvents = async (quryCrsr: string) => {
-  const clt = collection(db, EVENTS);
+  const clt = collection(getFstore(), EVENTS);
   const by = orderBy('createDate', 'desc');
   const lmt = limit(N_DOCS + 1);
 
@@ -31,17 +31,17 @@ const fetchEvents = async (quryCrsr: string) => {
     snapshots.push(ss);
   });
 
-  const nEvents = snapshots.slice(0, N_DOCS).map(ss => docToEvt(ss.id, ss.data()));
+  const newEvents = snapshots.slice(0, N_DOCS).map(ss => docToEvt(ss.id, ss.data()));
 
-  let nQuryCrsr = null;
+  let newQuryCrsr = null;
   if (snapshots.length >= N_DOCS + 1) {
     const ss = snapshots[N_DOCS];
     vars.fetchEvents.quryCrsr.id = ss.id;
     vars.fetchEvents.quryCrsr.snapshot = ss;
-    nQuryCrsr = vars.fetchEvents.quryCrsr.id;
+    newQuryCrsr = vars.fetchEvents.quryCrsr.id;
   }
 
-  return { events: nEvents, quryCrsr: nQuryCrsr };
+  return { events: newEvents, quryCrsr: newQuryCrsr };
 };
 
 const fetchEvent = async (slug: string) => {
@@ -50,7 +50,7 @@ const fetchEvent = async (slug: string) => {
 
 const listenSync = async (onSuccess, onError) => {
   const removeListener = onSnapshot(
-    doc(db, SYNCS, INDEX),
+    doc(getFstore(), SYNCS, INDEX),
     (snapshot) => {
       if (!snapshot.exists()) return;
 
@@ -59,7 +59,7 @@ const listenSync = async (onSuccess, onError) => {
     },
     (error) => {
       onError(error);
-    }
+    },
   );
   return removeListener;
 };

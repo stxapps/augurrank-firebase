@@ -2,7 +2,7 @@ import { serializeCV, postConditionToHex } from '@stacks/transactions/dist/esm';
 import {
   verifyMessageSignatureRsv, verifyMessageSignature, verifyECDSA,
 } from '@stacks/encryption/dist/esm';
-import { networkFromName } from '@stacks/network/dist/esm';
+import { networkFrom } from '@stacks/network/dist/esm';
 import { request as xRequest, AddressPurpose } from 'sats-connect';
 import { createUnsecuredToken } from 'jsontokens';
 
@@ -80,12 +80,12 @@ const connect = (id) => {
   throw new Error(ERR_INVALID_ARGS);
 };
 
-const signMessageLeather = async (msg) => {
+const signMessageLeather = async (msg, networkName) => {
   const wallet = getWallet(ID_LEATHER);
   if (!isObject(wallet)) throw new Error(ERR_NOT_FOUND);
 
   const res = await wallet.request('stx_signMessage', {
-    message: msg, messageType: 'utf8', network: 'mainnet',
+    message: msg, messageType: 'utf8', network: networkName,
   });
   return { stxSigStr: res.result.signature };
 };
@@ -100,12 +100,12 @@ const signMessageXverse = async (stxPubKey, msg) => {
   return { stxSigStr: res.result.signature };
 };
 
-const signMessage = async (stxPubKey, msg) => {
+const signMessage = async (stxPubKey, msg, networkName) => {
   const id = getWalletId();
 
   let res;
   if (id === ID_LEATHER) {
-    res = await signMessageLeather(msg);
+    res = await signMessageLeather(msg, networkName);
   } else if (id === ID_XVERSE) {
     res = await signMessageXverse(stxPubKey, msg);
   } else {
@@ -145,7 +145,7 @@ const contractCallLeather = async (opts) => {
     return serializeCV(arg);
   });
   const pcs = postConditions.map(postConditionToHex);
-  const ntw = networkFromName(network);
+  const ntw = networkFrom(network);
 
   const payload = {
     ...restOpts,
@@ -172,7 +172,7 @@ const contractCallXverse = async (opts) => {
     return serializeCV(arg);
   });
   const pcs = postConditions.map(postConditionToHex);
-  const ntw = networkFromName(network);
+  const ntw = networkFrom(network);
 
   const payload = {
     ...restOpts,

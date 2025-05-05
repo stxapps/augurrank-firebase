@@ -1,16 +1,19 @@
 import { AppDispatch, AppGetState } from '@/store';
+import { getInfo } from '@/info';
 import idxApi from '@/apis';
 import walletApi from '@/apis/wallet';
+import hiroApi from '@/apis/hiro';
 import {
-  INIT, UPDATE_WINDOW, UPDATE_POPUP, UPDATE_WALLET_POPUP, UPDATE_ERROR_POPUP,
-  UPDATE_ME, RESET_STATE,
+  INIT, UPDATE_WINDOW, UPDATE_POPUP, UPDATE_WALLET_POPUP, UPDATE_NOTI_POPUP,
+  UPDATE_ERROR_POPUP, UPDATE_ME, RESET_STATE,
 } from '@/types/actionTypes';
 import {
-  STX_TST_STR, PDG, ABT_BY_NF, ERR_NOT_FOUND, ENRL_ID_SUFFIX,
+  STX_TST_STR, TX_BUY, TX_SELL, TX_PUT_OK, TX_PUT_ERROR, PDG, SCS, ABT_BY_NF,
+  ERR_NOT_FOUND, ERR_USER_NOT_FOUND, ENRL_ID_SUFFIX,
 } from '@/types/const';
 import {
   isObject, isNumber, throttle, getWindowInsets, getWalletErrorText, getSignInStatus,
-  deriveTxInfo, mergeTxs,
+  deriveTxInfo, getTxAmount, getTxCost, mergeTxs, getTxState, isTxConfirmed,
 } from '@/utils';
 import vars from '@/vars';
 
@@ -68,7 +71,7 @@ export const signOut = () => async (dispatch: AppDispatch, getState: AppGetState
 };
 
 export const chooseWallet = () => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
   const installedWalletIds = walletApi.getInstalledWalletIds();
   if (installedWalletIds.length === 1) {
@@ -80,7 +83,7 @@ export const chooseWallet = () => async (
 };
 
 export const connectWallet = (walletId) => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
   let data;
   try {
@@ -88,8 +91,12 @@ export const connectWallet = (walletId) => async (
   } catch (error) {
     console.log('In connectWallet, error:', error);
     if (isObject(error.error) && [4001, -32000].includes(error.error.code)) return;
+    if (isObject(error.error) && [-32603].includes(error.error.code)) {
+      dispatch(updateErrorPopup(getWalletErrorText(ERR_USER_NOT_FOUND)));
+      return;
+    }
 
-    dispatch(updateErrorPopup(getWalletErrorText(error.message)));
+    dispatch(updateErrorPopup(getWalletErrorText(error)));
     return;
   }
 
@@ -100,18 +107,19 @@ export const connectWallet = (walletId) => async (
 };
 
 export const signStxTstStr = () => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
+  const { networkName } = getInfo();
   const { stxAddr, stxPubKey } = getState().me;
 
   let data;
   try {
-    data = await walletApi.signMessage(stxPubKey, STX_TST_STR);
+    data = await walletApi.signMessage(stxPubKey, STX_TST_STR, networkName);
   } catch (error) {
     console.log('In signStxTstStr, error:', error);
     if (isObject(error.error) && [4001, -32000].includes(error.error.code)) return;
 
-    dispatch(updateErrorPopup(getWalletErrorText(error.message)));
+    dispatch(updateErrorPopup(getWalletErrorText(error)));
     return;
   }
 
@@ -140,12 +148,16 @@ export const updateWalletPopup = (payload) => {
   return { type: UPDATE_WALLET_POPUP, payload };
 };
 
+export const updateNotiPopup = (payload) => {
+  return { type: UPDATE_NOTI_POPUP, payload };
+};
+
 export const updateErrorPopup = (payload) => {
   return { type: UPDATE_ERROR_POPUP, payload };
 };
 
 export const fetchMe = (doForce = false) => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
   if (getSignInStatus(getState().me) !== 3) return;
 
@@ -179,7 +191,7 @@ export const updateMe = (payload) => {
 };
 
 export const applyEnroll = (doForce = false) => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
   if (getSignInStatus(getState().me) !== 3) return;
 
@@ -187,11 +199,18 @@ export const applyEnroll = (doForce = false) => async (
   //        2. enroll and processing
   //        3. enrolled successfully
   const { stxAddr, balance, enrlFthSts } = getState().me;
-  if (isNumber(balance)) return;
+  if (isNumber(balance)) {
+    dispatch(refreshTxs());
+    return;
+  }
 
   if (enrlFthSts === 0) return;
   if (!doForce && enrlFthSts !== null) return;
   dispatch(updateMe({ enrlFthSts: 0 }));
+  dispatch(updateNotiPopup({
+    title: 'Welcome to the game!',
+    body: 'Your sign-up bonus of ₳1,000 is on the way. In 5 seconds!',
+  }));
 
   let data, isError;
   try {
@@ -205,17 +224,21 @@ export const applyEnroll = (doForce = false) => async (
 
   if (isError) {
     dispatch(updateMe({ enrlFthSts: 2 }));
+    dispatch(updateErrorPopup({
+      title: 'There is an error with your sign-up bonus!',
+      body: 'We\'ll sort it out. Please wait for a while and refresh the page.',
+    }));
     return;
   }
 
-  dispatch(updateMe({ tx: data, enrlFthSts: 1 }))
+  dispatch(updateMe({ ...data, enrlFthSts: 1 }));
   setTimeout(() => {
     dispatch(refreshEnroll());
-  }, 1000);
+  }, 5 * 1000);
 };
 
 const refreshEnroll = (doForce = false) => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
   if (!doForce && vars.refreshEnroll.timeId) return;
   clearTimeout(vars.refreshEnroll.timeId);
@@ -228,13 +251,13 @@ const refreshEnroll = (doForce = false) => async (
 
   const enrlId = `${stxAddr}${ENRL_ID_SUFFIX}`;
   const enrlTx = getState().me.txs[enrlId];
-  if (enrlTx.cTxSts !== PDG) return;
+  if (!isObject(enrlTx) || isTxConfirmed(enrlTx)) return;
 
   vars.refreshEnroll.timeId = PDG;
 
-  let txInfo, isError;
+  let txInfo, data, isError;
   try {
-    txInfo = await idxApi.fetchTxInfo(enrlTx.cTxId);
+    txInfo = await hiroApi.fetchTxInfo(enrlTx.cTxId);
   } catch (error) {
     if (error.message !== ERR_NOT_FOUND) {
       console.log('refreshEnroll.fetchTxInfo error:', error);
@@ -264,11 +287,11 @@ const refreshEnroll = (doForce = false) => async (
     return;
   }
 
-  const newTx = mergeTxs(enrlTx, { cTxSts: txInfo.status });
+  const newTx = mergeTxs(enrlTx, { cTxSts: txInfo.status, updateDate: Date.now() });
   try {
-    await idxApi.patchEnroll(newTx);
+    data = await idxApi.patchTx(newTx);
   } catch (error) {
-    console.log('refreshEnroll.patchEnroll error:', error);
+    console.log('refreshEnroll.patchTx error:', error);
     isError = true;
   }
 
@@ -282,17 +305,128 @@ const refreshEnroll = (doForce = false) => async (
     return;
   }
 
-  dispatch(updateMe({ tx: newTx }));
+  dispatch(updateMe({ ...data }));
+  dispatch(updateNotiPopup({
+    title: '₳1,000 Added!',
+    body: 'We\'ve just dropped ₳1,000 into your account. Have fun!',
+  }));
   [vars.refreshEnroll.timeId, vars.refreshEnroll.seq] = [null, 0];
 };
 
 const setRefreshEnrollTimeout = (dispatch) => {
   const seq = vars.refreshEnroll.seq;
   const ms = Math.max(Math.min(Math.round(
-    (0.8217 * seq ^ 2 + 2.6469 * seq + 5.7343) * 1000
+    (0.8217 * seq ^ 2 + 2.6469 * seq + 5.7343) * 1000,
   ), 5 * 60 * 1000), 5 * 1000);
   vars.refreshEnroll.timeId = setTimeout(() => {
     dispatch(refreshEnroll(true));
   }, ms);
   vars.refreshEnroll.seq += 1;
+};
+
+export const refreshTxs = (doForce = false) => async (
+  dispatch: AppDispatch, getState: AppGetState,
+) => {
+  if (!doForce && vars.refreshTxs.timeId) return;
+  clearTimeout(vars.refreshTxs.timeId);
+  [vars.refreshTxs.timeId, vars.refreshTxs.seq] = [null, 0];
+
+  if (getSignInStatus(getState().me) !== 3) return;
+
+  const putErrorTxs = [], unconfirmedTxs = [];
+  for (const tx of Object.values<any>(getState().me.txs)) {
+    if (![TX_BUY, TX_SELL].includes(tx.type)) continue;
+
+    const state = getTxState(tx);
+    if (state === TX_PUT_ERROR) putErrorTxs.push(tx);
+    if (state === TX_PUT_OK) unconfirmedTxs.push(tx);
+  }
+
+  if (putErrorTxs.length === 0 && unconfirmedTxs.length === 0) {
+    [vars.refreshTxs.timeId, vars.refreshTxs.seq] = [null, 0];
+    return;
+  }
+
+  const { stxAddr } = getState().me;
+
+  await retryPutErrorTxs(stxAddr, putErrorTxs, dispatch, getState);
+  await refreshUnconfirmedTxs(stxAddr, unconfirmedTxs, dispatch, getState);
+
+  const seq = vars.refreshTxs.seq;
+  const ms = Math.max(Math.min(Math.round(
+    (0.8217 * seq ^ 2 + 2.6469 * seq + 5.7343) * 1000,
+  ), 5 * 60 * 1000), 5 * 1000);
+  vars.refreshTxs.timeId = setTimeout(() => {
+    dispatch(refreshTxs(true));
+  }, ms);
+  vars.refreshTxs.seq += 1;
+};
+
+const retryPutErrorTxs = async (
+  stxAddr, txs, dispatch: AppDispatch, getState: AppGetState,
+) => {
+  for (const tx of txs) {
+    const newTx = mergeTxs(tx, { pTxSts: SCS, updateDate: Date.now() });
+    try {
+      await idxApi.patchTx(newTx);
+    } catch (error) {
+      console.log('retryPutErrorTxs error:', error);
+      continue; // Do it later.
+    }
+
+    if (getState().me.stxAddr !== stxAddr) return;
+
+    dispatch(updateMe({ tx: newTx }));
+  }
+};
+
+const refreshUnconfirmedTxs = async (
+  stxAddr, txs, dispatch: AppDispatch, getState: AppGetState,
+) => {
+  let doNoti = false;
+  for (const tx of txs) {
+    let txInfo, data;
+    try {
+      txInfo = await hiroApi.fetchTxInfo(tx.cTxId);
+    } catch (error) {
+      if (error.message !== ERR_NOT_FOUND) {
+        console.log('refreshUnconfirmedTxs.fetchTxInfo error:', error);
+        continue; // server error, network error, do it later or by server.
+      } else if (Date.now() - tx.createDate < 60 * 60 * 1000) {
+        continue; // wait a bit more, maybe the api lacks behind.
+      }
+
+      // Not in mempool anymore like cannot confirm i.e. wrong nonce, not enough fee
+      txInfo = { tx_id: tx.cTxId, tx_status: ABT_BY_NF };
+    }
+
+    if (getState().me.stxAddr !== stxAddr) return;
+
+    txInfo = deriveTxInfo(txInfo);
+    if (txInfo.status === PDG) continue;
+
+    const newTx = mergeTxs(tx, { cTxSts: txInfo.status, updateDate: Date.now() })
+    if (newTx.cTxSts === SCS) {
+      newTx.amount = getTxAmount(txInfo);
+      newTx.cost = getTxCost(txInfo);
+    }
+
+    try {
+      data = await idxApi.patchTx(newTx);
+    } catch (error) {
+      console.log('refreshUnconfirmedTxs.patchTx error:', error);
+      continue; // Do it later or by server.
+    }
+
+    if (getState().me.stxAddr !== stxAddr) return;
+
+    dispatch(updateMe({ ...data }));
+    doNoti = true;
+  }
+  if (doNoti) {
+    dispatch(updateNotiPopup({
+      title: 'Your transaction has been committed!',
+      body: 'Congrats! 🎉 Wishing you make excellent profits!',
+    }));
+  }
 };

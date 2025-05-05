@@ -3,6 +3,23 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint",
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
+    }
+  ],
   "storage": {
     "rules": "storage.rules"
   },
@@ -18,11 +35,14 @@
     "firestore": {
       "port": 5003
     },
+    "pubsub": {
+      "port": 8085
+    },
     "storage": {
       "port": 9199
     },
     "tasks": {
-      "port": 5004
+      "port": 9499
     },
     "ui": {
       "enabled": true

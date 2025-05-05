@@ -1,6 +1,6 @@
 import lsgApi from '@/apis/localSg';
 import {
-  ME_OBJ, NFT_METAS, STX_TST_STR, ME_PATH, ENROLLS_PATH, ERR_NOT_FOUND,
+  ME_OBJ, NFT_METAS, STX_TST_STR, ME_PATH, ENROLLS_PATH, TXS_PATH,
 } from '@/types/const';
 import { isString, isFldStr, newObject, getResErrMsg } from '@/utils';
 
@@ -11,7 +11,8 @@ const getLocalMe = () => {
   if (isString(str)) {
     try {
       const obj = JSON.parse(str);
-      data = newObject(obj, ['fthSts', 'enrlFthSts']);
+      data = newObject(obj, ['fthSts', 'shares', 'txs', 'enrlFthSts']);
+      data.txs = obj.pdgTxs;
     } catch (error) {
       // Ignore if cache value invalid
     }
@@ -21,7 +22,7 @@ const getLocalMe = () => {
 };
 
 const putLocalMe = (me) => {
-  const obj = newObject(me, ['fthSts', 'enrlFthSts']);
+  const obj = newObject(me, ['fthSts', 'shares', 'txs', 'enrlFthSts']);
   lsgApi.setItemSync(ME_OBJ, JSON.stringify(obj));
 };
 
@@ -88,10 +89,10 @@ const applyEnroll = async () => {
   return obj;
 };
 
-const patchEnroll = async (tx) => {
+const patchTx = async (tx) => {
   const authData = getAuthData();
 
-  const res = await fetch(`${ENROLLS_PATH}/${authData.stxAddr}`, {
+  const res = await fetch(`${TXS_PATH}/${tx.id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -103,28 +104,14 @@ const patchEnroll = async (tx) => {
     const msg = await getResErrMsg(res);
     throw new Error(msg);
   }
-};
 
-const fetchTxInfo = async (txId) => {
-  let url = 'https://api.hiro.so/extended/v1/tx/';
-  const network = process.env.NEXT_PUBLIC_STACKS_NETWORK;
-  if (network === 'testnet') url = 'https://api.testnet.hiro.so/extended/v1/tx/';
-
-  const res = await fetch(`${url}${txId}`);
-  if (res.status === 404) {
-    throw new Error(ERR_NOT_FOUND);
-  }
-  if (!res.ok) {
-    const msg = await getResErrMsg(res);
-    throw new Error(msg);
-  }
   const obj = await res.json();
   return obj;
 };
 
 const index = {
   getLocalMe, putLocalMe, deleteLocalFiles, getAuthData, fetchMe, applyEnroll,
-  patchEnroll, fetchTxInfo,
+  patchTx,
 };
 
 export default index;

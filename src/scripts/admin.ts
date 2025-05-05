@@ -1,14 +1,15 @@
 import { slugifyWithCounter } from '@sindresorhus/slugify';
 
-import scApi from '@/apis/server/sc';
+import { getInfo } from '@/info';
 import dataApi from '@/apis/server/data';
+import scApi from '@/apis/server/sc';
 import { randomString } from '@/utils';
 
 const now = Date.now(), logKey = `${now}-${randomString(4)}`;
-const info = scApi.getStacksInfo();
 const slugify = slugifyWithCounter();
 
 const uploadImage = async () => {
+  const info = getInfo();
   const src = '/home/wit/Desktop/lrmnHOuN_400x400.jpg';
   const bucket = info.bucket;
   const options = {
@@ -39,6 +40,7 @@ const createEventSc = async () => {
   console.log(`(${logKey}) createEventSc with txId: ${res.txId}`);
 };
 const createEventDb = async () => {
+  const info = getInfo();
   const closeDate = new Date('2025-05-01T00:00:00-04:00');
   const dbEvt = {
     ...evt,
@@ -64,6 +66,7 @@ const setEventBetaSc = async () => {
   console.log(`(${logKey}) setEventBeta with txId: ${res.txId}`);
 };
 const setEventBetaDb = async () => {
+  const info = getInfo();
   const dbBtEvt = { ...btEvt, id: `${info.marketsContract}-${btEvt.id}` };
   await dataApi.updateEvent(logKey, dbBtEvt, false);
   console.log(`(${logKey}) setEventBetaDb finishes`);
@@ -77,6 +80,7 @@ const setEventStatusSc = async () => {
   console.log(`(${logKey}) setEventStatusSc with txId: ${res.txId}`);
 };
 const setEventStatusDb = async () => {
+  const info = getInfo();
   const dbStsEvt = { ...stsEvt, id: `${info.marketsContract}-${stsEvt.id}` };
   await dataApi.updateEvent(logKey, dbStsEvt, false);
   console.log(`(${logKey}) setEventStatusDb finishes`);
@@ -85,6 +89,7 @@ const setEventStatusDb = async () => {
 //setEventStatusDb();
 
 const updateSyncEvt = async () => {
+  const info = getInfo();
   await dataApi.updateSyncEvt(logKey, `${info.marketsContract}-0`);
   console.log(`(${logKey}) updateSyncEvt finishes`);
 };

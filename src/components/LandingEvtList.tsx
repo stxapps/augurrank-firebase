@@ -27,7 +27,7 @@ export function LandingEvtList() {
         <EvtListItemLdg />
         <EvtListItemLdg />
       </>
-    )
+    );
   } else if (fthSts === 2) { // show error and retry button
     content = (
       <div className="mt-2 flex items-center justify-between space-x-2">
@@ -40,9 +40,9 @@ export function LandingEvtList() {
       <div className="mt-2 flex items-center justify-between space-x-2">
         <p className="text-slate-500">No live event. Check back later!</p>
       </div>
-    )
+    );
   } else {
-    content = events.map(evt => <EvtListItem key={evt.id} evt={evt} />)
+    content = events.map(evt => <EvtListItem key={evt.id} evt={evt} />);
   }
 
   return (

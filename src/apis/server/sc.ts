@@ -1,39 +1,11 @@
 import {
   makeContractCall, broadcastTransaction, PostConditionMode, Cl,
 } from '@stacks/transactions';
-import { STACKS_MAINNET, STACKS_TESTNET } from '@stacks/network';
 
+import { getInfo } from '@/info';
+import hrAmApi from '@/apis/server/hiroAdmin';
 import stxAccApi from '@/apis/server/stxAcc';
-import { SENDER_KEY } from '@/keys';
 import { isFldStr, isNumber } from '@/utils';
-
-const getStacksInfo = () => {
-  const network = process.env.NEXT_PUBLIC_STACKS_NETWORK;
-  if (network === 'mainnet') {
-    return {
-      network: STACKS_MAINNET,
-      stxAddr: 'SP1ARJX5XDEYWNDX8JEKGTZNZ0YJHQAYDWVNBRXGM',
-      tokenContract: 'augur-token-v1',
-      marketsContract: 'augur-markets-v1',
-      enrollContract: 'augur-enroll-v1',
-      storeContract: 'augur-store-v1',
-      bucket: 'augurrank-prod.firebasestorage.app',
-    };
-  }
-  if (network === 'testnet') {
-    return {
-      network: STACKS_TESTNET,
-      stxAddr: 'ST1ARJX5XDEYWNDX8JEKGTZNZ0YJHQAYDWRSAB44M',
-      tokenContract: 'augur-token-t1',
-      marketsContract: 'augur-markets-t1',
-      enrollContract: 'augur-enroll-t1',
-      storeContract: 'augur-store-t1',
-      bucket: 'augurrank-test.firebasestorage.app',
-    };
-  }
-
-  throw new Error(`Invalid Stacks network: ${network}`);
-};
 
 const prepend0x = (txId) => {
   if (!txId.startsWith('0x')) return '0x' + txId;
@@ -41,12 +13,11 @@ const prepend0x = (txId) => {
 };
 
 const setMarketsContract = async () => {
-  const info = getStacksInfo();
-
+  const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.tokenContract,
     functionName: 'set-markets-contract',
@@ -63,12 +34,11 @@ const setMarketsContract = async () => {
 };
 
 const setStoreContract = async () => {
-  const info = getStacksInfo();
-
+  const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.tokenContract,
     functionName: 'set-store-contract',
@@ -85,12 +55,11 @@ const setStoreContract = async () => {
 };
 
 const setTokenUri = async (uri) => {
-  const info = getStacksInfo();
-
+  const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.tokenContract,
     functionName: 'set-token-uri',
@@ -107,13 +76,13 @@ const setTokenUri = async (uri) => {
 };
 
 const mint = async (amount, recipient = null) => {
-  const info = getStacksInfo();
+  const info = getInfo();
   if (!isFldStr(recipient)) recipient = info.stxAddr;
 
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.tokenContract,
     functionName: 'mint',
@@ -130,7 +99,6 @@ const mint = async (amount, recipient = null) => {
 };
 
 const createEvent = async (evt) => {
-  const info = getStacksInfo();
   const args = [
     Cl.stringAscii(evt.title),
     Cl.stringAscii(evt.desc),
@@ -144,10 +112,11 @@ const createEvent = async (evt) => {
     })),
   ];
 
+  const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.marketsContract,
     functionName: 'create-event',
@@ -163,17 +132,16 @@ const createEvent = async (evt) => {
   return { ...res, txId: prepend0x(res.txid) };
 };
 
-const setEventBeta = async (evtId, beta) => {
-  const info = getStacksInfo();
-
+const setEventBeta = async (scEvtId, beta) => {
+  const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.marketsContract,
     functionName: 'set-event-beta',
-    functionArgs: [Cl.uint(evtId), Cl.uint(beta)],
+    functionArgs: [Cl.uint(scEvtId), Cl.uint(beta)],
     postConditionMode: PostConditionMode.Allow,
     postConditions: [],
     fee: 3261,
@@ -185,18 +153,18 @@ const setEventBeta = async (evtId, beta) => {
   return { ...res, txId: prepend0x(res.txid) };
 };
 
-const setEventStatus = async (evtId, status, winOcId = null) => {
-  const info = getStacksInfo();
+const setEventStatus = async (scEvtId, status, winOcId = null) => {
   const clWinOcId = isNumber(winOcId) ? Cl.uint(winOcId) : Cl.none();
 
+  const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.marketsContract,
     functionName: 'set-event-status',
-    functionArgs: [Cl.uint(evtId), Cl.uint(status), clWinOcId],
+    functionArgs: [Cl.uint(scEvtId), Cl.uint(status), clWinOcId],
     postConditionMode: PostConditionMode.Allow,
     postConditions: [],
     fee: 3261,
@@ -217,12 +185,11 @@ const refundFunds = async () => {
 };
 
 const enroll = async (stxAddr) => {
-  const info = getStacksInfo();
-
+  const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
     network: info.network,
-    senderKey: SENDER_KEY,
+    senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.enrollContract,
     functionName: 'enroll',
@@ -232,6 +199,7 @@ const enroll = async (stxAddr) => {
     fee: 3261,
     nonce,
     validateWithAbi: true,
+    client: { fetch: hrAmApi.getFetchFn() },
   };
   const transaction = await makeContractCall(txOptions);
   const res = await broadcastTransaction({ transaction, network: info.network });
@@ -239,7 +207,7 @@ const enroll = async (stxAddr) => {
 };
 
 const sc = {
-  getStacksInfo, setMarketsContract, setStoreContract, setTokenUri, mint, createEvent,
+  setMarketsContract, setStoreContract, setTokenUri, mint, createEvent,
   setEventBeta, setEventStatus, payRewards, refundFunds, enroll,
 };
 

@@ -25,7 +25,7 @@ export function EventsEvtList() {
 
   return (
     <div>
-      {events.map(evt => <EvtListItem evt={evt} />)}
+      {events.map(evt => <EvtListItem key={evt.id} evt={evt} />)}
     </div>
   );
 }

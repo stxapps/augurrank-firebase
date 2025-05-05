@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
 
 import { SCALE } from '@/types/const';
-import { isNumber, isFldStr, parseAvatar, isObject } from '@/utils';
+import { isObject, isNumber, isFldStr, parseAvatar } from '@/utils';
 import { getShareCosts } from '@/utils/lmsr';
 
 const _getInsets = (insetTop, insetRight, insetBottom, insetLeft) => {
@@ -119,6 +119,21 @@ export const doShowTradeEditor = createSelector(
   (_, evtId) => evtId,
   (trdEdtrEvtId, evtId) => {
     return trdEdtrEvtId === evtId;
+  },
+);
+
+export const getTrdEdtrEvt = createSelector(
+  state => state.events.entries,
+  state => state.tradeEditor.evtId,
+  (entries, evtId) => {
+    if (!isFldStr(evtId)) return null;
+
+    const evt = entries[evtId];
+    if (!isObject(evt)) return null;
+
+    const shareCosts = getShareCosts(evt).map(cost => cost / SCALE);
+
+    return { ...evt, shareCosts };
   },
 );
 

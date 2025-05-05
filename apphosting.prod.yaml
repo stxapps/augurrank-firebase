@@ -22,3 +22,15 @@ env:
 
   - variable: NEXT_PUBLIC_STACKS_NETWORK
     value: "mainnet"
+
+  - variable: FUNCTION_SYNC_EVT_NAME
+    value: "syncEvt"
+
+  - variable: FUNCTION_SYNC_EVT_URI
+    value: "https://us-central1-augurrank-prod.cloudfunctions.net/syncEvt"
+
+  - variable: SC_SENDER_KEY
+    secret: SC_SENDER_KEY
+
+  - variable: HIRO_API_KEY
+    secret: HIRO_API_KEY

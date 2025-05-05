@@ -9,7 +9,7 @@ import { isFldStr, validateEmail } from '@/utils';
 import vars from '@/vars';
 
 export const fetchEvents = (doForce = false) => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
   const fthSts = getState().events.fthSts;
 
@@ -32,7 +32,7 @@ export const fetchEvents = (doForce = false) => async (
 };
 
 export const fetchEventsMore = (doForce = false) => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
   const { quryCrsr, fthMoreSts } = getState().events;
 
@@ -54,7 +54,7 @@ export const fetchEventsMore = (doForce = false) => async (
 };
 
 export const fetchEvent = (slug: string, doForce = false) => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
   const { slug, slugFthSts } = getState().events;
 
@@ -83,7 +83,7 @@ export const updateSync = (payload) => {
 };
 
 export const joinLetter = () => async (
-  dispatch: AppDispatch, getState: AppGetState
+  dispatch: AppDispatch, getState: AppGetState,
 ) => {
   const { email } = getState().ltrjnEditor;
 
