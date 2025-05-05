@@ -1,7 +1,7 @@
 import { produce } from 'immer';
 
 import { INIT, UPDATE_ME, RESET_STATE } from '@/types/actionTypes';
-import { isObject, isString, isNumber, mergeTxs } from '@/utils';
+import { isObject, isString, isNumber, mergeTxs, isTxConfirmed } from '@/utils';
 
 const initialState = {
   stxAddr: null, // null: n/a, '': no value, str: has value
@@ -15,6 +15,7 @@ const initialState = {
   balance: null,
   shares: {},
   txs: {},
+  pdgTxs: {}, // a duplicate (of txs) pending txs e.g., for storing local
   enrlFthSts: null,
 };
 
@@ -48,19 +49,22 @@ const meReducer = (state = initialState, action) => produce(state, draft => {
 
     const { tx, txs, removeTxIds } = action.payload;
     if (isObject(tx)) {
-      draft.txs[tx.id] = mergeTxs(draft.txs[tx.id], tx);
+      txToDrft(draft, tx);
     }
     if (Array.isArray(txs)) {
       for (const tx of txs) {
-        draft.txs[tx.id] = mergeTxs(draft.txs[tx.id], tx);
+        txToDrft(draft, tx);
       }
     } else if (isObject(txs)) {
       for (const tx of Object.values<any>(txs)) {
-        draft.txs[tx.id] = mergeTxs(draft.txs[tx.id], tx);
+        txToDrft(draft, tx);
       }
     }
     if (Array.isArray(removeTxIds)) {
-      for (const id of removeTxIds) delete draft.txs[id];
+      for (const id of removeTxIds) {
+        delete draft.txs[id];
+        delete draft.pdgTxs[id];
+      }
     }
 
     const { enrlFthSts } = action.payload;
@@ -75,5 +79,15 @@ const meReducer = (state = initialState, action) => produce(state, draft => {
     return newState;
   }
 });
+
+const txToDrft = (draft, tx) => {
+  draft.txs[tx.id] = mergeTxs(draft.txs[tx.id], tx);
+
+  if (isTxConfirmed(tx)) {
+    delete draft.pdgTxs[tx.id];
+  } else {
+    draft.pdgTxs[tx.id] = structuredClone(draft.txs[tx.id]);
+  }
+};
 
 export default meReducer;

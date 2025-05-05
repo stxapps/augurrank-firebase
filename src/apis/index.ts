@@ -11,7 +11,8 @@ const getLocalMe = () => {
   if (isString(str)) {
     try {
       const obj = JSON.parse(str);
-      data = newObject(obj, ['fthSts', 'enrlFthSts']);
+      data = newObject(obj, ['fthSts', 'shares', 'txs', 'enrlFthSts']);
+      data.txs = obj.pdgTxs;
     } catch (error) {
       // Ignore if cache value invalid
     }
@@ -21,7 +22,7 @@ const getLocalMe = () => {
 };
 
 const putLocalMe = (me) => {
-  const obj = newObject(me, ['fthSts', 'enrlFthSts']);
+  const obj = newObject(me, ['fthSts', 'shares', 'txs', 'enrlFthSts']);
   lsgApi.setItemSync(ME_OBJ, JSON.stringify(obj));
 };
 
