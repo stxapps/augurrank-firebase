@@ -80,32 +80,29 @@ export const getBuyAmount = (evt, id, maxCost, startAmt) => {
   const qqbs = getQqbs(beta, evt.outcomes);
 
   let amt = u(startAmt);
-  const startCost = getDeltaCost(beta, qqbs, id, true, amt);
-  if (startCost === maxCost) return Number(amt);
+  let cost = getDeltaCost(beta, qqbs, id, true, amt);
+  if (cost === maxCost) return Number(amt);
 
-  const isInc = startCost < maxCost ? true : false;
-
-  let prevAmt = amt;
-  amt = isInc ? prevAmt + u('1000000') : prevAmt - u('1000000');
-
-  for (let i = 0; i < 1000000; i++) {
-    const cost = getDeltaCost(beta, qqbs, id, true, amt);
-    if (cost < maxCost) {
-      if (isInc) {
-        prevAmt = amt;
-        amt = amt + u('1000000');
-      } else {
+  if (cost < maxCost) {
+    for (let i = 0; i < 1000000; i++) {
+      const prevAmt = amt;
+      amt = amt + u('1000000');
+      cost = getDeltaCost(beta, qqbs, id, true, amt);
+      if (cost === maxCost) {
+        return Number(amt);
+      } else if (cost > maxCost) {
         return Number(prevAmt);
       }
-    } else if (cost > maxCost) {
-      if (isInc) {
-        return Number(prevAmt);
-      } else {
-        prevAmt = amt;
-        amt = amt - u('1000000');
+    }
+  } else {
+    for (let i = 0; i < 1000000; i++) {
+      amt = amt - u('1000000');
+      if (amt <= u(0)) break;
+
+      cost = getDeltaCost(beta, qqbs, id, true, amt);
+      if (cost <= maxCost) {
+        return Number(amt);
       }
-    } else {
-      return Number(amt);
     }
   }
 
