@@ -79,8 +79,9 @@ export const getEvents = createSelector(
 
       let fmtdVol;
       if (isNumber(evt.valVol)) {
-        if (evt.valVol >= 1000000) fmtdVol = Math.floor(evt.valVol / 1000000) + 'm';
-        else if (evt.valVol >= 100) fmtdVol = Math.floor(evt.valVol / 1000) + 'k';
+        const valVol = evt.valVol / SCALE;
+        if (valVol >= 1000000) fmtdVol = Math.floor(valVol / 1000000) + 'm';
+        else if (valVol >= 100) fmtdVol = Math.floor(valVol / 1000) + 'k';
       }
 
       return { ...evt, oc0Chance, oc0Rot, fmtdVol };

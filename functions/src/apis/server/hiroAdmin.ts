@@ -1,5 +1,5 @@
 import { serializeCV, deserializeCV } from '@stacks/transactions';
-import { createApiKeyMiddleware, createFetchFn } from "@stacks/common";
+import { createApiKeyMiddleware, createFetchFn } from '@stacks/common';
 
 import { getResErrMsg } from '@/utils';
 
@@ -11,7 +11,7 @@ const getFetchFn = () => {
     apiKey: process.env.HIRO_API_KEY,
   });
   fetchFn = createFetchFn(apiMiddleware);
-  return fetchFn
+  return fetchFn;
 };
 
 const callReadOnly = async (cntrcAddr, cntrcName, funcName, sdrAddr, args) => {

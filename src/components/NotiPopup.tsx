@@ -9,17 +9,18 @@ import { updateNotiPopup } from '@/actions';
 import { isFldStr } from '@/utils';
 
 export function NotiPopup() {
+  const type = useSelector(state => state.display.notiPopupType);
   const title = useSelector(state => state.display.notiPopupTitle);
   const body = useSelector(state => state.display.notiPopupBody);
   const didClick = useRef(false);
   const dispatch = useDispatch();
 
-  const isShown = isFldStr(title) && isFldStr(body);
+  const isShown = isFldStr(type) && isFldStr(title) && isFldStr(body);
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
     didClick.current = true;
-    dispatch(updateNotiPopup({ title: null, body: null }));
+    dispatch(updateNotiPopup({ type: null, title: null, body: null }));
   };
 
   useEffect(() => {
