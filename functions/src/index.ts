@@ -43,9 +43,9 @@ export const syncEvt = onTaskDispatched(
       data = await hrAmApi.callReadOnly(
         info.stxAddr,
         info.marketsContract,
-        'get-b-and-ocs',
+        'get-share-amounts',
         info.stxAddr,
-        [Cl.uint(scEvtId), Cl.list([Cl.uint(0), Cl.uint(1)])],
+        [Cl.uint(scEvtId)],
       );
     } catch (error) {
       logger.error(`(${logKey}) hiroApi.callReadOnly error: ${error}`);
@@ -65,8 +65,8 @@ export const syncEvt = onTaskDispatched(
 const parseData = (evtId, isNwTrdr, amount, cost, data) => {
   return {
     id: evtId,
-    outcomes: data.value.ocs.value.map(ocv => {
-      const shareAmount = Number(ocv.value.value['share-amount'].value);
+    outcomes: data.value.amounts.value.map(amount => {
+      const shareAmount = Number(amount.value);
       return { shareAmount };
     }),
     qtyVol: amount,
