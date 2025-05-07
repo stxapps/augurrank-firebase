@@ -1,13 +1,16 @@
+import { getInfo } from '@/info';
 import scApi from '@/apis/server/sc';
 
 const setMarketsContract = async () => {
-  const res = await scApi.setMarketsContract();
+  const info = getInfo();
+  const res = await scApi.addAllowedContract(`${info.stxAddr}.${info.marketsContract}`);
   console.log(`setMarketsContract with txId: ${res.txId}`);
 };
 //setMarketsContract();
 
 const setStoreContract = async () => {
-  const res = await scApi.setStoreContract();
+  const info = getInfo();
+  const res = await scApi.addAllowedContract(`${info.stxAddr}.${info.storeContract}`);
   console.log(`setStoreContract with txId: ${res.txId}`);
 };
 //setStoreContract();

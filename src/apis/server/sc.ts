@@ -12,7 +12,7 @@ const prepend0x = (txId) => {
   return txId;
 };
 
-const setMarketsContract = async () => {
+const addAllowedContract = async (value) => {
   const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
@@ -20,8 +20,8 @@ const setMarketsContract = async () => {
     senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.tokenContract,
-    functionName: 'set-markets-contract',
-    functionArgs: [Cl.principal(`${info.stxAddr}.${info.marketsContract}`)],
+    functionName: 'add-allowed-contract',
+    functionArgs: [Cl.principal(value)],
     postConditionMode: PostConditionMode.Allow,
     postConditions: [],
     fee: 3261,
@@ -33,7 +33,7 @@ const setMarketsContract = async () => {
   return { ...res, txId: prepend0x(res.txid) };
 };
 
-const setStoreContract = async () => {
+const deleteAllowedContract = async (value) => {
   const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
   const txOptions = {
@@ -41,8 +41,8 @@ const setStoreContract = async () => {
     senderKey: process.env.SC_SENDER_KEY,
     contractAddress: info.stxAddr,
     contractName: info.tokenContract,
-    functionName: 'set-store-contract',
-    functionArgs: [Cl.principal(`${info.stxAddr}.${info.storeContract}`)],
+    functionName: 'delete-allowed-contract',
+    functionArgs: [Cl.principal(value)],
     postConditionMode: PostConditionMode.Allow,
     postConditions: [],
     fee: 3261,
@@ -207,7 +207,7 @@ const enroll = async (stxAddr) => {
 };
 
 const sc = {
-  setMarketsContract, setStoreContract, setTokenUri, mint, createEvent,
+  addAllowedContract, deleteAllowedContract, setTokenUri, mint, createEvent,
   setEventBeta, setEventStatus, payRewards, refundFunds, enroll,
 };
 

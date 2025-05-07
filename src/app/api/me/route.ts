@@ -57,7 +57,9 @@ const toMe = (user, shares) => {
     'username', 'avatar', 'bio', 'didAgreeTerms', 'balance', 'noInLdb', 'noPrflPg',
   ];
 
-  const me: any = {};
+  const me: any = {
+    username: '', avatar: '', bio: '', didAgreeTerms: null, balance: null,
+  };
   if (isObject(user)) {
     for (const attr of attrs) {
       if (!(attr in user)) continue;

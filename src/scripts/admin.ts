@@ -25,7 +25,7 @@ const uploadImage = async () => {
 //uploadImage();
 
 const evt = {
-  title: 'Will STX price more than $1 on 1 May 2025?',
+  title: 'Will STX price more than $1 on 1 Jun 2025?',
   desc: '',
   beta: 200000000,
   status: 0,
@@ -41,7 +41,7 @@ const createEventSc = async () => {
 };
 const createEventDb = async () => {
   const info = getInfo();
-  const closeDate = new Date('2025-05-01T00:00:00-04:00');
+  const closeDate = new Date('2025-06-01T00:00:00-04:00');
   const dbEvt = {
     ...evt,
     id: `${info.marketsContract}-0`, // Make sure update contract and id!
