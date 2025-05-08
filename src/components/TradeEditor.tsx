@@ -94,7 +94,7 @@ export function TradeEditor() {
   }
 
   return (
-    <div className="relative max-w-md overflow-hidden rounded-lg border border-slate-700 bg-slate-800 sm:max-w-none">
+    <div className="relative max-w-xs overflow-hidden rounded-lg border border-slate-700 bg-slate-800 sm:max-w-none">
       <div className="relative flex items-center space-x-3.5 px-5 pt-4">
         <div className="relative shrink-0 size-8 rounded bg-slate-700 overflow-hidden">
           {isFldStr(evt.img) && <Image className="object-cover" src={evt.img} alt="" fill={true} unoptimized={true} />}

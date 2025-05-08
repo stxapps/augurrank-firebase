@@ -13,7 +13,7 @@ import { isFldStr } from '@/utils';
 
 export function EvtListItemLdg() {
   return (
-    <div className="max-w-md p-6 aanimate-pulsee rounded-lg bg-slate-800">
+    <div className="max-w-xs p-6 aanimate-pulsee rounded-lg bg-slate-800 sm:max-w-none">
       <div className="flex space-x-3.5">
         <div className="size-10 rounded bg-slate-700"></div>
         <div className="h-4 grow rounded bg-slate-700"></div>
@@ -74,7 +74,7 @@ function Cnt(props) {
   }
 
   return (
-    <div className="max-w-md overflow-hidden rounded-lg border border-slate-700 bg-slate-800 sm:max-w-none">
+    <div className="max-w-xs overflow-hidden rounded-lg border border-slate-700 bg-slate-800 sm:max-w-none">
       <div className="flex space-x-3.5 px-5 pt-5">
         <div className="relative shrink-0 size-10 rounded bg-slate-700 overflow-hidden">
           {isFldStr(evt.img) && <Image className="object-cover" src={evt.img} alt="" fill={true} unoptimized={true} />}

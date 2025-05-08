@@ -77,7 +77,7 @@ export const getEvents = createSelector(
       const oc0Chance = Math.floor((costs[0] * 100) / SCALE);
       const oc0Rot = Math.floor(180 / 100 * oc0Chance);
 
-      let fmtdVol;
+      let fmtdVol = '';
       if (isNumber(evt.valVol)) {
         const valVol = evt.valVol / SCALE;
         if (valVol >= 1000000) fmtdVol = Math.floor(valVol / 1000000) + 'm';
@@ -138,8 +138,24 @@ export const getTrdEdtrEvt = createSelector(
   },
 );
 
+export const getMeAvtWthObj = createSelector(
+  state => state.me.avatar,
+  (str) => {
+    const obj = parseAvatar(str);
+    return { str, obj };
+  },
+);
+
+export const getPflAvtWthObj = createSelector(
+  state => state.profile.avatar,
+  (str) => {
+    const obj = parseAvatar(str);
+    return { str, obj };
+  },
+);
+
 export const getPflEdtrAvtWthObj = createSelector(
-  state => state.meEditor.avatar,
+  state => state.profileEditor.avatar,
   (str) => {
     const obj = parseAvatar(str);
     return { str, obj };
@@ -147,7 +163,7 @@ export const getPflEdtrAvtWthObj = createSelector(
 );
 
 export const getAvlbAvtsWthObj = createSelector(
-  state => state.meEditor.avlbAvts,
+  state => state.profileEditor.avlbAvts,
   (strs) => {
     if (!Array.isArray(strs)) return null;
 
@@ -167,9 +183,9 @@ export const getAvlbAvtsWthObj = createSelector(
 );
 
 export const getAvlbAvtsHasMore = createSelector(
-  state => state.meEditor.nftOffset,
-  state => state.meEditor.nftLimit,
-  state => state.meEditor.nftTotal,
+  state => state.profileEditor.nftOffset,
+  state => state.profileEditor.nftLimit,
+  state => state.profileEditor.nftTotal,
   (nftOffset, nftLimit, nftTotal) => {
     if (!isNumber(nftOffset) || !isNumber(nftLimit) || !isNumber(nftTotal)) return null;
     return nftOffset + nftLimit < nftTotal;

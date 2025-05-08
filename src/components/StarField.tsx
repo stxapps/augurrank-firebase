@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useId, useRef } from 'react';
 import clsx from 'clsx';
-import { animate, AnimationSequence } from 'motion';
+import { animate, AnimationSequence } from 'motion/react';
 
 import { randBtw } from '@/utils';
 

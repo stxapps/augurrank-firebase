@@ -40,11 +40,11 @@ export function NotiPopup() {
                   <CheckCircleIcon aria-hidden="true" className="size-6 text-green-400" />
                 </div>
                 <div className="ml-3 w-0 flex-1 pt-0.5">
-                  <p className="text-sm font-medium text-gray-900">{title}</p>
-                  <p className="mt-1 text-sm text-gray-500">{body}</p>
+                  <p className="text-sm font-medium text-slate-900">{title}</p>
+                  <p className="mt-1 text-sm text-slate-500">{body}</p>
                 </div>
                 <div className="ml-4 flex shrink-0">
-                  <button type="button" onClick={onCancelBtnClick} className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                  <button type="button" onClick={onCancelBtnClick} className="inline-flex rounded-md bg-white text-slate-400 hover:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                     <span className="sr-only">Close</span>
                     <XMarkIcon aria-hidden="true" className="size-5" />
                   </button>

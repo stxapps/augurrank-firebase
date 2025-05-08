@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { StarField } from '@/components/StarField';
 import { TopBar } from '@/components/TopBar';
 import { Footer } from '@/components/Footer';
+import { TopBarMenuPopup } from '@/components/TopBarMenuPopup';
 import { WalletPopup } from '@/components/WalletPopup';
 import { NotiPopup } from '@/components/NotiPopup';
 import { ErrorPopup } from '@/components/ErrorPopup';
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <TopBar />
           {children}
           <Footer />
+          <TopBarMenuPopup />
           <WalletPopup />
           <NotiPopup />
           <ErrorPopup />

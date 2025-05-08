@@ -3,9 +3,11 @@ import { produce } from 'immer';
 import {
   UPDATE_POPUP, UPDATE_WALLET_POPUP, UPDATE_ERROR_POPUP, UPDATE_NOTI_POPUP, RESET_STATE,
 } from '@/types/actionTypes';
-import { AGREE_POPUP } from '@/types/const';
+import { TOP_BAR_MENU_POPUP, AGREE_POPUP } from '@/types/const';
 
 const initialState = {
+  isTopBarMenuPopupShown: false,
+  topBarMenuPopupPosition: null,
   isAgreePopupShown: false,
   installedWalletIds: null,
   notiPopupType: null,
@@ -17,7 +19,12 @@ const initialState = {
 
 const displayReducer = (state = initialState, action) => produce(state, draft => {
   if (action.type === UPDATE_POPUP) {
-    const { id, isShown } = action.payload;
+    const { id, isShown, anchorPosition } = action.payload;
+
+    if (id === TOP_BAR_MENU_POPUP) {
+      draft.isTopBarMenuPopupShown = isShown;
+      draft.topBarMenuPopupPosition = anchorPosition;
+    }
 
     if (id === AGREE_POPUP) {
       draft.isAgreePopupShown = isShown;
