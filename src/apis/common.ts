@@ -1,5 +1,5 @@
 import {
-  collection, query, orderBy, startAt, limit, getDocs, doc, onSnapshot,
+  collection, query, where, orderBy, startAt, limit, getDocs, doc, onSnapshot,
 } from 'firebase/firestore';
 
 import { getFstore } from '@/apis/fbase';
@@ -44,8 +44,18 @@ const fetchEvents = async (quryCrsr: string) => {
   return { events: newEvents, quryCrsr: newQuryCrsr };
 };
 
-const fetchEvent = async (slug: string) => {
+const fetchEventsBySlugs = async (slugs: string[]) => {
+  const clt = collection(getFstore(), EVENTS);
+  const wh = where('slug', 'in', slugs);
+  const q = query(clt, wh);
 
+  const newEvents = [];
+  const snapshots = await getDocs(q);
+  snapshots.forEach(ss => {
+    newEvents.push(docToEvt(ss.id, ss.data()));
+  });
+
+  return { events: newEvents };
 };
 
 const listenSync = async (onSuccess, onError) => {
@@ -79,6 +89,6 @@ const joinLetter = async (email) => {
   }
 };
 
-const common = { fetchEvents, fetchEvent, listenSync, joinLetter };
+const common = { fetchEvents, fetchEventsBySlugs, listenSync, joinLetter };
 
 export default common;

@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronDoubleDownIcon, ChevronDoubleUpIcon } from '@heroicons/react/24/solid';
 
@@ -13,7 +14,7 @@ import { isFldStr } from '@/utils';
 
 export function EvtListItemLdg() {
   return (
-    <div className="max-w-xs p-6 aanimate-pulsee rounded-lg bg-slate-800 sm:max-w-none">
+    <div className="max-w-xs p-6 animate-pulse rounded-lg bg-slate-800 sm:max-w-none">
       <div className="flex space-x-3.5">
         <div className="size-10 rounded bg-slate-700"></div>
         <div className="h-4 grow rounded bg-slate-700"></div>
@@ -79,9 +80,9 @@ function Cnt(props) {
         <div className="relative shrink-0 size-10 rounded bg-slate-700 overflow-hidden">
           {isFldStr(evt.img) && <Image className="object-cover" src={evt.img} alt="" fill={true} unoptimized={true} />}
         </div>
-        <a className="grow group" href={`/event/${evt.slug}`}>
+        <Link className="grow group" href={`/event/${evt.slug}`} prefetch={false}>
           <h4 className="text-base font-semibold text-slate-200 group-hover:underline">{evt.title}</h4>
-        </a>
+        </Link>
         <div className="shrink-0 relative h-14 w-12 flex flex-col items-center justify-end overflow-hidden">
           <div className="absolute top-0 aspect-2/1 w-full overflow-hidden flex justify-center items-center rounded-t-full bg-green-400">
             <div style={{ rotate: `${evt.oc0Rot}deg` }} className="absolute top-0 aspect-square w-full bg-gradient-to-t from-transparent from-50% to-slate-500 to-50%" />

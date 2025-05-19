@@ -23,7 +23,7 @@ export const viewport = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <body className={clsx('safe-area min-h-full bg-slate-900 antialiased', inter.variable)}>

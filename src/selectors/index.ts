@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
 
 import { SCALE } from '@/types/const';
-import { isObject, isNumber, isFldStr, parseAvatar } from '@/utils';
+import { isObject, isNumber, isFldStr, getEvent, parseAvatar } from '@/utils';
 import { getShareCosts } from '@/utils/lmsr';
 
 const _getInsets = (insetTop, insetRight, insetBottom, insetLeft) => {
@@ -91,27 +91,17 @@ export const getEvents = createSelector(
   },
 );
 
-export const getEvent = createSelector(
+export const getEventWthSts = createSelector(
   (state, _) => state.events.entries,
-  (state, _) => state.events.slug,
-  (state, _) => state.events.slugFthSts,
+  (state, _) => state.events.slugFthStses,
   (_, slug) => slug,
-  (entries, slug, slugFthSts, curSlug) => {
-    // show loading, event, error
+  (entries, slugFthStses, slug) => {
+    const fthSts = slugFthStses[slug] ?? null;
 
-    if (isObject(entries)) {
-      // if found an event with the same slug in events, return that event
-    }
+    let event = null;
+    if (fthSts === 1) event = getEvent(entries, slug);
 
-    if (slug === curSlug && slugFthSts === 2) {
-      // show error
-    }
-
-    // show loading
-
-    //if (!isFldStr(curSlug) || curSlug !== slug)
-
-    // logic to fetch in useEffect?
+    return { fthSts, ...event };
   },
 );
 
