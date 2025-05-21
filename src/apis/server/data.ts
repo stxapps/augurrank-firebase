@@ -2,14 +2,14 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 
 import {
-  getFstoreAdmin, evtToDoc, syncToDoc, userToDoc, shareToDoc, txToDoc,
+  getFstoreAdmin, evtToDoc, evtChgToDoc, syncToDoc, userToDoc, shareToDoc, txToDoc,
 } from '@/apis/server/fbaseAdmin';
 import {
-  LETTER_JOINS, USERS, SHARES, TXS, EVENTS, SYNCS, ACTIVE, INDEX, N_DOCS, SCS,
+  LETTER_JOINS, USERS, SHARES, TXS, EVENTS, CHANGES, SYNCS, ACTIVE, INDEX, N_DOCS, SCS,
 } from '@/types/const';
 import {
   isObject, isFldStr, newObject, isAvatarEqual, mergeTxs, rectifyUser, rectifyShare,
-  rectifyTx,
+  rectifyTx, areOutcomesEqual,
 } from '@/utils';
 import { docToEvt, docToSync, docToUser, docToShare, docToTx } from '@/utils/fbase';
 
@@ -285,23 +285,28 @@ const queryTxs = async (stxAddr: string, quryCrsr: string | null) => {
 
 const updateEvent = async (logKey, evt, doAdd) => {
   const db = getFstoreAdmin();
-  const ref = db.collection(EVENTS).doc(evt.id);
+  const evtRef = db.collection(EVENTS).doc(evt.id);
+  const chgRef = evtRef.collection(CHANGES);
 
   await db.runTransaction(async (t) => {
-    let newEvt;
+    let newEvt, newChg;
 
-    const snapshot = await t.get(ref);
+    const snapshot = await t.get(evtRef);
     if (snapshot.exists) {
       if (doAdd) throw new Error(`Invalid doAdd ${doAdd} with evt.id: ${evt.id}`);
 
       const oldEvt = docToEvt(evt.id, snapshot.data());
       newEvt = { ...oldEvt, ...evt };
+
+      const areEqual = areOutcomesEqual(oldEvt.outcomes, newEvt.outcomes);
+      if (!areEqual) newChg = newEvt;
     } else {
       if (!doAdd) throw new Error(`Invalid doAdd ${doAdd} with evt.id: ${evt.id}`);
-      newEvt = evt;
+      [newEvt, newChg] = [evt, evt];
     }
 
-    t.set(ref, evtToDoc(newEvt));
+    t.set(evtRef, evtToDoc(newEvt));
+    if (isObject(newChg)) t.set(chgRef, evtChgToDoc(newChg));
     console.log(`(${logKey}) Updated to Firestore`);
   });
 };
@@ -338,6 +343,7 @@ const updateSyncEvt = async (logKey, evtId) => {
 const updateEvtSyncEvt = async (logKey, evt) => {
   const db = getFstoreAdmin();
   const evtRef = db.collection(EVENTS).doc(evt.id);
+  const chgRef = evtRef.collection(CHANGES);
   const syncRef = db.collection(SYNCS).doc(INDEX);
 
   await db.runTransaction(async (t) => {
@@ -355,6 +361,8 @@ const updateEvtSyncEvt = async (logKey, evt) => {
     newEvt.valVol += evt.valVol;
     newEvt.nTraders += evt.nTraders;
 
+    const newChg = newEvt;
+
     const syncSs = await t.get(syncRef);
     if (!syncSs.exists) throw new Error('Sync does not exist: INDEX');
 
@@ -362,6 +370,7 @@ const updateEvtSyncEvt = async (logKey, evt) => {
     newSync.evts[newEvt.id] = newEvt;
 
     t.set(evtRef, evtToDoc(newEvt));
+    t.set(chgRef, evtChgToDoc(newChg));
     t.set(syncRef, syncToDoc(newSync));
     console.log(`(${logKey}) Updated to Firestore`);
   });

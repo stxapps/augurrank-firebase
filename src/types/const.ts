@@ -20,6 +20,7 @@ export const USERS = 'users';
 export const SHARES = 'shares';
 export const TXS = 'txs';
 export const EVENTS = 'events';
+export const CHANGES = 'changes';
 export const COMMENTS = 'comments';
 export const COMMENT_REPLIES = 'commentReplies';
 export const TOTALS = 'totals';

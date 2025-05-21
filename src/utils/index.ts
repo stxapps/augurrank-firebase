@@ -543,3 +543,13 @@ export const getScEvtId = (evtId) => {
   const id = parseInt(match[0], 10);
   return id;
 };
+
+export const areOutcomesEqual = (ocs1, ocs2) => {
+  if (ocs1.length !== ocs2.length) return false;
+
+  for (let i = 0; i < ocs1.length; i++) {
+    const [oc1, oc2] = [ocs1[i], ocs2[i]];
+    if (oc1.id !== oc2.id || oc1.shareAmount !== oc2.shareAmount) return false;
+  }
+  return true;
+};

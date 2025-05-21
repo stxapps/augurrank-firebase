@@ -61,6 +61,20 @@ export const evtToDoc = (evt) => {
   return doc;
 };
 
+export const evtChgToDoc = (chg) => {
+  const doc = {
+    outcomes: chg.outcomes.map(oc => {
+      return { id: oc.id, shareAmount: oc.shareAmount };
+    }),
+    qtyVol: chg.qtyVol,
+    valVol: chg.valVol,
+    nTraders: chg.nTraders,
+    createDate: Timestamp.fromDate(new Date(chg.createDate)),
+    updateDate: Timestamp.fromDate(new Date(chg.updateDate)),
+  };
+  return doc;
+};
+
 export const syncToDoc = (sync) => {
   const doc = { evts: {} };
   for (const [evtId, evt] of Object.entries<any>(sync.evts)) {
