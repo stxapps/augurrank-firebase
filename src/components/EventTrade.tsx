@@ -38,7 +38,7 @@ export function EventTrade() {
   } else if (fthSts === 1) {
     if (isFldStr(id)) { // show content
       content = (
-        <div className="mx-auto max-w-xs lg:w-2/5">
+        <div className="mx-auto max-w-xs lg:grow-0 lg:shrink-0 lg:w-2/5">
           <TradeEditor />
         </div>
       );

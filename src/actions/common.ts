@@ -1,7 +1,9 @@
 import { AppDispatch, AppGetState } from '@/store';
 
 import cmnApi from '@/apis/common';
-import { UPDATE_EVENTS, UPDATE_SYNC, UPDATE_LTRJN_EDITOR } from '@/types/actionTypes';
+import {
+  UPDATE_EVENTS, UPDATE_EVENT_CHANGES, UPDATE_SYNC, UPDATE_LTRJN_EDITOR,
+} from '@/types/actionTypes';
 import {
   JOIN_LETTER_JOINING, JOIN_LETTER_INVALID, JOIN_LETTER_COMMIT, JOIN_LETTER_ROLLBACK,
 } from '@/types/const';
@@ -85,6 +87,41 @@ export const fetchEvent = (slug, doForce = false) => async (
 
 export const updateEvents = (payload) => {
   return { type: UPDATE_EVENTS, payload };
+};
+
+export const fetchEventChanges = (evtId, doForce = false) => async (
+  dispatch: AppDispatch, getState: AppGetState,
+) => {
+  if (!isFldStr(evtId)) return;
+  const evtChgData = getState().eventChanges[evtId];
+
+  let fthSts = null;
+  if (isObject(evtChgData)) fthSts = evtChgData.fthSts;
+
+  if (fthSts === 0) return;
+  if (!doForce && fthSts !== null) return;
+  dispatch(updateEventChanges({ evtId, fthSts: 0 }));
+
+  let data;
+  try {
+    data = await cmnApi.fetchEventChanges(evtId, null);
+  } catch (error) {
+    console.log('fetchEventChanges error:', error);
+    dispatch(updateEventChanges({ evtId, fthSts: 2 }));
+    return;
+  }
+
+  dispatch(updateEventChanges({ ...data, evtId, fthSts: 1 }));
+};
+
+export const fetchEventChangesMore = () => async (
+  dispatch: AppDispatch, getState: AppGetState,
+) => {
+
+};
+
+export const updateEventChanges = (payload) => {
+  return { type: UPDATE_EVENT_CHANGES, payload };
 };
 
 const listenSync = async (dispatch: AppDispatch, getState: AppGetState) => {

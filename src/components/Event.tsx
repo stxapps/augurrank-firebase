@@ -7,7 +7,7 @@ export function Event() {
   return (
     <main className="relative mx-auto max-w-3xl overflow-hidden px-4 py-20 sm:px-6 lg:px-8 xl:px-12">
       <EventTitle />
-      <div className="mt-10 lg:flex">
+      <div className="mt-10 lg:flex lg:space-x-4">
         <EventChart />
         <EventTrade />
       </div>

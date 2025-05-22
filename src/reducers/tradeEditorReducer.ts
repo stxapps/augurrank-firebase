@@ -4,6 +4,7 @@ import { UPDATE_TRADE_EDITOR, RESET_STATE } from '@/types/actionTypes';
 import { isNumber, isString, isFldStr } from '@/utils';
 
 const initialState = {
+  page: null,
   evtId: null,
   type: null,
   ocId: null,

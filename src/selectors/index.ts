@@ -94,14 +94,29 @@ export const getEvents = createSelector(
 export const getEventWthSts = createSelector(
   (state, _) => state.events.entries,
   (state, _) => state.events.slugFthStses,
+  (state, _) => state.eventChanges,
   (_, slug) => slug,
-  (entries, slugFthStses, slug) => {
+  (entries, slugFthStses, eventChanges, slug) => {
     const fthSts = slugFthStses[slug] ?? null;
 
-    let event = null;
-    if (fthSts === 1) event = getEvent(entries, slug);
+    let event = null, chgFthSts = null, chgs = [];
+    if (fthSts === 1) {
+      event = getEvent(entries, slug);
+      if (isObject(event)) {
+        const evtChgData = eventChanges[event.id];
+        if (isObject(evtChgData)) {
+          chgFthSts = evtChgData.fthSts;
+          if (chgFthSts === 1) {
+            for (const evtChg of Object.values<any>(evtChgData.entries)) {
+              const costs = getShareCosts(evtChg).map(cost => cost / SCALE);
+              chgs.push({ time: evtChg.createDate, value: costs[0] });
+            }
+          }
+        }
+      }
+    }
 
-    return { fthSts, ...event };
+    return { fthSts, ...event, chgFthSts, chgs };
   },
 );
 

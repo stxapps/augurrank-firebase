@@ -20,11 +20,11 @@ export function EventDetails() {
   } else if (fthSts === 1) {
     if (isFldStr(desc)) { // show content
       content = (
-        <>
+        <div className="mt-10">
           <InformationCircleIcon className="size-5 text-slate-500" />
           {/* In desc, class="underline" */}
           <p className="mt-1 text-slate-400 text-base" dangerouslySetInnerHTML={{ __html: desc }} />
-        </>
+        </div>
       );
     } else { // not found
       content = (

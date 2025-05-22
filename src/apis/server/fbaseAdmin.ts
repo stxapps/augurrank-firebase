@@ -63,6 +63,7 @@ export const evtToDoc = (evt) => {
 
 export const evtChgToDoc = (chg) => {
   const doc = {
+    beta: chg.beta,
     outcomes: chg.outcomes.map(oc => {
       return { id: oc.id, shareAmount: oc.shareAmount };
     }),

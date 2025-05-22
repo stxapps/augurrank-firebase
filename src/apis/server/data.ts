@@ -299,7 +299,10 @@ const updateEvent = async (logKey, evt, doAdd) => {
       newEvt = { ...oldEvt, ...evt };
 
       const areEqual = areOutcomesEqual(oldEvt.outcomes, newEvt.outcomes);
-      if (!areEqual) newChg = newEvt;
+      if (!areEqual) {
+        newChg = structuredClone(newEvt);
+        newChg.createDate = newChg.updateDate;
+      }
     } else {
       if (!doAdd) throw new Error(`Invalid doAdd ${doAdd} with evt.id: ${evt.id}`);
       [newEvt, newChg] = [evt, evt];
@@ -361,7 +364,8 @@ const updateEvtSyncEvt = async (logKey, evt) => {
     newEvt.valVol += evt.valVol;
     newEvt.nTraders += evt.nTraders;
 
-    const newChg = newEvt;
+    const newChg = structuredClone(newEvt);
+    newChg.createDate = newChg.updateDate;
 
     const syncSs = await t.get(syncRef);
     if (!syncSs.exists) throw new Error('Sync does not exist: INDEX');

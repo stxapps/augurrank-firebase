@@ -31,6 +31,7 @@ const getMsgCnt = (msg) => {
 };
 
 export function TradeEditor() {
+  const page = useSelector(state => state.tradeEditor.page);
   const type = useSelector(state => state.tradeEditor.type);
   const ocId = useSelector(state => state.tradeEditor.ocId);
   const value = useSelector(state => state.tradeEditor.value);

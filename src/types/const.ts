@@ -31,6 +31,7 @@ export const INDEX = 'index';
 export const ACTIVE = 'Active';
 
 export const N_DOCS = 10;
+export const N_CHANGES = 50;
 
 export const SM_WIDTH = 640;
 export const MD_WIDTH = 768;
