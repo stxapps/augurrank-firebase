@@ -128,4 +128,9 @@
     unicode-bidi: bidi-override;
     direction: rtl;
   }
+
+  a#tv-attr-logo svg {
+    --fill: rgb(148 163 184);
+    transform: scale(0.6);
+  }
 }

@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { useSelector, useDispatch } from '@/store';
 import { updateTradeEditor } from '@/actions/tx';
 import { TradeEditor } from '@/components/TradeEditor';
-import { TX_BUY } from '@/types/const';
+import { EVENT, TX_BUY } from '@/types/const';
 import { getEventWthSts } from '@/selectors';
 import { isFldStr } from '@/utils';
 
@@ -18,7 +18,9 @@ export function EventTrade() {
 
   useEffect(() => {
     if (fthSts === 1 && isFldStr(id)) {
-      dispatch(updateTradeEditor({ evtId: id, type: TX_BUY, ocId: 0, value: '10' }));
+      dispatch(updateTradeEditor({
+        evtId: id, page: EVENT, type: TX_BUY, ocId: 0, value: '10',
+      }));
     } else {
       dispatch(updateTradeEditor({ evtId: null }));
     }
@@ -33,7 +35,7 @@ export function EventTrade() {
   let content;
   if (fthSts === 2) { // show error
     content = (
-      <div className="h-5 w-20 bg-slate-700 rounded" />
+      <div className="mx-auto h-40 max-w-xs bg-slate-700 rounded lg:grow-0 lg:shrink-0 lg:w-2/5" />
     );
   } else if (fthSts === 1) {
     if (isFldStr(id)) { // show content
@@ -44,12 +46,12 @@ export function EventTrade() {
       );
     } else { // not found
       content = (
-        <div className="h-5 w-20 bg-slate-700 rounded" />
+        <div className="mx-auto h-40 max-w-xs bg-slate-700 rounded lg:grow-0 lg:shrink-0 lg:w-2/5" />
       );
     }
   } else { // show loading
     content = (
-      <div className="h-5 w-20 bg-slate-700 rounded animate-pulse" />
+      <div className="mx-auto h-40 max-w-xs bg-slate-700 rounded lg:grow-0 lg:shrink-0 lg:w-2/5 animate-pulse" />
     );
   }
 

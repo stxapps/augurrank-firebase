@@ -74,17 +74,7 @@ export const getEvents = createSelector(
     let evts = Object.values<any>(entries);
     evts = evts.map(evt => {
       const costs = getShareCosts(evt);
-      const oc0Chance = Math.floor((costs[0] * 100) / SCALE);
-      const oc0Rot = Math.floor(180 / 100 * oc0Chance);
-
-      let fmtdVol = '';
-      if (isNumber(evt.valVol)) {
-        const valVol = evt.valVol / SCALE;
-        if (valVol >= 1000000) fmtdVol = Math.floor(valVol / 1000000) + 'm';
-        else if (valVol >= 100) fmtdVol = Math.floor(valVol / 1000) + 'k';
-      }
-
-      return { ...evt, oc0Chance, oc0Rot, fmtdVol };
+      return { ...evt, costs };
     });
     evts.sort((a, b) => b.createDate - a.createDate);
     return evts;
@@ -99,24 +89,26 @@ export const getEventWthSts = createSelector(
   (entries, slugFthStses, eventChanges, slug) => {
     const fthSts = slugFthStses[slug] ?? null;
 
-    let event = null, chgFthSts = null, chgs = [];
+    let evt = null, costs = [], chgFthSts = null, chgs = [];
     if (fthSts === 1) {
-      event = getEvent(entries, slug);
-      if (isObject(event)) {
-        const evtChgData = eventChanges[event.id];
+      evt = getEvent(entries, slug);
+      if (isObject(evt)) {
+        costs = getShareCosts(evt);
+
+        const evtChgData = eventChanges[evt.id];
         if (isObject(evtChgData)) {
           chgFthSts = evtChgData.fthSts;
           if (chgFthSts === 1) {
             for (const evtChg of Object.values<any>(evtChgData.entries)) {
-              const costs = getShareCosts(evtChg).map(cost => cost / SCALE);
-              chgs.push({ time: evtChg.createDate, value: costs[0] });
+              const costs = getShareCosts(evtChg);
+              chgs.push({ ...evtChg, costs });
             }
           }
         }
       }
     }
 
-    return { fthSts, ...event, chgFthSts, chgs };
+    return { fthSts, ...evt, costs, chgFthSts, chgs };
   },
 );
 
@@ -137,9 +129,9 @@ export const getTrdEdtrEvt = createSelector(
     const evt = entries[evtId];
     if (!isObject(evt)) return null;
 
-    const shareCosts = getShareCosts(evt).map(cost => cost / SCALE);
+    const costs = getShareCosts(evt);
 
-    return { ...evt, shareCosts };
+    return { ...evt, costs };
   },
 );
 

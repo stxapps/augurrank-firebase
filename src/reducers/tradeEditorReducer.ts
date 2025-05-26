@@ -4,8 +4,8 @@ import { UPDATE_TRADE_EDITOR, RESET_STATE } from '@/types/actionTypes';
 import { isNumber, isString, isFldStr } from '@/utils';
 
 const initialState = {
-  page: null,
   evtId: null,
+  page: null,
   type: null,
   ocId: null,
   value: null,
@@ -15,12 +15,13 @@ const initialState = {
 
 const tradeEditorReducer = (state = initialState, action) => produce(state, draft => {
   if (action.type === UPDATE_TRADE_EDITOR) {
-    const { evtId, type, ocId, value, msg, doLoad } = action.payload;
+    const { evtId, page, type, ocId, value, msg, doLoad } = action.payload;
 
     if (evtId === null || isFldStr(evtId)) {
       for (const [key, value] of Object.entries(initialState)) draft[key] = value;
       draft.evtId = evtId;
     }
+    if (page === null || isFldStr(page)) draft.page = page;
     if (type === null || isFldStr(type)) draft.type = type;
     if (ocId === null || isNumber(ocId)) draft.ocId = ocId;
     if (value === null || isString(value)) draft.value = value;

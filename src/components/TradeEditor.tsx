@@ -5,9 +5,9 @@ import clsx from 'clsx';
 import { useSelector, useDispatch } from '@/store';
 import { updateTradeEditor, trade } from '@/actions/tx';
 import {
-  EVT_INIT, EVT_OPENED, EVT_CLOSED, EVT_RESOLVED, EVT_PAUSED, EVT_DISPUTED,
-  EVT_CANCELED, ERR_INVALID_ARGS, ERR_BALANCE_NOT_FOUND, ERR_BALANCE_TOO_LOW,
-  ERR_SHARES_TOO_LOW,
+  EVENTS, EVENT, EVT_INIT, EVT_OPENED, EVT_CLOSED, EVT_RESOLVED, EVT_PAUSED,
+  EVT_DISPUTED, EVT_CANCELED, TX_BUY, TX_SELL, ERR_INVALID_ARGS, ERR_BALANCE_NOT_FOUND,
+  ERR_BALANCE_TOO_LOW, ERR_SHARES_TOO_LOW, SCALE,
 } from '@/types/const';
 import { getTrdEdtrEvt } from '@/selectors';
 import { isObject, isFldStr } from '@/utils';
@@ -61,6 +61,14 @@ export function TradeEditor() {
     dispatch(updateTradeEditor({ value: `${prsdValue + delta}`, msg: '' }));
   };
 
+  const onOcBtnClick = () => {
+
+  };
+
+  const onTypeBtnClick = (type) => {
+    dispatch(updateTradeEditor({ type }));
+  };
+
   if (!isObject(evt)) return null;
 
   const rangeStyle = { backgroundSize: `${prsdValue}% 100%` };
@@ -70,7 +78,7 @@ export function TradeEditor() {
   if (evt.status === EVT_OPENED) {
     const cls = ocId === 0 ? 'bg-green-400' : 'bg-red-400';
     const txt = ocId === 0 ? 'Buy Yes' : 'Buy No';
-    const amt = Math.floor(prsdValue / evt.shareCosts[ocId]);
+    const amt = Math.floor(prsdValue * SCALE / evt.costs[ocId]);
 
     btn = (
       <button onClick={onOkBtnClick} className={clsx('w-full flex flex-col items-center justify-center py-2 rounded-full hover:brightness-110', cls)}>
@@ -96,7 +104,7 @@ export function TradeEditor() {
 
   return (
     <div className="relative max-w-xs overflow-hidden rounded-lg border border-slate-700 bg-slate-800 sm:max-w-none">
-      <div className="relative flex items-center space-x-3.5 px-5 pt-4">
+      {page === EVENTS && <div className="relative flex items-center space-x-3.5 px-5 pt-4">
         <div className="relative shrink-0 size-8 rounded bg-slate-700 overflow-hidden">
           {isFldStr(evt.img) && <Image className="object-cover" src={evt.img} alt="" fill={true} unoptimized={true} />}
         </div>
@@ -107,7 +115,14 @@ export function TradeEditor() {
             <path fillRule="evenodd" clipRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" />
           </svg>
         </button>
-      </div>
+      </div>}
+      {page === EVENT && <div className="relative flex items-center space-x-3.5 px-5 pt-4">
+        <button className="text-slate-300" onClick={() => onTypeBtnClick(TX_BUY)}>Buy</button>
+        <button className="text-slate-300" onClick={() => onTypeBtnClick(TX_SELL)}>Sell</button>
+      </div>}
+      {page === EVENT && <div className="">
+
+      </div>}
       <div className="mt-4 px-5 flex space-x-3">
         <div className="flex justify-start items-center border border-slate-600 rounded-md pl-2 pr-1 py-1 w-3/5">
           <span className="grow-0 shrink-0 text-slate-100">₳</span>

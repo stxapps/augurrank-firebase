@@ -27,6 +27,8 @@ export const TOTALS = 'totals';
 export const SYNCS = 'syncs';
 export const STX_ACCS = 'stxAccs';
 
+export const EVENT = 'event';
+
 export const INDEX = 'index';
 export const ACTIVE = 'Active';
 

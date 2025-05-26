@@ -15,7 +15,7 @@ export function EventDetails() {
   let content;
   if (fthSts === 2) { // show error
     content = (
-      <div className="h-5 w-20 bg-slate-700 rounded" />
+      <div className="mt-10 h-40 w-2/3 bg-slate-700 rounded" />
     );
   } else if (fthSts === 1) {
     if (isFldStr(desc)) { // show content
@@ -23,17 +23,17 @@ export function EventDetails() {
         <div className="mt-10">
           <InformationCircleIcon className="size-5 text-slate-500" />
           {/* In desc, class="underline" */}
-          <p className="mt-1 text-slate-400 text-base" dangerouslySetInnerHTML={{ __html: desc }} />
+          <p className="mt-2 text-slate-400 text-base" dangerouslySetInnerHTML={{ __html: desc }} />
         </div>
       );
     } else { // not found
       content = (
-        <div className="h-5 w-20 bg-slate-700 rounded" />
+        <div className="mt-10 h-40 w-2/3 bg-slate-700 rounded" />
       );
     }
   } else { // show loading
     content = (
-      <div className="h-5 w-20 bg-slate-700 rounded animate-pulse" />
+      <div className="mt-10 h-40 w-2/3 bg-slate-700 rounded animate-pulse" />
     );
   }
 
