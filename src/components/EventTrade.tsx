@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -19,7 +20,7 @@ export function EventTrade() {
   useEffect(() => {
     if (fthSts === 1 && isFldStr(id)) {
       dispatch(updateTradeEditor({
-        evtId: id, page: EVENT, type: TX_BUY, ocId: 0, value: '10',
+        evtId: id, page: EVENT, type: TX_BUY, ocId: 0, value: '',
       }));
     } else {
       dispatch(updateTradeEditor({ evtId: null }));
@@ -42,6 +43,7 @@ export function EventTrade() {
       content = (
         <div className="mx-auto max-w-xs lg:grow-0 lg:shrink-0 lg:w-2/5">
           <TradeEditor />
+          <p className="mt-4 text-sm text-slate-400 text-center">By trading, you agree to the <Link className="underline" href="/terms" target="_blank" rel="noreferrer">Terms of Use</Link>.</p>
         </div>
       );
     } else { // not found
