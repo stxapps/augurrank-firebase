@@ -45,6 +45,7 @@ export const ID_XVERSE = 'XverseProviders.StacksProvider';
 
 export const STX_TST_STR = 'Please sign this message to prove you own your STX address so we can give you access to our server.';
 
+export const TOP_BAR_MENU_POPUP = 'TOP_BAR_MENU_POPUP';
 export const AGREE_POPUP = 'AGREE_POPUP';
 
 export const LETTERS_JOINS_PATH = '/api/letters/joins';

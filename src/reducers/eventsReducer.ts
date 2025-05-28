@@ -8,8 +8,7 @@ const initialState = {
   entries: {},
   quryCrsr: null,
   fthMoreSts: null, // null: not yet, 0: fetching, 2: error
-  slug: null,
-  slugFthSts: null, // null: not yet, 0: fetching, 1: fetched, 2: error
+  slugFthStses: {}, // key: slug, value: slugFthSts <same as fthSts>
 };
 
 const eventsReducer = (state = initialState, action) => produce(state, draft => {
@@ -35,8 +34,9 @@ const eventsReducer = (state = initialState, action) => produce(state, draft => 
 
     if (quryCrsr === null || isFldStr(quryCrsr)) draft.quryCrsr = quryCrsr;
     if ([null, 0, 2].includes(fthMoreSts)) draft.fthMoreSts = fthMoreSts;
-    if (slug === null || isFldStr(slug)) draft.slug = slug;
-    if ([null, 0, 1, 2].includes(slugFthSts)) draft.slugFthSts = slugFthSts;
+    if (isFldStr(slug) && [null, 0, 1, 2].includes(slugFthSts)) {
+      draft.slugFthStses[slug] = slugFthSts;
+    }
   }
 
   if (action.type === UPDATE_SYNC) {

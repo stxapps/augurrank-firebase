@@ -27,7 +27,7 @@ const meReducer = (state = initialState, action) => produce(state, draft => {
     if (stxSigStr === null || isString(stxSigStr)) draft.stxSigStr = stxSigStr;
 
     const {
-      fthSts, username, avatar, bio, didAgreeTerms, balance, shares,
+      fthSts, username, avatar, bio, didAgreeTerms, balance,
     } = action.payload;
     if ([null, 0, 1, 2].includes(fthSts)) draft.fthSts = fthSts;
     if (username === null || isString(username)) draft.username = username;
@@ -37,6 +37,11 @@ const meReducer = (state = initialState, action) => produce(state, draft => {
       draft.didAgreeTerms = didAgreeTerms;
     }
     if (balance === null || isNumber(balance)) draft.balance = balance;
+
+    const { share, shares } = action.payload;
+    if (isObject(share)) {
+      draft.shares[share.id] = structuredClone(share);
+    }
     if (Array.isArray(shares)) {
       for (const share of shares) {
         draft.shares[share.id] = structuredClone(share);

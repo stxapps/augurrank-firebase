@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
-import { DOMAIN_NAME } from '@/types/const';
 import { Landing } from '@/components/Landing';
+import { DOMAIN_NAME } from '@/types/const';
 
 const title = 'AugurRank - Your vision on chain';
 const description = 'Challenge yourself to envision the future, store your predictions on the chain, and brag about your accuracy forever.';
@@ -25,6 +25,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default function Page() {
   return <Landing />;
 }

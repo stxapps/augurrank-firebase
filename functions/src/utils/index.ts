@@ -256,6 +256,15 @@ export const getWalletErrorText = (error) => {
   return { title, body };
 };
 
+export const getEvent = (entries, slug) => {
+  for (const evt of Object.values<any>(entries)) {
+    if (evt.slug === slug) {
+      return evt;
+    }
+  }
+  return null;
+};
+
 export const getShare = (shares, evtId, ocId) => {
   for (const shr of Object.values<any>(shares)) {
     if (shr.evtId === evtId && shr.ocId === ocId) {

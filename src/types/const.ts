@@ -20,16 +20,20 @@ export const USERS = 'users';
 export const SHARES = 'shares';
 export const TXS = 'txs';
 export const EVENTS = 'events';
+export const CHANGES = 'changes';
 export const COMMENTS = 'comments';
 export const COMMENT_REPLIES = 'commentReplies';
 export const TOTALS = 'totals';
 export const SYNCS = 'syncs';
 export const STX_ACCS = 'stxAccs';
 
+export const EVENT = 'event';
+
 export const INDEX = 'index';
 export const ACTIVE = 'Active';
 
 export const N_DOCS = 10;
+export const N_CHANGES = 50;
 
 export const SM_WIDTH = 640;
 export const MD_WIDTH = 768;
@@ -45,6 +49,7 @@ export const ID_XVERSE = 'XverseProviders.StacksProvider';
 
 export const STX_TST_STR = 'Please sign this message to prove you own your STX address so we can give you access to our server.';
 
+export const TOP_BAR_MENU_POPUP = 'TOP_BAR_MENU_POPUP';
 export const AGREE_POPUP = 'AGREE_POPUP';
 
 export const LETTERS_JOINS_PATH = '/api/letters/joins';

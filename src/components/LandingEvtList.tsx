@@ -46,7 +46,7 @@ export function LandingEvtList() {
   }
 
   return (
-    <div className="mt-10 grid grid-cols-2 gap-4">
+    <div className="mt-10 flex flex-col items-center sm:grid sm:grid-cols-2 sm:gap-4">
       {content}
     </div>
   );

@@ -389,8 +389,17 @@ const deleteSyncEvt = async (logKey, evtId) => {
   });
 };
 
-const getEventBySlug = async (logKey, slug) => {
-  console.log(logKey, slug);
+const getEventBySlug = async (slug) => {
+  const db = getFstoreAdmin();
+  const q = db.collection(EVENTS).where('slug', '==', slug);
+
+  let evt = null;
+  const snapshots = await q.get();
+  snapshots.forEach(ss => {
+    evt = docToEvt(ss.id, ss.data());
+  });
+
+  return evt;
 };
 
 const getEventById = async (logKey, contract, id) => {

@@ -11,7 +11,7 @@ const syncEvt = async () => {
   const logKey = randomString(12);
   logger.info(`(${logKey}) syncEvt receives a task`);
 
-  const evtId = 'augur-markets-t1-0';
+  const evtId = 'augur-markets-t2-0';
   const isNwTrdr = true;
   const amount = 15000000;
   const cost = 9679082;
@@ -24,9 +24,9 @@ const syncEvt = async () => {
     data = await hrAmApi.callReadOnly(
       info.stxAddr,
       info.marketsContract,
-      'get-b-and-ocs',
+      'get-share-amounts',
       info.stxAddr,
-      [Cl.uint(scEvtId), Cl.list([Cl.uint(0), Cl.uint(1)])],
+      [Cl.uint(scEvtId)],
     );
   } catch (error) {
     logger.error(`(${logKey}) hiroApi.callReadOnly error: ${error}`);
@@ -44,8 +44,8 @@ const syncEvt = async () => {
 const parseData = (evtId, isNwTrdr, amount, cost, data) => {
   return {
     id: evtId,
-    outcomes: data.value.ocs.value.map(ocv => {
-      const shareAmount = Number(ocv.value.value['share-amount'].value);
+    outcomes: data.value.amounts.value.map(amount => {
+      const shareAmount = Number(amount.value);
       return { shareAmount };
     }),
     qtyVol: amount,

@@ -1,11 +1,13 @@
 import { AppDispatch, AppGetState } from '@/store';
 
 import cmnApi from '@/apis/common';
-import { UPDATE_EVENTS, UPDATE_SYNC, UPDATE_LTRJN_EDITOR } from '@/types/actionTypes';
+import {
+  UPDATE_EVENTS, UPDATE_EVENT_CHANGES, UPDATE_SYNC, UPDATE_LTRJN_EDITOR,
+} from '@/types/actionTypes';
 import {
   JOIN_LETTER_JOINING, JOIN_LETTER_INVALID, JOIN_LETTER_COMMIT, JOIN_LETTER_ROLLBACK,
 } from '@/types/const';
-import { isFldStr, validateEmail } from '@/utils';
+import { isObject, isFldStr, validateEmail, getEvent } from '@/utils';
 import vars from '@/vars';
 
 export const fetchEvents = (doForce = false) => async (
@@ -53,16 +55,73 @@ export const fetchEventsMore = (doForce = false) => async (
   dispatch(updateEvents({ ...data, fthMoreSts: null }));
 };
 
-export const fetchEvent = (slug: string, doForce = false) => async (
+export const fetchEvent = (slug, doForce = false) => async (
   dispatch: AppDispatch, getState: AppGetState,
 ) => {
-  const { slug, slugFthSts } = getState().events;
+  const { entries, slugFthStses } = getState().events;
+  const fthSts = slugFthStses[slug] ?? null;
+
+  const event = getEvent(entries, slug);
+  if (isObject(event)) {
+    dispatch(updateEvents({ slug, slugFthSts: 1 }));
+    return;
+  }
+
+  if (fthSts === 0) return;
+  if (!doForce && fthSts !== null) return;
+  dispatch(updateEvents({ slug, slugFthSts: 0 }));
+
+  let data;
+  try {
+    data = await cmnApi.fetchEventsBySlugs([slug]);
+  } catch (error) {
+    console.log('fetchEvent error:', error);
+    dispatch(updateEvents({ slug, slugFthSts: 2 }));
+    return;
+  }
+
+  dispatch(updateEvents({ ...data, slug, slugFthSts: 1 }));
 
   await listenSync(dispatch, getState);
 };
 
 export const updateEvents = (payload) => {
   return { type: UPDATE_EVENTS, payload };
+};
+
+export const fetchEventChanges = (evtId, doForce = false) => async (
+  dispatch: AppDispatch, getState: AppGetState,
+) => {
+  if (!isFldStr(evtId)) return;
+  const evtChgData = getState().eventChanges[evtId];
+
+  let fthSts = null;
+  if (isObject(evtChgData)) fthSts = evtChgData.fthSts;
+
+  if (fthSts === 0) return;
+  if (!doForce && fthSts !== null) return;
+  dispatch(updateEventChanges({ evtId, fthSts: 0 }));
+
+  let data;
+  try {
+    data = await cmnApi.fetchEventChanges(evtId, null);
+  } catch (error) {
+    console.log('fetchEventChanges error:', error);
+    dispatch(updateEventChanges({ evtId, fthSts: 2 }));
+    return;
+  }
+
+  dispatch(updateEventChanges({ ...data, evtId, fthSts: 1 }));
+};
+
+export const fetchEventChangesMore = () => async (
+  dispatch: AppDispatch, getState: AppGetState,
+) => {
+
+};
+
+export const updateEventChanges = (payload) => {
+  return { type: UPDATE_EVENT_CHANGES, payload };
 };
 
 const listenSync = async (dispatch: AppDispatch, getState: AppGetState) => {

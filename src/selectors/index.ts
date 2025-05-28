@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
 
 import { SCALE } from '@/types/const';
-import { isObject, isNumber, isFldStr, parseAvatar } from '@/utils';
+import { isObject, isNumber, isFldStr, getEvent, parseAvatar } from '@/utils';
 import { getShareCosts } from '@/utils/lmsr';
 
 const _getInsets = (insetTop, insetRight, insetBottom, insetLeft) => {
@@ -74,44 +74,41 @@ export const getEvents = createSelector(
     let evts = Object.values<any>(entries);
     evts = evts.map(evt => {
       const costs = getShareCosts(evt);
-      const oc0Chance = Math.floor((costs[0] * 100) / SCALE);
-      const oc0Rot = Math.floor(180 / 100 * oc0Chance);
-
-      let fmtdVol;
-      if (isNumber(evt.valVol)) {
-        const valVol = evt.valVol / SCALE;
-        if (valVol >= 1000000) fmtdVol = Math.floor(valVol / 1000000) + 'm';
-        else if (valVol >= 100) fmtdVol = Math.floor(valVol / 1000) + 'k';
-      }
-
-      return { ...evt, oc0Chance, oc0Rot, fmtdVol };
+      return { ...evt, costs };
     });
     evts.sort((a, b) => b.createDate - a.createDate);
     return evts;
   },
 );
 
-export const getEvent = createSelector(
+export const getEventWthSts = createSelector(
   (state, _) => state.events.entries,
-  (state, _) => state.events.slug,
-  (state, _) => state.events.slugFthSts,
+  (state, _) => state.events.slugFthStses,
+  (state, _) => state.eventChanges,
   (_, slug) => slug,
-  (entries, slug, slugFthSts, curSlug) => {
-    // show loading, event, error
+  (entries, slugFthStses, eventChanges, slug) => {
+    const fthSts = slugFthStses[slug] ?? null;
 
-    if (isObject(entries)) {
-      // if found an event with the same slug in events, return that event
+    let evt = null, costs = [], chgFthSts = null, chgs = [];
+    if (fthSts === 1) {
+      evt = getEvent(entries, slug);
+      if (isObject(evt)) {
+        costs = getShareCosts(evt);
+
+        const evtChgData = eventChanges[evt.id];
+        if (isObject(evtChgData)) {
+          chgFthSts = evtChgData.fthSts;
+          if (chgFthSts === 1) {
+            for (const evtChg of Object.values<any>(evtChgData.entries)) {
+              const costs = getShareCosts(evtChg);
+              chgs.push({ ...evtChg, costs });
+            }
+          }
+        }
+      }
     }
 
-    if (slug === curSlug && slugFthSts === 2) {
-      // show error
-    }
-
-    // show loading
-
-    //if (!isFldStr(curSlug) || curSlug !== slug)
-
-    // logic to fetch in useEffect?
+    return { fthSts, ...evt, costs, chgFthSts, chgs };
   },
 );
 
@@ -132,14 +129,30 @@ export const getTrdEdtrEvt = createSelector(
     const evt = entries[evtId];
     if (!isObject(evt)) return null;
 
-    const shareCosts = getShareCosts(evt).map(cost => cost / SCALE);
+    const costs = getShareCosts(evt);
 
-    return { ...evt, shareCosts };
+    return { ...evt, costs };
+  },
+);
+
+export const getMeAvtWthObj = createSelector(
+  state => state.me.avatar,
+  (str) => {
+    const obj = parseAvatar(str);
+    return { str, obj };
+  },
+);
+
+export const getPflAvtWthObj = createSelector(
+  state => state.profile.avatar,
+  (str) => {
+    const obj = parseAvatar(str);
+    return { str, obj };
   },
 );
 
 export const getPflEdtrAvtWthObj = createSelector(
-  state => state.meEditor.avatar,
+  state => state.profileEditor.avatar,
   (str) => {
     const obj = parseAvatar(str);
     return { str, obj };
@@ -147,7 +160,7 @@ export const getPflEdtrAvtWthObj = createSelector(
 );
 
 export const getAvlbAvtsWthObj = createSelector(
-  state => state.meEditor.avlbAvts,
+  state => state.profileEditor.avlbAvts,
   (strs) => {
     if (!Array.isArray(strs)) return null;
 
@@ -167,9 +180,9 @@ export const getAvlbAvtsWthObj = createSelector(
 );
 
 export const getAvlbAvtsHasMore = createSelector(
-  state => state.meEditor.nftOffset,
-  state => state.meEditor.nftLimit,
-  state => state.meEditor.nftTotal,
+  state => state.profileEditor.nftOffset,
+  state => state.profileEditor.nftLimit,
+  state => state.profileEditor.nftTotal,
   (nftOffset, nftLimit, nftTotal) => {
     if (!isNumber(nftOffset) || !isNumber(nftLimit) || !isNumber(nftTotal)) return null;
     return nftOffset + nftLimit < nftTotal;

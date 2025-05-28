@@ -2,7 +2,7 @@ import Url from 'url-parse';
 import {
   HTTP, TX_INIT, TX_IN_MEMPOOL, TX_PUT_OK, TX_PUT_ERROR, TX_CONFIRMED_OK,
   TX_CONFIRMED_ERROR, PDG, SCS, ERR_INVALID_ARGS, ERR_NOT_FOUND, ERR_USER_NOT_FOUND,
-  ERR_VRF_SIG,
+  ERR_VRF_SIG, SCALE,
 } from '@/types/const';
 
 export const isObject = (val) => {
@@ -254,6 +254,15 @@ export const getWalletErrorText = (error) => {
   }
 
   return { title, body };
+};
+
+export const getEvent = (entries, slug) => {
+  for (const evt of Object.values<any>(entries)) {
+    if (evt.slug === slug) {
+      return evt;
+    }
+  }
+  return null;
 };
 
 export const getShare = (shares, evtId, ocId) => {
@@ -533,4 +542,38 @@ export const getScEvtId = (evtId) => {
 
   const id = parseInt(match[0], 10);
   return id;
+};
+
+export const areOutcomesEqual = (ocs1, ocs2) => {
+  if (ocs1.length !== ocs2.length) return false;
+
+  for (let i = 0; i < ocs1.length; i++) {
+    const [oc1, oc2] = [ocs1[i], ocs2[i]];
+    if (oc1.id !== oc2.id || oc1.shareAmount !== oc2.shareAmount) return false;
+  }
+  return true;
+};
+
+export const getFmtdVol = (vol) => {
+  let fmtdVol = '';
+  if (isNumber(vol)) {
+    const valVol = vol / SCALE;
+    if (valVol >= 1000000) fmtdVol = Math.floor(valVol / 1000000) + 'm';
+    else if (valVol >= 100) fmtdVol = Math.floor(valVol / 1000) + 'k';
+  }
+  return fmtdVol;
+};
+
+export const getFmtdDt = (ts) => {
+  const shortMonths = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  const d = new Date(ts);
+
+  const year = d.getFullYear() % 2000;
+  const month = shortMonths[d.getMonth()];
+  const date = d.getDate();
+
+  return `${date} ${month} ${year}`;
 };

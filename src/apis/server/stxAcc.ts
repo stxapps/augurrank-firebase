@@ -28,7 +28,7 @@ const reserveNonce = async (stxAddr, network) => {
     });
     if (fNonce > cNonce) cNonce = fNonce;
 
-    newStxAcc.nonce = cNonce + BigInt(1);
+    newStxAcc.nonce = BigInt(cNonce) + BigInt(1);
     t.set(ref, stxAccToDoc(newStxAcc));
 
     return cNonce;

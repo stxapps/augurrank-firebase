@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronDoubleDownIcon, ChevronDoubleUpIcon } from '@heroicons/react/24/solid';
 
@@ -6,14 +7,15 @@ import { useSelector, useDispatch } from '@/store';
 import { updateTradeEditor } from '@/actions/tx';
 import { TradeEditor } from '@/components/TradeEditor';
 import {
-  EVT_INIT, EVT_CLOSED, EVT_RESOLVED, EVT_PAUSED, EVT_DISPUTED, EVT_CANCELED, TX_BUY,
+  EVENTS, EVT_INIT, EVT_CLOSED, EVT_RESOLVED, EVT_PAUSED, EVT_DISPUTED, EVT_CANCELED,
+  TX_BUY, SCALE,
 } from '@/types/const';
 import { doShowTradeEditor } from '@/selectors';
-import { isFldStr } from '@/utils';
+import { isFldStr, getFmtdVol } from '@/utils';
 
 export function EvtListItemLdg() {
   return (
-    <div className="max-w-md p-6 aanimate-pulsee rounded-lg bg-slate-800">
+    <div className="max-w-xs p-6 animate-pulse rounded-lg bg-slate-800 sm:max-w-none">
       <div className="flex space-x-3.5">
         <div className="size-10 rounded bg-slate-700"></div>
         <div className="h-4 grow rounded bg-slate-700"></div>
@@ -45,8 +47,13 @@ function Cnt(props) {
   const dispatch = useDispatch();
 
   const onTradeBtnClick = (ocId) => {
-    dispatch(updateTradeEditor({ evtId: evt.id, type: TX_BUY, ocId, value: '10' }));
+    dispatch(updateTradeEditor({
+      evtId: evt.id, page: EVENTS, type: TX_BUY, ocId, value: '10',
+    }));
   };
+
+  const oc0Chance = Math.floor((evt.costs[0] * 100) / SCALE);
+  const oc0Rot = Math.floor(180 / 100 * oc0Chance);
 
   let btmCnt = null;
   if (evt.status === EVT_INIT) {
@@ -64,8 +71,10 @@ function Cnt(props) {
   } else if (evt.status === EVT_CANCELED) {
     btmCnt = <p className="text-sm text-slate-400">Canceled</p>;
   } else {
-    if (isFldStr(evt.fmtdVol)) {
-      btmCnt = <p className="text-sm text-slate-400">₳{evt.fmtdVol} Vol.</p>;
+    const fmtdVol = getFmtdVol(evt.valVol);
+
+    if (isFldStr(fmtdVol)) {
+      btmCnt = <p className="text-sm text-slate-400">₳{fmtdVol} Vol.</p>;
     } else {
       btmCnt = (
         <p className="inline-block bg-yellow-900 rounded text-xs font-medium text-yellow-500 px-1 py-0.5">New</p>
@@ -74,20 +83,20 @@ function Cnt(props) {
   }
 
   return (
-    <div className="max-w-md overflow-hidden rounded-lg border border-slate-700 bg-slate-800 sm:max-w-none">
+    <div className="max-w-xs overflow-hidden rounded-lg border border-slate-700 bg-slate-800 sm:max-w-none">
       <div className="flex space-x-3.5 px-5 pt-5">
         <div className="relative shrink-0 size-10 rounded bg-slate-700 overflow-hidden">
           {isFldStr(evt.img) && <Image className="object-cover" src={evt.img} alt="" fill={true} unoptimized={true} />}
         </div>
-        <a className="grow group" href={`/event/${evt.slug}`}>
+        <Link className="grow group" href={`/event/${evt.slug}`} prefetch={false}>
           <h4 className="text-base font-semibold text-slate-200 group-hover:underline">{evt.title}</h4>
-        </a>
+        </Link>
         <div className="shrink-0 relative h-14 w-12 flex flex-col items-center justify-end overflow-hidden">
           <div className="absolute top-0 aspect-2/1 w-full overflow-hidden flex justify-center items-center rounded-t-full bg-green-400">
-            <div style={{ rotate: `${evt.oc0Rot}deg` }} className="absolute top-0 aspect-square w-full bg-gradient-to-t from-transparent from-50% to-slate-500 to-50%" />
+            <div style={{ rotate: `${oc0Rot}deg` }} className="absolute top-0 aspect-square w-full bg-gradient-to-t from-transparent from-50% to-slate-500 to-50%" />
             <div className="absolute top-1/5 aspect-square w-4/5 rounded-full bg-slate-800" />
           </div>
-          <p className="relative text-sm font-semibold text-slate-300">{evt.oc0Chance}%</p>
+          <p className="relative text-sm font-semibold text-slate-300">{oc0Chance}%</p>
           <p className="relative text-sm text-slate-400">chance</p>
         </div>
       </div>
