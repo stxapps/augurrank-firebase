@@ -1,5 +1,5 @@
 'use client';
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -25,7 +25,7 @@ export function TopBarMenuPopup() {
   const cancelBtn = useRef(null);
   const didClick = useRef(false);
   const dispatch = useDispatch();
-  const router = useRouter()
+  const router = useRouter();
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;

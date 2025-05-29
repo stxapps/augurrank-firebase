@@ -90,7 +90,7 @@ export function TradeEditor() {
   useEffect(() => {
     valueRef.current = value;
     trltXRef.current = trltX;
-  }, [value, trltX])
+  }, [value, trltX]);
 
   useEffect(() => {
     if (hSpnRef.current) {

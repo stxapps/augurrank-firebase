@@ -1,6 +1,5 @@
 import { createSelector } from 'reselect';
 
-import { SCALE } from '@/types/const';
 import { isObject, isNumber, isFldStr, getEvent, parseAvatar } from '@/utils';
 import { getShareCosts } from '@/utils/lmsr';
 
@@ -89,7 +88,8 @@ export const getEventWthSts = createSelector(
   (entries, slugFthStses, eventChanges, slug) => {
     const fthSts = slugFthStses[slug] ?? null;
 
-    let evt = null, costs = [], chgFthSts = null, chgs = [];
+    let evt = null, costs = [], chgFthSts = null;
+    const chgs = [];
     if (fthSts === 1) {
       evt = getEvent(entries, slug);
       if (isObject(evt)) {
@@ -143,11 +143,24 @@ export const getMeAvtWthObj = createSelector(
   },
 );
 
-export const getPflAvtWthObj = createSelector(
-  state => state.profile.avatar,
-  (str) => {
-    const obj = parseAvatar(str);
-    return { str, obj };
+export const getProfileWthSts = createSelector(
+  (state, _) => state.me,
+  (state, _) => state.profiles,
+  (_, stxAddr) => stxAddr,
+  (me, profiles, stxAddr) => {
+    let profile;
+    if (me.stxAddr === stxAddr) {
+      profile = { ...me };
+    } else if (isObject(profiles[stxAddr])) {
+      profile = { ...profiles[stxAddr] };
+      return;
+    } else {
+      profile = { fthSts: null };
+    }
+
+    profile.avtWthObj = { str: profile.avatar, obj: parseAvatar(profile.avatar) };
+
+    return profile;
   },
 );
 

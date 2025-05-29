@@ -23,7 +23,7 @@ const axisPosition = (oDim, oSpc, wDim, tPos, tDim, iBgn, iEd) => {
     return [tPos + tDim - oDim, EDGE_TRIGGER];
   }
   // compute center position
-  let pos = Math.round(tPos + (tDim / 2) - (oDim / 2));
+  const pos = Math.round(tPos + (tDim / 2) - (oDim / 2));
   // top boundary overflows, render at window center instead
   if (pos - oSpc - iBgn < 0) {
     return [Math.round((wDim - oDim) / 2), CENTER];
@@ -50,11 +50,11 @@ const computePosition = (
   const { height: oHeight, width: oWidth } = optionsLayout;
   const { x: wX, y: wY, width: wWidth, height: wHeight } = windowLayout;
 
-  let [top, topOrigin] = axisPosition(
-    oHeight, popupMargin, wHeight, tY - wY, tHeight, insets.top, insets.bottom
+  const [top, topOrigin] = axisPosition(
+    oHeight, popupMargin, wHeight, tY - wY, tHeight, insets.top, insets.bottom,
   );
-  let [left, leftOrigin] = axisPosition(
-    oWidth, popupMargin, wWidth, tX - wX, tWidth, insets.left, insets.right
+  const [left, leftOrigin] = axisPosition(
+    oWidth, popupMargin, wWidth, tX - wX, tWidth, insets.left, insets.right,
   );
 
   return { top, left, topOrigin, leftOrigin };
@@ -78,7 +78,7 @@ export const computePositionStyle = (
   triggerLayout, optionsLayout, windowLayout, triggerOffsets, insets, popupMargin = 0,
 ) => {
   const { top, left, topOrigin, leftOrigin } = computePosition(
-    triggerLayout, optionsLayout, windowLayout, triggerOffsets, insets, popupMargin
+    triggerLayout, optionsLayout, windowLayout, triggerOffsets, insets, popupMargin,
   );
   const { transformOrigin } = getOriginStyle(topOrigin, leftOrigin);
 

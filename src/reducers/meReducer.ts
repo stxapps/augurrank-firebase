@@ -1,7 +1,9 @@
 import { produce } from 'immer';
 
 import { INIT, UPDATE_ME, RESET_STATE } from '@/types/actionTypes';
-import { isObject, isString, isNumber, mergeTxs, isTxConfirmed } from '@/utils';
+import {
+  isObject, isString, isNumber, isFldStr, mergeTxs, isTxConfirmed,
+} from '@/utils';
 
 const initialState = {
   stxAddr: null, // null: n/a, '': no value, str: has value
@@ -14,8 +16,11 @@ const initialState = {
   didAgreeTerms: null, // null or false: n/a or did not agree, true: agreed
   balance: null,
   shares: {},
+  txFthSts: null,
   txs: {},
   pdgTxs: {}, // a duplicate (of txs) pending txs e.g., for storing local
+  txQuryCrsr: null,
+  txFthMoreSts: null,
   enrlFthSts: null,
 };
 
@@ -52,7 +57,8 @@ const meReducer = (state = initialState, action) => produce(state, draft => {
       }
     }
 
-    const { tx, txs, removeTxIds } = action.payload;
+    const { txFthSts, tx, txs, removeTxIds } = action.payload;
+    if ([null, 0, 1, 2].includes(txFthSts)) draft.txFthSts = txFthSts;
     if (isObject(tx)) {
       txToDrft(draft, tx);
     }
@@ -71,6 +77,10 @@ const meReducer = (state = initialState, action) => produce(state, draft => {
         delete draft.pdgTxs[id];
       }
     }
+
+    const { txQuryCrsr, txFthMoreSts } = action.payload;
+    if (txQuryCrsr === null || isFldStr(txQuryCrsr)) draft.txQuryCrsr = txQuryCrsr;
+    if ([null, 0, 2].includes(txFthMoreSts)) draft.txFthMoreSts = txFthMoreSts;
 
     const { enrlFthSts } = action.payload;
     if ([null, 0, 1, 2].includes(enrlFthSts)) draft.enrlFthSts = enrlFthSts;

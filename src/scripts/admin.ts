@@ -26,7 +26,7 @@ const uploadImage = async () => {
 
 const evt = {
   title: 'Will STX price more than $1 on 1 Jun 2025?',
-  desc: '',
+  desc: 'More info on https://augurrank.com',
   beta: 200000000,
   status: 0,
   winOcId: null,
@@ -47,6 +47,7 @@ const createEventDb = async () => {
     id: `${info.marketsContract}-0`, // Make sure update contract and id!
     slug: slugify(evt.title),
     img: `https://storage.googleapis.com/${info.bucket}/static/media/lrmnHOuN_400x400.jpg`,
+    desc: 'This will resolve Yes if blablabla. This will resolve No if blablabla. We will use <a className="underline" href="https://betmoar.com/blabla">this</a> as a primary source.',
     qtyVol: 0,
     valVol: 0,
     nTraders: 0,

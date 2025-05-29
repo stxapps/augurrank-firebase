@@ -323,7 +323,7 @@ const refreshUnconfirmedTxs = async (
     txInfo = deriveTxInfo(txInfo);
     if (txInfo.status === PDG) continue;
 
-    const newTx = mergeTxs(tx, { cTxSts: txInfo.status, updateDate: Date.now() })
+    const newTx = mergeTxs(tx, { cTxSts: txInfo.status, updateDate: Date.now() });
     if ([TX_BUY, TX_SELL].includes(newTx.type) && newTx.cTxSts === SCS) {
       newTx.amount = getTxAmount(txInfo);
       newTx.cost = getTxCost(txInfo);

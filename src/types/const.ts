@@ -56,6 +56,7 @@ export const LETTERS_JOINS_PATH = '/api/letters/joins';
 export const ME_PATH = '/api/me';
 export const ENROLLS_PATH = '/api/enrolls';
 export const EVENTS_PATH = '/api/events';
+export const PROFILES_PATH = '/api/profiles';
 export const TXS_PATH = '/api/txs';
 
 export const JOIN_LETTER_INIT = 'JOIN_LETTER_INIT'; // Join letter status

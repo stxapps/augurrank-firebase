@@ -1,7 +1,7 @@
 import { produce } from 'immer';
 
 import { UPDATE_EVENT_CHANGES, UPDATE_SYNC } from '@/types/actionTypes';
-import { isFldStr, isObject, randomString } from '@/utils';
+import { isObject, isFldStr, randomString } from '@/utils';
 
 /* key: evtId, value: fthSts, entries, quryCrsr, fthMoreSts */
 const initialState = {};

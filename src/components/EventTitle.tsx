@@ -23,7 +23,7 @@ export function EventTitle() {
 
   useEffect(() => {
     dispatch(fetchEvent(slug));
-  }, [slug]);
+  }, [slug, dispatch]);
 
   const renderContent = () => {
     let btmCnt = null;
