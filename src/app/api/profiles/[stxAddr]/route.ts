@@ -58,14 +58,15 @@ const toProfile = (user, shares, events) => {
   }
   if (Array.isArray(shares)) {
     profile.shares = shares.map(share => {
-      let evtSlug = '', evtTitle = '', evtDesc = '', evtImg = '';
+      let evtSlug = '', evtTitle = '', evtDesc = '', evtImg = '', ocDesc = '';
 
       const evt = events.find(evt => evt.id === share.evtId);
       if (isObject(evt)) {
         [evtSlug, evtTitle, evtDesc, evtImg] = [evt.slug, evt.title, evt.desc, evt.img];
+        ocDesc = evt.outcomes[share.ocId].desc;
       }
 
-      return { ...share, evtSlug, evtTitle, evtDesc, evtImg };
+      return { ...share, evtSlug, evtTitle, evtDesc, evtImg, ocDesc };
     });
   }
 

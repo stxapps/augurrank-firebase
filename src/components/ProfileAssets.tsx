@@ -41,7 +41,7 @@ export function ProfileAssets() {
                 </div>
                 <div className="shrink grow">
                   <p className="text-base font-semibold text-slate-200 text-right group-hover:underline">{share.evtTitle}</p>
-                  <p className="text-slate-300 text-right mt-1">{Math.floor(share.amount / SCALE)} shares</p>
+                  <p className="text-slate-300 text-right mt-1">{share.ocDesc} {Math.floor(share.amount / SCALE)} shares</p>
                 </div>
               </Link>
             </div>
