@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import {
-  CheckIcon, TrophyIcon, EnvelopeIcon, NewspaperIcon,
-} from '@heroicons/react/24/solid';
+import { EnvelopeIcon, NewspaperIcon } from '@heroicons/react/24/solid';
 
 import { LandingEvtList } from '@/components/LandingEvtList';
 import { LtrjnEditor } from '@/components/LtrjnEditor';
@@ -22,7 +20,7 @@ export function Landing() {
         </div>
       </div>
       <LandingEvtList />
-      <div className="mt-10 flex justify-center space-x-4">
+      <div className="mt-24 flex justify-center space-x-4">
         <Link className="group flex size-10 items-center justify-center rounded-full bg-slate-800" href="https://x.com/AugurRank" target="_blank" rel="noreferrer">
           <TwitterIcon className="size-5 fill-violet-600 group-hover:fill-violet-500" />
         </Link>

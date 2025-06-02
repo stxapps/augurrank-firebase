@@ -15,7 +15,7 @@ import { isFldStr, getFmtdVol } from '@/utils';
 
 export function EvtListItemLdg() {
   return (
-    <div className="max-w-xs p-6 animate-pulse rounded-lg bg-slate-800 sm:max-w-none">
+    <div className="w-full max-w-xs p-6 animate-pulse rounded-lg bg-slate-800">
       <div className="flex space-x-3.5">
         <div className="size-10 rounded bg-slate-700"></div>
         <div className="h-4 grow rounded bg-slate-700"></div>
@@ -29,6 +29,9 @@ export function EvtListItemLdg() {
       <div className="mt-6 flex space-x-3">
         <div className="h-8.5 w-full rounded bg-slate-700"></div>
         <div className="h-8.5 w-full rounded bg-slate-700"></div>
+      </div>
+      <div className="mt-6">
+        <div className="h-5 w-8 rounded bg-slate-700"></div>
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ export function ProfileAssets() {
 
   const renderEmpty = () => {
     return (
-      <div className="flex flex-col items-center justify-center pt-6 text-center">
+      <div className="mt-10 flex flex-col items-center justify-center text-center">
         <ArrowTrendingUpIcon className="size-12 text-slate-400" />
         <h3 className="mt-3 text-base font-semibold text-slate-100">There are no predictions yet.</h3>
         <p className="mt-1 text-sm text-slate-400">Get started by buying a share.</p>

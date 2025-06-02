@@ -57,16 +57,16 @@ export function TopBar() {
           );
         } else {
           blnCnt = (
-            <div className="w-10 h-6 bg-slate-700 animate-pulse" />
+            <div className="w-8 h-6 bg-slate-700 rounded animate-pulse" />
           );
         }
       } else if (fthSts === 2) { // show error
         blnCnt = (
-          <ExclamationCircleIcon className="size-10 text-red-400" />
+          <ExclamationCircleIcon className="size-7.5 text-red-400" />
         );
       } else { // show loading
         blnCnt = (
-          <ArrowDownTrayIcon className="size-8 bg-slate-700 animate-pulse" />
+          <ArrowDownTrayIcon className="size-6.5 text-slate-500 animate-pulse" />
         );
       }
     }
