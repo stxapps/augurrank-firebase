@@ -25,9 +25,16 @@ export async function GET(
   const { stxAddr } = await params;
 
   const user = await dataApi.getUser(stxAddr);
-  const shares = isObject(user) ? await dataApi.getShares(stxAddr) : null;
 
-  const profile = toProfile(user, shares);
+  let shares = null, events = null;
+  if (isObject(user)) {
+    shares = await dataApi.getShares(stxAddr);
+
+    const evtIds = shares.map(share => share.evtId);
+    events = await dataApi.getEvents(evtIds);
+  }
+
+  const profile = toProfile(user, shares, events);
 
   console.log(`(${logKey}) /api/profiles/[stxAddr] finished`);
   return NextResponse.json({ profile }, {
@@ -37,7 +44,7 @@ export async function GET(
   });
 }
 
-const toProfile = (user, shares) => {
+const toProfile = (user, shares, events) => {
   const attrs = ['username', 'avatar', 'bio', 'balance', 'noInLdb'];
 
   const profile: any = {
@@ -49,7 +56,18 @@ const toProfile = (user, shares) => {
       profile[attr] = user[attr];
     }
   }
-  if (Array.isArray(shares)) profile.shares = shares;
+  if (Array.isArray(shares)) {
+    profile.shares = shares.map(share => {
+      let evtSlug = '', evtTitle = '', evtDesc = '', evtImg = '';
+
+      const evt = events.find(evt => evt.id === share.evtId);
+      if (isObject(evt)) {
+        [evtSlug, evtTitle, evtDesc, evtImg] = [evt.slug, evt.title, evt.desc, evt.img];
+      }
+
+      return { ...share, evtSlug, evtTitle, evtDesc, evtImg };
+    });
+  }
 
   return profile;
 };

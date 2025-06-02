@@ -402,6 +402,21 @@ const deleteSyncEvt = async (logKey, evtId) => {
   });
 };
 
+const getEvents = async (ids) => {
+  const db = getFstoreAdmin();
+  const refs = ids.map(id => {
+    return db.collection(EVENTS).doc(id);
+  });
+
+  const events = [];
+  const snapshots = await db.getAll(...refs);
+  snapshots.forEach(ss => {
+    events.push(docToEvt(ss.id, ss.data()));
+  });
+
+  return events;
+};
+
 const getEventBySlug = async (slug) => {
   const db = getFstoreAdmin();
   const q = db.collection(EVENTS).where('slug', '==', slug);
@@ -425,7 +440,7 @@ const uploadFile = async (src, bucket, options) => {
 
 const data = {
   addLetterJoin, updateProfile, updateUsrShrTx, getUser, getShares, getTx, getTxs,
-  queryTxs, updateEvent, updateSyncEvt, updateEvtSyncEvt, deleteSyncEvt,
+  queryTxs, updateEvent, updateSyncEvt, updateEvtSyncEvt, deleteSyncEvt, getEvents,
   getEventBySlug, getEventById, uploadFile,
 };
 

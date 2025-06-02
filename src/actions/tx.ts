@@ -6,6 +6,7 @@ import walletApi from '@/apis/wallet';
 import {
   chooseWallet, signStxTstStr, updateNotiPopup, updateErrorPopup, updateMe, refreshTxs,
 } from '@/actions';
+import { updateProfile } from '@/actions/profile';
 import { UPDATE_TRADE_EDITOR } from '@/types/actionTypes';
 import {
   EVT_OPENED, TX_BUY, TX_SELL, SCS, ERROR, ERR_BALANCE_NOT_FOUND, ERR_INVALID_ARGS,
@@ -16,6 +17,57 @@ import {
   getShare, mergeTxs, getScEvtId,
 } from '@/utils';
 import { getShareCosts, getBuyAmount, getSellCost } from '@/utils/lmsr';
+
+export const fetchTxs = (stxAddr, doForce = false) => async (
+  dispatch: AppDispatch, getState: AppGetState,
+) => {
+  if (!isFldStr(stxAddr)) return;
+
+  let txFthSts = null;
+  if (getState().me.stxAddr === stxAddr) {
+    txFthSts = getState().me.txFthSts;
+  } else {
+    const profileData = getState().profiles[stxAddr];
+    if (isObject(profileData)) txFthSts = profileData.txFthSts;
+  }
+
+  if (txFthSts === 0) return;
+  if (!doForce && txFthSts !== null) return;
+  if (getState().me.stxAddr === stxAddr) {
+    dispatch(updateMe({ txFthSts: 0 }));
+  } else {
+    dispatch(updateProfile({ stxAddr, txFthSts: 0 }));
+  }
+
+  let data, isError;
+  try {
+
+  } catch (error) {
+    console.log('fetchTxs error:', error);
+    isError = true;
+  }
+
+  if (isError) {
+    if (getState().me.stxAddr === stxAddr) {
+      dispatch(updateMe({ txFthSts: 2 }));
+    } else {
+      dispatch(updateProfile({ stxAddr, txFthSts: 2 }));
+    }
+    return;
+  }
+
+  if (getState().me.stxAddr === stxAddr) {
+    dispatch(updateProfile({ ...data }));
+  } else {
+    dispatch(updateProfile({ stxAddr, ...data }));
+  }
+};
+
+export const fetchTxsMore = (stxAddr, doForce = false) => async (
+  dispatch: AppDispatch, getState: AppGetState,
+) => {
+
+};
 
 export const agreeTerms = () => async (
   dispatch: AppDispatch, getState: AppGetState,

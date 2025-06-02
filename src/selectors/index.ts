@@ -1,6 +1,8 @@
 import { createSelector } from 'reselect';
 
-import { isObject, isNumber, isFldStr, getEvent, parseAvatar } from '@/utils';
+import {
+  isObject, isNumber, isFldStr, getEvent, parseAvatar, getAvtThbnl,
+} from '@/utils';
 import { getShareCosts } from '@/utils/lmsr';
 
 const _getInsets = (insetTop, insetRight, insetBottom, insetLeft) => {
@@ -155,10 +157,17 @@ export const getProfileWthSts = createSelector(
       profile = { ...profiles[stxAddr] };
       return;
     } else {
-      profile = { fthSts: null };
+      profile = { fthSts: null, txFthSts: null };
     }
 
     profile.avtWthObj = { str: profile.avatar, obj: parseAvatar(profile.avatar) };
+    profile.avtThbnl = getAvtThbnl(profile.avtWthObj.obj);
+
+    if (isObject(profile.shares)) {
+      profile.shares = Object.values<any>(profile.shares).sort((a, b) => {
+        return a.createDate - b.createDate;
+      });
+    }
 
     return profile;
   },
