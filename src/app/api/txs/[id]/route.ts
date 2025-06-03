@@ -69,7 +69,7 @@ export async function PATCH(
 
     const user = { balance: getInfo().enrollBonus, updateDate: tx.updateDate };
     const { isToScs, rctdUser, rctdTx } = await dataApi.updateUsrShrTx(
-      logKey, stxAddr, user, null, tx
+      logKey, stxAddr, user, null, tx,
     );
     data = { tx: rctdTx };
     if (isToScs) {

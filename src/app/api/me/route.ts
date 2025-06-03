@@ -42,9 +42,16 @@ export async function POST(req: NextRequest) {
   }
 
   const user = await dataApi.getUser(stxAddr);
-  const shares = isObject(user) ? await dataApi.getShares(stxAddr) : null;
 
-  const me = toMe(user, shares);
+  let shares = null, events = null;
+  if (isObject(user)) {
+    shares = await dataApi.getShares(stxAddr);
+
+    const evtIds = shares.map(share => share.evtId);
+    events = await dataApi.getEvents(evtIds);
+  }
+
+  const me = toMe(user, shares, events);
 
   console.log(`(${logKey}) /api/me finished`);
   return NextResponse.json(me, {
@@ -52,7 +59,7 @@ export async function POST(req: NextRequest) {
   });
 }
 
-const toMe = (user, shares) => {
+const toMe = (user, shares, events) => {
   const attrs = [
     'username', 'avatar', 'bio', 'didAgreeTerms', 'balance', 'noInLdb', 'noPrflPg',
   ];
@@ -66,7 +73,19 @@ const toMe = (user, shares) => {
       me[attr] = user[attr];
     }
   }
-  if (Array.isArray(shares)) me.shares = shares;
+  if (Array.isArray(shares)) {
+    me.shares = shares.map(share => {
+      let evtSlug = '', evtTitle = '', evtDesc = '', evtImg = '', ocDesc = '';
+
+      const evt = events.find(evt => evt.id === share.evtId);
+      if (isObject(evt)) {
+        [evtSlug, evtTitle, evtDesc, evtImg] = [evt.slug, evt.title, evt.desc, evt.img];
+        ocDesc = evt.outcomes[share.ocId].desc;
+      }
+
+      return { ...share, evtSlug, evtTitle, evtDesc, evtImg, ocDesc };
+    });
+  }
 
   return me;
 };

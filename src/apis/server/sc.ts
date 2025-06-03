@@ -154,7 +154,7 @@ const setEventBeta = async (scEvtId, beta) => {
 };
 
 const setEventStatus = async (scEvtId, status, winOcId = null) => {
-  const clWinOcId = isNumber(winOcId) ? Cl.uint(winOcId) : Cl.none();
+  const clWinOcId = isNumber(winOcId) ? Cl.some(Cl.uint(winOcId)) : Cl.none();
 
   const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
@@ -176,8 +176,31 @@ const setEventStatus = async (scEvtId, status, winOcId = null) => {
   return { ...res, txId: prepend0x(res.txid) };
 };
 
-const payRewards = async () => {
+const payRewards = async (keys) => {
+  const clKeys = keys.map(key => {
+    return Cl.tuple({
+      'event-id': Cl.uint(key.evtId), 'user-id': Cl.principal(key.userId),
+    });
+  });
 
+  const info = getInfo();
+  const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);
+  const txOptions = {
+    network: info.network,
+    senderKey: process.env.SC_SENDER_KEY,
+    contractAddress: info.stxAddr,
+    contractName: info.marketsContract,
+    functionName: 'pay-rewards',
+    functionArgs: [Cl.list(clKeys)],
+    postConditionMode: PostConditionMode.Allow,
+    postConditions: [],
+    fee: 3261,
+    nonce,
+    validateWithAbi: true,
+  };
+  const transaction = await makeContractCall(txOptions);
+  const res = await broadcastTransaction({ transaction, network: info.network });
+  return { ...res, txId: prepend0x(res.txid) };
 };
 
 const refundFunds = async () => {

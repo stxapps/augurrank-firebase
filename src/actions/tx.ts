@@ -6,16 +6,69 @@ import walletApi from '@/apis/wallet';
 import {
   chooseWallet, signStxTstStr, updateNotiPopup, updateErrorPopup, updateMe, refreshTxs,
 } from '@/actions';
+import { updateProfile } from '@/actions/profile';
 import { UPDATE_TRADE_EDITOR } from '@/types/actionTypes';
 import {
   EVT_OPENED, TX_BUY, TX_SELL, SCS, ERROR, ERR_BALANCE_NOT_FOUND, ERR_INVALID_ARGS,
   ERR_INVALID_AMT, ERR_COST_TOO_LOW, ERR_BALANCE_TOO_LOW, ERR_SHARES_TOO_LOW, SCALE,
+  EVENT,
 } from '@/types/const';
 import {
   isObject, isNumber, isFldStr, randomString, getSignInStatus, getWalletErrorText,
   getShare, mergeTxs, getScEvtId,
 } from '@/utils';
 import { getShareCosts, getBuyAmount, getSellCost } from '@/utils/lmsr';
+
+export const fetchTxs = (stxAddr, doForce = false) => async (
+  dispatch: AppDispatch, getState: AppGetState,
+) => {
+  if (!isFldStr(stxAddr)) return;
+
+  let txFthSts = null;
+  if (getState().me.stxAddr === stxAddr) {
+    txFthSts = getState().me.txFthSts;
+  } else {
+    const profileData = getState().profiles[stxAddr];
+    if (isObject(profileData)) txFthSts = profileData.txFthSts;
+  }
+
+  if (txFthSts === 0) return;
+  if (!doForce && txFthSts !== null) return;
+  if (getState().me.stxAddr === stxAddr) {
+    dispatch(updateMe({ txFthSts: 0 }));
+  } else {
+    dispatch(updateProfile({ stxAddr, txFthSts: 0 }));
+  }
+
+  let data, isError;
+  try {
+
+  } catch (error) {
+    console.log('fetchTxs error:', error);
+    isError = true;
+  }
+
+  if (isError) {
+    if (getState().me.stxAddr === stxAddr) {
+      dispatch(updateMe({ txFthSts: 2 }));
+    } else {
+      dispatch(updateProfile({ stxAddr, txFthSts: 2 }));
+    }
+    return;
+  }
+
+  if (getState().me.stxAddr === stxAddr) {
+    dispatch(updateProfile({ ...data }));
+  } else {
+    dispatch(updateProfile({ stxAddr, ...data }));
+  }
+};
+
+export const fetchTxsMore = (stxAddr, doForce = false) => async (
+  dispatch: AppDispatch, getState: AppGetState,
+) => {
+
+};
 
 export const agreeTerms = () => async (
   dispatch: AppDispatch, getState: AppGetState,
@@ -36,7 +89,7 @@ export const updateTradeEditor = (payload) => {
 export const trade = () => async (
   dispatch: AppDispatch, getState: AppGetState,
 ) => {
-  const { evtId, type, ocId, value } = getState().tradeEditor;
+  const { evtId, page, type, ocId, value } = getState().tradeEditor;
   if (!isFldStr(evtId) || ![TX_BUY, TX_SELL].includes(type) || !isNumber(ocId)) {
     console.log('In trade, invalid evtId, type, or ocId');
     dispatch(updateTradeEditor({ msg: ERROR }));
@@ -70,6 +123,7 @@ export const trade = () => async (
   }
 
   const { stxAddr, stxPubKey, balance, shares } = getState().me;
+  const scldValue = prsdValue * SCALE;
 
   if (type === TX_BUY) {
     if (!isNumber(balance)) {
@@ -82,7 +136,7 @@ export const trade = () => async (
     }
   } else if (type === TX_SELL) {
     const share = getShare(shares, evtId, ocId);
-    if (!isObject(share) || share.amount < prsdValue) {
+    if (!isObject(share) || share.amount < scldValue) {
       dispatch(updateTradeEditor({ msg: ERR_SHARES_TOO_LOW }));
       return;
     }
@@ -90,7 +144,6 @@ export const trade = () => async (
 
   const info = getInfo();
   const scEvtId = getScEvtId(evtId);
-  const scldValue = prsdValue * SCALE;
 
   let functionName, functionArgs, postConditions;
   if (type === TX_BUY) {
@@ -187,13 +240,20 @@ export const trade = () => async (
   }
 
   const newTx = mergeTxs(tx, { cTxId: data.txId, updateDate: Date.now() });
-  dispatch(updateTradeEditor({ evtId: null }));
   dispatch(updateMe({ tx: newTx }));
   dispatch(updateNotiPopup({
     type: SCS,
     title: 'Call the smart contract successfully!',
     body: 'Your transaction should be committed within 5 seconds.',
   }));
+
+  if (page === EVENT) {
+    dispatch(updateTradeEditor({
+      type: TX_BUY, ocId: 0, value: '', msg: '', doLoad: false,
+    }));
+  } else {
+    dispatch(updateTradeEditor({ evtId: null }));
+  }
 
   setTimeout(() => {
     dispatch(refreshTxs());

@@ -32,7 +32,7 @@ export function EventChart() {
 
   useEffect(() => {
     dispatch(fetchEventChanges(evt.id));
-  }, [evt.id]);
+  }, [evt.id, dispatch]);
 
   useEffect(() => {
     if (chgFthSts !== 1) return;

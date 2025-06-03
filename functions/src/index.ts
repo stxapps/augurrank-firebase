@@ -72,5 +72,6 @@ const parseData = (evtId, isNwTrdr, amount, cost, data) => {
     qtyVol: amount,
     valVol: cost,
     nTraders: isNwTrdr ? 1 : 0,
+    updateDate: Date.now(),
   };
 };

@@ -1,7 +1,7 @@
 import { produce } from 'immer';
 
 import { UPDATE_EVENTS, UPDATE_SYNC } from '@/types/actionTypes';
-import { isFldStr, isObject, isNumber } from '@/utils';
+import { isObject, isNumber, isFldStr } from '@/utils';
 
 const initialState = {
   fthSts: null, // null: not yet, 0: fetching, 1: fetched, 2: error

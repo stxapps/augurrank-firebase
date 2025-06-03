@@ -7,7 +7,7 @@ import {
 import {
   JOIN_LETTER_JOINING, JOIN_LETTER_INVALID, JOIN_LETTER_COMMIT, JOIN_LETTER_ROLLBACK,
 } from '@/types/const';
-import { isObject, isFldStr, validateEmail, getEvent } from '@/utils';
+import { isObject, isFldStr, validateEmail, getEventBySlug } from '@/utils';
 import vars from '@/vars';
 
 export const fetchEvents = (doForce = false) => async (
@@ -61,7 +61,7 @@ export const fetchEvent = (slug, doForce = false) => async (
   const { entries, slugFthStses } = getState().events;
   const fthSts = slugFthStses[slug] ?? null;
 
-  const event = getEvent(entries, slug);
+  const event = getEventBySlug(entries, slug);
   if (isObject(event)) {
     dispatch(updateEvents({ slug, slugFthSts: 1 }));
     return;

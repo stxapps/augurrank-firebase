@@ -35,7 +35,7 @@ export function LtrjnEditor() {
   };
 
   return (
-    <div className="px-7 pt-8">
+    <div className="mt-10 mx-auto max-w-sm">
       <p className="text-xl font-medium text-slate-100">Stay up to date</p>
       <p className="mt-2.5 text-sm text-slate-400">Get notified when we have something new, and unsubscribe at any time.</p>
       <input className="mt-5 block w-full rounded-full border border-slate-700 bg-slate-700 px-4 py-1.5 text-sm text-slate-200 placeholder:text-slate-400 focus:outline focus:outline-orange-400" onChange={onEmailInputChange} type="email" autoComplete="email" placeholder="Email address" value={state.email} autoCapitalize="none" disabled={[JOINING, COMMIT].includes(state.status)} />

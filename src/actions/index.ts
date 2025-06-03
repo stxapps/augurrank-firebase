@@ -323,7 +323,7 @@ const refreshUnconfirmedTxs = async (
     txInfo = deriveTxInfo(txInfo);
     if (txInfo.status === PDG) continue;
 
-    const newTx = mergeTxs(tx, { cTxSts: txInfo.status, updateDate: Date.now() })
+    const newTx = mergeTxs(tx, { cTxSts: txInfo.status, updateDate: Date.now() });
     if ([TX_BUY, TX_SELL].includes(newTx.type) && newTx.cTxSts === SCS) {
       newTx.amount = getTxAmount(txInfo);
       newTx.cost = getTxCost(txInfo);
@@ -356,11 +356,19 @@ const refreshUnconfirmedTxs = async (
         }));
       }
     } else if (state === TX_CONFIRMED_ERROR) {
-      dispatch(updateNotiPopup({
-        type: ERROR,
-        title: 'There is an error with your sign-up bonus!',
-        body: 'We\'ll sort it out. Please wait for a while and refresh the page.',
-      }));
+      if ([TX_ENROLL].includes(data.tx.type)) {
+        dispatch(updateNotiPopup({
+          type: ERROR,
+          title: 'There is an error with your sign-up bonus!',
+          body: 'We\'ll sort it out. Please wait for a while and refresh the page.',
+        }));
+      } else if ([TX_BUY, TX_SELL].includes(data.tx.type)) {
+        dispatch(updateNotiPopup({
+          type: ERROR,
+          title: 'There is an error with your transaction!',
+          body: 'Please verify that the nonce and fee are valid, or feel free to contact us.',
+        }));
+      }
     }
   }
 };

@@ -25,13 +25,13 @@ export function EventTrade() {
     } else {
       dispatch(updateTradeEditor({ evtId: null }));
     }
-  }, [slug, fthSts]);
+  }, [slug, fthSts, id, dispatch]);
 
   useEffect(() => {
     return () => {
       dispatch(updateTradeEditor({ evtId: null }));
     };
-  }, []);
+  }, [dispatch]);
 
   let content;
   if (fthSts === 2) { // show error

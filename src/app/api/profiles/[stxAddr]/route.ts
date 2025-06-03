@@ -10,10 +10,6 @@ import {
   validateProfile,
 } from '@/utils';
 
-//export const dynamic = 'force-static';
-//export const revalidate = 60;
-//Use revalidatePath('/profiles/[stxAddr]'), when there is a change?
-
 export async function GET(
   req: NextRequest, { params }: { params: Promise<{ stxAddr: string }> },
 ) {
@@ -29,16 +25,53 @@ export async function GET(
   const { stxAddr } = await params;
 
   const user = await dataApi.getUser(stxAddr);
-  const profile = { username: user.username, avatar: user.avatar, bio: user.bio };
+
+  let shares = null, events = null;
+  if (isObject(user)) {
+    shares = await dataApi.getShares(stxAddr);
+
+    const evtIds = shares.map(share => share.evtId);
+    events = await dataApi.getEvents(evtIds);
+  }
+
+  const profile = toProfile(user, shares, events);
 
   console.log(`(${logKey}) /api/profiles/[stxAddr] finished`);
   return NextResponse.json({ profile }, {
     status: 200, headers: {
-      'Cache-Control': 'public, max-age=60', // Cache for 60 seconds
-      //'Cache-Control': 's-maxage=300, stale-while-revalidate=60', // CDN caches for 5 min, serves stale for 1 min while revalidating
+      'Cache-Control': 'public, max-age=300, s-maxage=300, stale-while-revalidate=60',
     },
   });
 }
+
+const toProfile = (user, shares, events) => {
+  const attrs = ['username', 'avatar', 'bio', 'balance', 'noInLdb'];
+
+  const profile: any = {
+    username: '', avatar: '', bio: '', balance: null,
+  };
+  if (isObject(user) && user.noPrflPg !== true) {
+    for (const attr of attrs) {
+      if (!(attr in user)) continue;
+      profile[attr] = user[attr];
+    }
+  }
+  if (Array.isArray(shares)) {
+    profile.shares = shares.map(share => {
+      let evtSlug = '', evtTitle = '', evtDesc = '', evtImg = '', ocDesc = '';
+
+      const evt = events.find(evt => evt.id === share.evtId);
+      if (isObject(evt)) {
+        [evtSlug, evtTitle, evtDesc, evtImg] = [evt.slug, evt.title, evt.desc, evt.img];
+        ocDesc = evt.outcomes[share.ocId].desc;
+      }
+
+      return { ...share, evtSlug, evtTitle, evtDesc, evtImg, ocDesc };
+    });
+  }
+
+  return profile;
+};
 
 export async function PATCH(
   req: NextRequest, { params }: { params: Promise<{ stxAddr: string }> },

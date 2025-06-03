@@ -256,7 +256,16 @@ export const getWalletErrorText = (error) => {
   return { title, body };
 };
 
-export const getEvent = (entries, slug) => {
+export const getEventById = (entries, id) => {
+  for (const evt of Object.values<any>(entries)) {
+    if (evt.id === id) {
+      return evt;
+    }
+  }
+  return null;
+};
+
+export const getEventBySlug = (entries, slug) => {
   for (const evt of Object.values<any>(entries)) {
     if (evt.slug === slug) {
       return evt;

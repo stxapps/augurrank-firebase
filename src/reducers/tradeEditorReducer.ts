@@ -1,6 +1,7 @@
 import { produce } from 'immer';
 
 import { UPDATE_TRADE_EDITOR, RESET_STATE } from '@/types/actionTypes';
+import { EVENT, TX_BUY } from '@/types/const';
 import { isNumber, isString, isFldStr } from '@/utils';
 
 const initialState = {
@@ -35,6 +36,13 @@ const tradeEditorReducer = (state = initialState, action) => produce(state, draf
   }
 
   if (action.type === RESET_STATE) {
+    const { evtId, page } = state;
+    if (page === EVENT) {
+      return {
+        ...structuredClone(initialState),
+        evtId, page, type: TX_BUY, ocId: 0, value: '', shdwValue: '',
+      };
+    }
     return structuredClone(initialState);
   }
 });

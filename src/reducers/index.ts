@@ -6,7 +6,7 @@ import eventsReducer from './eventsReducer';
 import eventChangesReducer from './eventChangesReducer';
 import ltrjnEditorReducer from './ltrjnEditorReducer';
 import meReducer from './meReducer';
-import profileReducer from './profileReducer';
+import profilesReducer from './profilesReducer';
 import profileEditorReducer from './profileEditorReducer';
 import tradeEditorReducer from './tradeEditorReducer';
 
@@ -17,7 +17,7 @@ const reducers = combineReducers({
   eventChanges: eventChangesReducer,
   ltrjnEditor: ltrjnEditorReducer,
   me: meReducer,
-  profile: profileReducer,
+  profiles: profilesReducer,
   profileEditor: profileEditorReducer,
   tradeEditor: tradeEditorReducer,
 });

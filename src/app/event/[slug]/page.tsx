@@ -4,7 +4,7 @@ import { DOMAIN_NAME } from '@/types/const';
 import { isObject } from '@/utils';
 
 export async function generateMetadata(
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
   const evt = await cacheApi.getEvt(slug);
@@ -12,7 +12,11 @@ export async function generateMetadata(
   let title = 'Event not found';
   let description = 'Sorry, we couldn’t find the event you’re looking for.';
   if (isObject(evt)) {
-    [title, description] = [evt.title, evt.desc];
+    title = evt.title;
+
+    description = evt.desc;
+    description = description.slice(0, 256).split('<')[0].trim();
+    if (description.length < evt.desc.length) description += '...';
   }
   return {
     title,
@@ -32,7 +36,7 @@ export async function generateMetadata(
       type: 'article',
       images: [DOMAIN_NAME + '/twitter-card-image-pattern1.png'],
     },
-  }
+  };
 }
 
 export default function Page() {

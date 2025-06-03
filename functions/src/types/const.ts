@@ -20,16 +20,20 @@ export const USERS = 'users';
 export const SHARES = 'shares';
 export const TXS = 'txs';
 export const EVENTS = 'events';
+export const CHANGES = 'changes';
 export const COMMENTS = 'comments';
 export const COMMENT_REPLIES = 'commentReplies';
 export const TOTALS = 'totals';
 export const SYNCS = 'syncs';
 export const STX_ACCS = 'stxAccs';
 
+export const EVENT = 'event';
+
 export const INDEX = 'index';
 export const ACTIVE = 'Active';
 
 export const N_DOCS = 10;
+export const N_CHANGES = 50;
 
 export const SM_WIDTH = 640;
 export const MD_WIDTH = 768;
@@ -52,6 +56,7 @@ export const LETTERS_JOINS_PATH = '/api/letters/joins';
 export const ME_PATH = '/api/me';
 export const ENROLLS_PATH = '/api/enrolls';
 export const EVENTS_PATH = '/api/events';
+export const PROFILES_PATH = '/api/profiles';
 export const TXS_PATH = '/api/txs';
 
 export const JOIN_LETTER_INIT = 'JOIN_LETTER_INIT'; // Join letter status

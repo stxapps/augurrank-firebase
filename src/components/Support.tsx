@@ -1,26 +1,17 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { EnvelopeIcon, NewspaperIcon } from '@heroicons/react/24/solid';
 
-import { LandingEvtList } from '@/components/LandingEvtList';
-import { LtrjnEditor } from '@/components/LtrjnEditor';
 import { TwitterIcon, ThreadsIcon, BSkyIcon, GithubIcon } from '@/components/Icons';
-import Logo from '@/images/logo.svg';
 
-export function Landing() {
+export function Support() {
+
   return (
-    <main className="relative mx-auto max-w-2xl overflow-hidden px-4 py-20 sm:px-6 lg:px-8 xl:px-12">
-      <div className="flex flex-col items-center justify-start sm:flex-row sm:justify-center">
-        <div className="rounded-full border-2 border-slate-800 p-2">
-          <Image className="size-32" width={128} height={128} src={Logo} alt="" placeholder="empty" priority={true} />
-        </div>
-        <div className="mt-6 sm:ml-6 sm:mt-0">
-          <h1 className="text-center text-5xl font-medium text-white sm:text-left">AugurRank</h1>
-          <p className="mt-3 text-center text-xl text-slate-400 sm:text-left">Your vision on chain</p>
-        </div>
+    <main className="relative px-4 py-20 sm:px-6 lg:px-8 xl:px-12">
+      <div className="mx-auto max-w-prose">
+        <h1 className="text-center text-3xl font-extrabold text-slate-100 sm:text-4xl">Support</h1>
+        <p className="mt-5 text-base text-gray-400">Please feel free to contact us.</p>
       </div>
-      <LandingEvtList />
-      <div className="mt-24 flex justify-center space-x-4">
+      <div className="mt-20 flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
         <Link className="group flex size-10 items-center justify-center rounded-full bg-slate-800" href="https://x.com/AugurRank" target="_blank" rel="noreferrer">
           <TwitterIcon className="size-5 fill-violet-600 group-hover:fill-violet-500" />
         </Link>
@@ -40,7 +31,6 @@ export function Landing() {
           <NewspaperIcon className="size-5 fill-orange-400 group-hover:fill-orange-300" />
         </Link>
       </div>
-      <LtrjnEditor />
     </main>
   );
 }

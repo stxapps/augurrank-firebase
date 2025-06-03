@@ -1,15 +1,15 @@
 import { FieldValue } from 'firebase-admin/firestore';
-import { getStorage } from 'firebase-admin/storage';
 
 import {
-  getFstoreAdmin, evtToDoc, syncToDoc, userToDoc, shareToDoc, txToDoc,
+  getFstoreAdmin, getStrgAdmin, evtToDoc, evtChgToDoc, syncToDoc, userToDoc,
+  shareToDoc, txToDoc,
 } from '@/apis/server/fbaseAdmin';
 import {
-  LETTER_JOINS, USERS, SHARES, TXS, EVENTS, SYNCS, ACTIVE, INDEX, N_DOCS, SCS,
+  LETTER_JOINS, USERS, SHARES, TXS, EVENTS, CHANGES, SYNCS, ACTIVE, INDEX, N_DOCS, SCS,
 } from '@/types/const';
 import {
   isObject, isFldStr, newObject, isAvatarEqual, mergeTxs, rectifyUser, rectifyShare,
-  rectifyTx,
+  rectifyTx, areOutcomesEqual,
 } from '@/utils';
 import { docToEvt, docToSync, docToUser, docToShare, docToTx } from '@/utils/fbase';
 
@@ -123,6 +123,43 @@ const updateProfile = async (logKey, stxAddr, profile) => {
   });
 };
 
+const updateUsrShr = async (logKey, stxAddr, user, share) => {
+  const db = getFstoreAdmin();
+  const userRef = db.collection(USERS).doc(stxAddr);
+  const shareRef = userRef.collection(SHARES).doc(share.id);
+
+  const res = await db.runTransaction(async (t) => {
+    let oldUser, newUser, oldShare, newShare;
+
+    const uSnapshot = await t.get(userRef);
+    if (uSnapshot.exists) {
+      oldUser = docToUser(uSnapshot.id, uSnapshot.data());
+      newUser = { ...oldUser, ...user };
+    } else {
+      throw new Error(`Invalid user: ${user}`);
+    }
+
+    const sSnapshot = await t.get(shareRef);
+    if (sSnapshot.exists) {
+      oldShare = docToShare(sSnapshot.id, sSnapshot.data());
+      newShare = { ...oldShare, ...share };
+    } else {
+      throw new Error(`Invalid share: ${share}`);
+    }
+
+    const rctdUser = rectifyUser(oldUser, newUser);
+    t.set(userRef, userToDoc(rctdUser));
+
+    const rctdShare = rectifyShare(oldShare, newShare);
+    t.set(shareRef, shareToDoc(rctdShare));
+    console.log(`(${logKey}) Updated to Firestore`);
+
+    return { rctdUser, rctdShare };
+  });
+
+  return res;
+};
+
 const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
   const db = getFstoreAdmin();
   const rRef = db.collection(USERS).doc(stxAddr);
@@ -159,7 +196,7 @@ const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
         };
       } else {
         newShare = { ...share, createDate: share.updateDate };
-        isNwTrdr = true;
+        isNwTrdr = true; // Bug alert: nTraders + 1 for all outcomes even same trader!
       }
     }
     const snapshot = await t.get(txRef);
@@ -236,13 +273,15 @@ const getTxs = async (stxAddr, ids) => {
   });
 
   const txsPerId = {};
-  const snapshots = await db.getAll(...refs);
-  snapshots.forEach(ss => {
-    if (!ss.exists) return;
+  if (refs.length > 0) {
+    const snapshots = await db.getAll(...refs);
+    snapshots.forEach(ss => {
+      if (!ss.exists) return;
 
-    const tx = docToTx(ss.id, ss.data());
-    txsPerId[tx.id] = tx;
-  });
+      const tx = docToTx(ss.id, ss.data());
+      txsPerId[tx.id] = tx;
+    });
+  }
 
   const txs = ids.map(id => {
     const tx = txsPerId[id];
@@ -285,23 +324,31 @@ const queryTxs = async (stxAddr: string, quryCrsr: string | null) => {
 
 const updateEvent = async (logKey, evt, doAdd) => {
   const db = getFstoreAdmin();
-  const ref = db.collection(EVENTS).doc(evt.id);
+  const evtRef = db.collection(EVENTS).doc(evt.id);
+  const chgRef = evtRef.collection(CHANGES).doc();
 
   await db.runTransaction(async (t) => {
-    let newEvt;
+    let newEvt, newChg;
 
-    const snapshot = await t.get(ref);
+    const snapshot = await t.get(evtRef);
     if (snapshot.exists) {
       if (doAdd) throw new Error(`Invalid doAdd ${doAdd} with evt.id: ${evt.id}`);
 
       const oldEvt = docToEvt(evt.id, snapshot.data());
       newEvt = { ...oldEvt, ...evt };
+
+      const areEqual = areOutcomesEqual(oldEvt.outcomes, newEvt.outcomes);
+      if (!areEqual) {
+        newChg = structuredClone(newEvt);
+        newChg.createDate = newChg.updateDate;
+      }
     } else {
       if (!doAdd) throw new Error(`Invalid doAdd ${doAdd} with evt.id: ${evt.id}`);
-      newEvt = evt;
+      [newEvt, newChg] = [evt, evt];
     }
 
-    t.set(ref, evtToDoc(newEvt));
+    t.set(evtRef, evtToDoc(newEvt));
+    if (isObject(newChg)) t.create(chgRef, evtChgToDoc(newChg));
     console.log(`(${logKey}) Updated to Firestore`);
   });
 };
@@ -338,6 +385,7 @@ const updateSyncEvt = async (logKey, evtId) => {
 const updateEvtSyncEvt = async (logKey, evt) => {
   const db = getFstoreAdmin();
   const evtRef = db.collection(EVENTS).doc(evt.id);
+  const chgRef = evtRef.collection(CHANGES).doc();
   const syncRef = db.collection(SYNCS).doc(INDEX);
 
   await db.runTransaction(async (t) => {
@@ -354,6 +402,10 @@ const updateEvtSyncEvt = async (logKey, evt) => {
     newEvt.qtyVol += evt.qtyVol;
     newEvt.valVol += evt.valVol;
     newEvt.nTraders += evt.nTraders;
+    newEvt.updateDate = evt.updateDate;
+
+    const newChg = structuredClone(newEvt);
+    newChg.createDate = newChg.updateDate;
 
     const syncSs = await t.get(syncRef);
     if (!syncSs.exists) throw new Error('Sync does not exist: INDEX');
@@ -362,6 +414,7 @@ const updateEvtSyncEvt = async (logKey, evt) => {
     newSync.evts[newEvt.id] = newEvt;
 
     t.set(evtRef, evtToDoc(newEvt));
+    t.create(chgRef, evtChgToDoc(newChg));
     t.set(syncRef, syncToDoc(newSync));
     console.log(`(${logKey}) Updated to Firestore`);
   });
@@ -389,6 +442,27 @@ const deleteSyncEvt = async (logKey, evtId) => {
   });
 };
 
+const getEvents = async (ids) => {
+  const db = getFstoreAdmin();
+  const refs = ids.map(id => {
+    return db.collection(EVENTS).doc(id);
+  });
+
+  const events = [];
+  if (refs.length > 0) {
+    const snapshots = await db.getAll(...refs);
+    snapshots.forEach(ss => {
+      events.push(docToEvt(ss.id, ss.data()));
+    });
+  }
+
+  return events;
+};
+
+const getEventById = async (logKey, contract, id) => {
+  console.log(logKey, contract, id);
+};
+
 const getEventBySlug = async (slug) => {
   const db = getFstoreAdmin();
   const q = db.collection(EVENTS).where('slug', '==', slug);
@@ -402,18 +476,15 @@ const getEventBySlug = async (slug) => {
   return evt;
 };
 
-const getEventById = async (logKey, contract, id) => {
-  console.log(logKey, contract, id);
-};
-
 const uploadFile = async (src, bucket, options) => {
-  await getStorage().bucket(bucket).upload(src, options);
+  const strg = getStrgAdmin();
+  await strg.bucket(bucket).upload(src, options);
 };
 
 const data = {
-  addLetterJoin, updateProfile, updateUsrShrTx, getUser, getShares, getTx, getTxs,
-  queryTxs, updateEvent, updateSyncEvt, updateEvtSyncEvt, deleteSyncEvt,
-  getEventBySlug, getEventById, uploadFile,
+  addLetterJoin, updateProfile, updateUsrShr, updateUsrShrTx, getUser, getShares,
+  getTx, getTxs, queryTxs, updateEvent, updateSyncEvt, updateEvtSyncEvt, deleteSyncEvt,
+  getEvents, getEventById, getEventBySlug, uploadFile,
 };
 
 export default data;
