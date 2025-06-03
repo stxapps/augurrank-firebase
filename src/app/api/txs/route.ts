@@ -5,10 +5,7 @@ import dataApi from '@/apis/server/data';
 import { ALLOWED_ORIGINS } from '@/types/const';
 import { getReferrer, randomString, removeTailingSlash, isFldStr } from '@/utils';
 
-export async function GET(
-  req: NextRequest,
-  { searchParams }: { searchParams: Promise<{ stxAddr: string, quryCusr: string }> },
-) {
+export async function GET(req: NextRequest) {
   const logKey = randomString(12);
   console.log(`(${logKey}) /api/txs receives a get request`);
 
@@ -18,7 +15,9 @@ export async function GET(
     console.log(`(${logKey}) Not expected referrer.`);
   }
 
-  const { stxAddr, quryCusr } = await searchParams;
+  const searchParams = req.nextUrl.searchParams;
+  const stxAddr = searchParams.get('stxAddr');
+  const quryCusr = searchParams.get('quryCusr');
   if (!isFldStr(stxAddr)) {
 
   }
