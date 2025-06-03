@@ -348,7 +348,7 @@ const updateEvent = async (logKey, evt, doAdd) => {
     }
 
     t.set(evtRef, evtToDoc(newEvt));
-    if (isObject(newChg)) t.set(chgRef, evtChgToDoc(newChg));
+    if (isObject(newChg)) t.create(chgRef, evtChgToDoc(newChg));
     console.log(`(${logKey}) Updated to Firestore`);
   });
 };
@@ -385,7 +385,7 @@ const updateSyncEvt = async (logKey, evtId) => {
 const updateEvtSyncEvt = async (logKey, evt) => {
   const db = getFstoreAdmin();
   const evtRef = db.collection(EVENTS).doc(evt.id);
-  const chgRef = evtRef.collection(CHANGES);
+  const chgRef = evtRef.collection(CHANGES).doc();
   const syncRef = db.collection(SYNCS).doc(INDEX);
 
   await db.runTransaction(async (t) => {
@@ -414,7 +414,7 @@ const updateEvtSyncEvt = async (logKey, evt) => {
     newSync.evts[newEvt.id] = newEvt;
 
     t.set(evtRef, evtToDoc(newEvt));
-    t.set(chgRef, evtChgToDoc(newChg));
+    t.create(chgRef, evtChgToDoc(newChg));
     t.set(syncRef, syncToDoc(newSync));
     console.log(`(${logKey}) Updated to Firestore`);
   });
