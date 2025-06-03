@@ -181,7 +181,7 @@ const payRewards = async (keys) => {
     return Cl.tuple({
       'event-id': Cl.uint(key.evtId), 'user-id': Cl.principal(key.userId),
     });
-  })
+  });
 
   const info = getInfo();
   const nonce = await stxAccApi.reserveNonce(info.stxAddr, info.network);

@@ -30,7 +30,7 @@ export function ProfileTitle() {
   }, [stxAddr, meStxAddr, dispatch]);
 
   const renderContent = () => {
-    let avatarPane, usernamePane, stxAddrPane, bioPane;
+    let avatarPane, stxAddrPane, bioPane;
 
     let addrUrl = `https://explorer.hiro.so/address/${stxAddr}`;
     const networkName = process.env.NEXT_PUBLIC_STACKS_NETWORK;
@@ -47,7 +47,7 @@ export function ProfileTitle() {
         <UserIcon className="size-32 text-slate-700" />
       );
     }
-    usernamePane = (
+    const usernamePane = (
       <Link href={addrUrl} target="_blank" rel="noreferrer">
         <h1 className="truncate text-center text-4xl font-medium text-slate-100 sm:text-left sm:text-5xl sm:leading-tight">{isFldStr(username) ? username : 'Username'}</h1>
       </Link>
@@ -77,17 +77,15 @@ export function ProfileTitle() {
   };
 
   const renderLoading = () => {
-    let avatarPane, usernamePane, stxAddrPane, bioPane;
-
-    avatarPane = (
+    const avatarPane = (
       <div className="size-32 rounded-full bg-slate-800 animate-pulse" />
     );
-    usernamePane = (
+    const usernamePane = (
       <div className="flex items-center justify-center sm:justify-start">
         <div className="h-10 w-64 rounded bg-slate-800 animate-pulse" />
       </div>
     );
-    stxAddrPane = (
+    const stxAddrPane = (
       <div className="flex items-center justify-center sm:justify-start">
         <div className="mt-4 h-6 w-40 rounded bg-slate-800 animate-pulse" />
       </div>
@@ -99,7 +97,6 @@ export function ProfileTitle() {
         <div className="mt-6 w-full max-w-md sm:ml-6 sm:mt-0 sm:w-auto sm:min-w-52">
           {usernamePane}
           {stxAddrPane}
-          {bioPane}
         </div>
       </div>
     );

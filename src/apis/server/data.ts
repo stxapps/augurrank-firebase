@@ -129,7 +129,7 @@ const updateUsrShr = async (logKey, stxAddr, user, share) => {
   const shareRef = userRef.collection(SHARES).doc(share.id);
 
   const res = await db.runTransaction(async (t) => {
-    let oldUser, newUser, oldShare, newShare, rctdUser, rctdShare;
+    let oldUser, newUser, oldShare, newShare;
 
     const uSnapshot = await t.get(userRef);
     if (uSnapshot.exists) {
@@ -147,10 +147,10 @@ const updateUsrShr = async (logKey, stxAddr, user, share) => {
       throw new Error(`Invalid share: ${share}`);
     }
 
-    rctdUser = rectifyUser(oldUser, newUser);
+    const rctdUser = rectifyUser(oldUser, newUser);
     t.set(userRef, userToDoc(rctdUser));
 
-    rctdShare = rectifyShare(oldShare, newShare);
+    const rctdShare = rectifyShare(oldShare, newShare);
     t.set(shareRef, shareToDoc(rctdShare));
     console.log(`(${logKey}) Updated to Firestore`);
 
