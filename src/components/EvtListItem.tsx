@@ -2,13 +2,14 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronDoubleDownIcon, ChevronDoubleUpIcon } from '@heroicons/react/24/solid';
+import clsx from 'clsx';
 
 import { useSelector, useDispatch } from '@/store';
 import { updateTradeEditor } from '@/actions/tx';
 import { TradeEditor } from '@/components/TradeEditor';
 import {
-  EVENTS, EVT_INIT, EVT_CLOSED, EVT_RESOLVED, EVT_PAUSED, EVT_DISPUTED, EVT_CANCELED,
-  TX_BUY, SCALE,
+  EVENTS, EVT_INIT, EVT_OPENED, EVT_CLOSED, EVT_RESOLVED, EVT_PAUSED, EVT_DISPUTED,
+  EVT_CANCELED, TX_BUY, SCALE,
 } from '@/types/const';
 import { doShowTradeEditor } from '@/selectors';
 import { isFldStr, getFmtdVol } from '@/utils';
@@ -104,13 +105,13 @@ function Cnt(props) {
         </div>
       </div>
       <div className="mt-4.5 px-5 flex space-x-3">
-        <button onClick={() => onTradeBtnClick(0)} className="w-full bg-green-200 rounded flex items-center justify-center py-2 rounded-full hover:brightness-110">
-          <span className="text-sm text-gree-700 font-medium">Buy Yes</span>
-          <ChevronDoubleUpIcon className="ml-1 mb-0.5 size-3 text-gree-700" />
+        <button onClick={() => onTradeBtnClick(0)} className={clsx('w-full rounded flex items-center justify-center py-2 rounded-full', evt.status === EVT_OPENED && 'bg-green-200 text-green-700 hover:brightness-110', evt.status !== EVT_OPENED && 'bg-green-300 text-green-600')}>
+          <span className="text-sm font-medium">Buy Yes</span>
+          <ChevronDoubleUpIcon className="ml-1 mb-0.5 size-3" />
         </button>
-        <button onClick={() => onTradeBtnClick(1)} className="w-full bg-red-200 rounded flex items-center justify-center py-2 rounded-full hover:brightness-110">
-          <span className="text-sm text-red-700 font-medium">Buy No</span>
-          <ChevronDoubleDownIcon className="ml-1 size-3 text-red-700" />
+        <button onClick={() => onTradeBtnClick(1)} className={clsx('w-full rounded flex items-center justify-center py-2 rounded-full', evt.status === EVT_OPENED && 'bg-red-200 text-red-700 hover:brightness-110', evt.status !== EVT_OPENED && 'bg-red-300 text-red-600')}>
+          <span className="text-sm font-medium">Buy No</span>
+          <ChevronDoubleDownIcon className="ml-1 size-3" />
         </button>
       </div>
       <div className="px-5 pb-3 mt-3">

@@ -75,7 +75,7 @@ const setEventBetaDb = async () => {
 //setEventBetaSc();
 //setEventBetaDb();
 
-const stsEvt = { id: 0, status: 1, winOcId: null };
+const stsEvt = { id: 0, status: 3, winOcId: 1 };
 const setEventStatusSc = async () => {
   const res = await scApi.setEventStatus(stsEvt.id, stsEvt.status, stsEvt.winOcId);
   console.log(`(${logKey}) setEventStatusSc with txId: ${res.txId}`);
@@ -100,10 +100,28 @@ const updateSyncEvt = async () => {
 
 // sellShares
 
-const payRewards = async () => {
-
+const payRewardsSc = async () => {
+  const keys = [
+    { evtId: 0, userId: '' },
+  ];
+  const res = await scApi.payRewards(keys);
+  console.log(`(${logKey}) payRewardsSc with txId: ${res.txId}`);
 };
-//payRewards();
+const payRewardsDb = async () => {
+  // update balance to all winners
+  // set share zero to all participants
+  const stxAddr = '';
+  const user = { balance: 1005450400, updateDate: now };
+  const share = {
+    id: `${stxAddr}-augur-markets-t2-0-1`,
+    amount: 0,
+    cost: 0,
+    updateDate: now,
+  };
+  await dataApi.updateUsrShr(logKey, stxAddr, user, share);
+};
+//payRewardsSc();
+//payRewardsDb();
 
 const refundFunds = async () => {
 
