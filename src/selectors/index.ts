@@ -167,7 +167,9 @@ export const getProfileWthSts = createSelector(
     profile.avtThbnl = getAvtThbnl(profile.avtWthObj.obj);
 
     if (isObject(profile.shares)) {
-      profile.shares = Object.values<any>(profile.shares).sort((a, b) => {
+      profile.shares = Object.values<any>(profile.shares).filter(share => {
+        return share.amount > 0;
+      }).sort((a, b) => {
         return a.createDate - b.createDate;
       });
 

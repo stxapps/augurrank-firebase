@@ -196,7 +196,7 @@ const updateUsrShrTx = async (logKey, stxAddr, user, share, tx) => {
         };
       } else {
         newShare = { ...share, createDate: share.updateDate };
-        isNwTrdr = true;
+        isNwTrdr = true; // Bug alert: nTraders + 1 for all outcomes even same trader!
       }
     }
     const snapshot = await t.get(txRef);
