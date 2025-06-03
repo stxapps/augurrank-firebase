@@ -1,10 +1,11 @@
 import { initializeApp, getApps, applicationDefault } from 'firebase-admin/app';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
 import { getFunctions } from 'firebase-admin/functions';
 
 import { isNumber, isFldStr } from '@/utils';
 
-let fstoreAdmin, funcsAdmin;
+let fstoreAdmin, strgAdmin, funcsAdmin;
 
 const init = () => {
   let fbase;
@@ -29,6 +30,14 @@ export const getFstoreAdmin = () => {
   init();
   fstoreAdmin = getFirestore();
   return fstoreAdmin;
+};
+
+export const getStrgAdmin = () => {
+  if (strgAdmin) return strgAdmin;
+
+  init();
+  strgAdmin = getStorage();
+  return strgAdmin;
 };
 
 export const getFuncsAdmin = () => {

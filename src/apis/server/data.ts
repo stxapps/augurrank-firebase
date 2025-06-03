@@ -1,8 +1,8 @@
 import { FieldValue } from 'firebase-admin/firestore';
-import { getStorage } from 'firebase-admin/storage';
 
 import {
-  getFstoreAdmin, evtToDoc, evtChgToDoc, syncToDoc, userToDoc, shareToDoc, txToDoc,
+  getFstoreAdmin, getStrgAdmin, evtToDoc, evtChgToDoc, syncToDoc, userToDoc,
+  shareToDoc, txToDoc,
 } from '@/apis/server/fbaseAdmin';
 import {
   LETTER_JOINS, USERS, SHARES, TXS, EVENTS, CHANGES, SYNCS, ACTIVE, INDEX, N_DOCS, SCS,
@@ -273,13 +273,15 @@ const getTxs = async (stxAddr, ids) => {
   });
 
   const txsPerId = {};
-  const snapshots = await db.getAll(...refs);
-  snapshots.forEach(ss => {
-    if (!ss.exists) return;
+  if (refs.length > 0) {
+    const snapshots = await db.getAll(...refs);
+    snapshots.forEach(ss => {
+      if (!ss.exists) return;
 
-    const tx = docToTx(ss.id, ss.data());
-    txsPerId[tx.id] = tx;
-  });
+      const tx = docToTx(ss.id, ss.data());
+      txsPerId[tx.id] = tx;
+    });
+  }
 
   const txs = ids.map(id => {
     const tx = txsPerId[id];
@@ -323,7 +325,7 @@ const queryTxs = async (stxAddr: string, quryCrsr: string | null) => {
 const updateEvent = async (logKey, evt, doAdd) => {
   const db = getFstoreAdmin();
   const evtRef = db.collection(EVENTS).doc(evt.id);
-  const chgRef = evtRef.collection(CHANGES);
+  const chgRef = evtRef.collection(CHANGES).doc();
 
   await db.runTransaction(async (t) => {
     let newEvt, newChg;
@@ -400,6 +402,7 @@ const updateEvtSyncEvt = async (logKey, evt) => {
     newEvt.qtyVol += evt.qtyVol;
     newEvt.valVol += evt.valVol;
     newEvt.nTraders += evt.nTraders;
+    newEvt.updateDate = evt.updateDate;
 
     const newChg = structuredClone(newEvt);
     newChg.createDate = newChg.updateDate;
@@ -446,12 +449,18 @@ const getEvents = async (ids) => {
   });
 
   const events = [];
-  const snapshots = await db.getAll(...refs);
-  snapshots.forEach(ss => {
-    events.push(docToEvt(ss.id, ss.data()));
-  });
+  if (refs.length > 0) {
+    const snapshots = await db.getAll(...refs);
+    snapshots.forEach(ss => {
+      events.push(docToEvt(ss.id, ss.data()));
+    });
+  }
 
   return events;
+};
+
+const getEventById = async (logKey, contract, id) => {
+  console.log(logKey, contract, id);
 };
 
 const getEventBySlug = async (slug) => {
@@ -467,18 +476,15 @@ const getEventBySlug = async (slug) => {
   return evt;
 };
 
-const getEventById = async (logKey, contract, id) => {
-  console.log(logKey, contract, id);
-};
-
 const uploadFile = async (src, bucket, options) => {
-  await getStorage().bucket(bucket).upload(src, options);
+  const strg = getStrgAdmin();
+  await strg.bucket(bucket).upload(src, options);
 };
 
 const data = {
   addLetterJoin, updateProfile, updateUsrShr, updateUsrShrTx, getUser, getShares,
   getTx, getTxs, queryTxs, updateEvent, updateSyncEvt, updateEvtSyncEvt, deleteSyncEvt,
-  getEvents, getEventBySlug, getEventById, uploadFile,
+  getEvents, getEventById, getEventBySlug, uploadFile,
 };
 
 export default data;

@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
 
 import {
-  isObject, isNumber, isFldStr, getEvent, parseAvatar, getAvtThbnl,
+  isObject, isNumber, isFldStr, getEventById, getEventBySlug, parseAvatar, getAvtThbnl,
 } from '@/utils';
 import { getShareCosts } from '@/utils/lmsr';
 
@@ -91,9 +91,9 @@ export const getEventWthSts = createSelector(
     const fthSts = slugFthStses[slug] ?? null;
 
     let evt = null, costs = [], chgFthSts = null;
-    const chgs = [];
+    const chgs = [], chgCds = [];
     if (fthSts === 1) {
-      evt = getEvent(entries, slug);
+      evt = getEventBySlug(entries, slug);
       if (isObject(evt)) {
         costs = getShareCosts(evt);
 
@@ -102,9 +102,12 @@ export const getEventWthSts = createSelector(
           chgFthSts = evtChgData.fthSts;
           if (chgFthSts === 1) {
             for (const evtChg of Object.values<any>(evtChgData.entries)) {
+              if (chgCds.includes(evtChg.createDate)) continue;
               const costs = getShareCosts(evtChg);
               chgs.push({ ...evtChg, costs });
+              chgCds.push(evtChg.createDate);
             }
+            chgs.sort((a, b) => a.createDate - b.createDate);
           }
         }
       }
@@ -146,16 +149,16 @@ export const getMeAvtWthObj = createSelector(
 );
 
 export const getProfileWthSts = createSelector(
+  (state, _) => state.events.entries,
   (state, _) => state.me,
   (state, _) => state.profiles,
   (_, stxAddr) => stxAddr,
-  (me, profiles, stxAddr) => {
+  (entries, me, profiles, stxAddr) => {
     let profile;
     if (me.stxAddr === stxAddr) {
-      profile = { ...me };
+      profile = structuredClone(me);
     } else if (isObject(profiles[stxAddr])) {
-      profile = { ...profiles[stxAddr] };
-      return;
+      profile = structuredClone(profiles[stxAddr]);
     } else {
       profile = { fthSts: null, txFthSts: null };
     }
@@ -167,6 +170,17 @@ export const getProfileWthSts = createSelector(
       profile.shares = Object.values<any>(profile.shares).sort((a, b) => {
         return a.createDate - b.createDate;
       });
+
+      for (const share of profile.shares) {
+        const evt = getEventById(entries, share.evtId);
+        if (!isObject(evt)) continue;
+
+        if (!isFldStr(share.evtSlug)) share.evtSlug = evt.slug;
+        if (!isFldStr(share.evtTitle)) share.evtTitle = evt.title;
+        if (!isFldStr(share.evtDesc)) share.evtDesc = evt.desc;
+        if (!isFldStr(share.evtImg)) share.evtImg = evt.img;
+        if (!isFldStr(share.ocDesc)) share.ocDesc = evt.outcomes[share.ocId].desc;
+      }
     }
 
     return profile;

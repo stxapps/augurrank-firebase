@@ -10,10 +10,10 @@ const slugify = slugifyWithCounter();
 
 const uploadImage = async () => {
   const info = getInfo();
-  const src = '/home/wit/Desktop/lrmnHOuN_400x400.jpg';
+  const src = '/home/wit/Desktop/stx-logo1.png';
   const bucket = info.bucket;
   const options = {
-    destination: 'static/media/lrmnHOuN_400x400.jpg',
+    destination: 'static/media/stx-logo1.png',
     public: true,
     metadata: {
       cacheControl: 'public, max-age=31536000',
@@ -25,10 +25,10 @@ const uploadImage = async () => {
 //uploadImage();
 
 const evt = {
-  title: 'Will STX price more than $1 on 1 Jun 2025?',
+  title: 'Will STX price more than $1 on 1 Jul 2025?',
   desc: 'More info on https://augurrank.com',
-  beta: 200000000,
-  status: 0,
+  beta: 300000000,
+  status: 1,
   winOcId: null,
   outcomes: [
     { id: 0, desc: 'Yes', shareAmount: 0 },
@@ -41,13 +41,13 @@ const createEventSc = async () => {
 };
 const createEventDb = async () => {
   const info = getInfo();
-  const closeDate = new Date('2025-06-01T00:00:00-04:00');
+  const closeDate = new Date('2025-07-01T00:00:00-04:00');
   const dbEvt = {
     ...evt,
-    id: `${info.marketsContract}-0`, // Make sure update contract and id!
+    id: `${info.marketsContract}-1`, // Make sure update contract and id!
     slug: slugify(evt.title),
-    img: `https://storage.googleapis.com/${info.bucket}/static/media/lrmnHOuN_400x400.jpg`,
-    desc: 'This will resolve Yes if blablabla. This will resolve No if blablabla. We will use <a className="underline" href="https://betmoar.com/blabla">this</a> as a primary source.',
+    img: `https://storage.googleapis.com/${info.bucket}/static/media/stx-logo1.png`,
+    desc: 'This market will immediately resolve to "Yes" if any Binance 1-minute candle for Stacks (STXUSDT) between July 1, 2025, 00:00 and 23:59 in the ET timezone has a final "High" price of $1.00 or higher. Otherwise, this market will resolve to "No". The resolution source for this market is Binance, specifically the STXUSDT "High" prices available at <a class="underline" href="https://www.binance.com/en/trade/STX_USDT">binance.com/en/trade/STX_USDT</a>, with the chart settings on "1m" for one-minute candles selected on the top bar. Please note that the outcome of this market depends solely on the price data from the Binance STXUSDT trading pair. Prices from other exchanges, different trading pairs, or spot markets will not be considered for the resolution of this market.',
     qtyVol: 0,
     valVol: 0,
     nTraders: 0,
@@ -91,7 +91,7 @@ const setEventStatusDb = async () => {
 
 const updateSyncEvt = async () => {
   const info = getInfo();
-  await dataApi.updateSyncEvt(logKey, `${info.marketsContract}-0`);
+  await dataApi.updateSyncEvt(logKey, `${info.marketsContract}-1`);
   console.log(`(${logKey}) updateSyncEvt finishes`);
 };
 //updateSyncEvt();
