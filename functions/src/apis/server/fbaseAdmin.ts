@@ -1,10 +1,11 @@
 import { initializeApp, getApps, applicationDefault } from 'firebase-admin/app';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
 import { getFunctions } from 'firebase-admin/functions';
 
 import { isNumber, isFldStr } from '@/utils';
 
-let fstoreAdmin, funcsAdmin;
+let fstoreAdmin, strgAdmin, funcsAdmin;
 
 const init = () => {
   let fbase;
@@ -29,6 +30,14 @@ export const getFstoreAdmin = () => {
   init();
   fstoreAdmin = getFirestore();
   return fstoreAdmin;
+};
+
+export const getStrgAdmin = () => {
+  if (strgAdmin) return strgAdmin;
+
+  init();
+  strgAdmin = getStorage();
+  return strgAdmin;
 };
 
 export const getFuncsAdmin = () => {
@@ -57,6 +66,21 @@ export const evtToDoc = (evt) => {
     closeDate: Timestamp.fromDate(new Date(evt.closeDate)),
     createDate: Timestamp.fromDate(new Date(evt.createDate)),
     updateDate: Timestamp.fromDate(new Date(evt.updateDate)),
+  };
+  return doc;
+};
+
+export const evtChgToDoc = (chg) => {
+  const doc = {
+    beta: chg.beta,
+    outcomes: chg.outcomes.map(oc => {
+      return { id: oc.id, shareAmount: oc.shareAmount };
+    }),
+    qtyVol: chg.qtyVol,
+    valVol: chg.valVol,
+    nTraders: chg.nTraders,
+    createDate: Timestamp.fromDate(new Date(chg.createDate)),
+    updateDate: Timestamp.fromDate(new Date(chg.updateDate)),
   };
   return doc;
 };

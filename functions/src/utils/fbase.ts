@@ -23,6 +23,22 @@ export const docToEvt = (id, doc) => {
   return evt;
 };
 
+export const docToEvtChg = (id, doc) => {
+  const chg = {
+    id,
+    beta: doc.beta,
+    outcomes: doc.outcomes.map(oc => {
+      return { id: oc.id, shareAmount: oc.shareAmount };
+    }),
+    qtyVol: doc.qtyVol,
+    valVol: doc.valVol,
+    nTraders: doc.nTraders,
+    createDate: doc.createDate.toMillis(),
+    updateDate: doc.updateDate.toMillis(),
+  };
+  return chg;
+};
+
 export const docToSync = (id, doc) => {
   const sync = { id, evts: {} };
   for (const [evtId, evtDoc] of Object.entries<any>(doc.evts)) {
