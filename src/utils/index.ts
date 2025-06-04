@@ -568,7 +568,7 @@ export const getFmtdVol = (vol) => {
   if (isNumber(vol)) {
     const valVol = vol / SCALE;
     if (valVol >= 1000000) fmtdVol = Math.floor(valVol / 1000000) + 'm';
-    else if (valVol >= 100) fmtdVol = Math.floor(valVol / 1000) + 'k';
+    else if (valVol >= 1000) fmtdVol = Math.floor(valVol / 1000) + 'k';
   }
   return fmtdVol;
 };
